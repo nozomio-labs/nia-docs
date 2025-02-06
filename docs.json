@@ -1,11 +1,11 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Nia AI Documentation",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#0050f3",
+    "light": "#0050f3",
+    "dark": "#0050f3"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -36,6 +36,7 @@
       },
       {
         "tab": "API Reference",
+        "openapi": "/openapi-v2.yaml",
         "groups": [
           {
             "group": "API Documentation",
@@ -58,17 +59,17 @@
       "anchors": [
         {
           "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
+          "href": "https://docs.trynia.ai/introduction",
           "icon": "book-open-cover"
         },
         {
           "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
+          "href": "https://discord.gg/8M3T3mgn8k",
+          "icon": "discord"
         },
         {
           "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
+          "href": "https://www.nozomio.com/blog",
           "icon": "newspaper"
         }
       ]
@@ -82,20 +83,23 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:arlan@hanlantech.net"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "Get your API key",
+      "href": "https://trynia.ai"
     }
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "x": "https://x.com/nozomio_edu",
+      "github": "https://github.com/nozomio-labs/",
+      "linkedin": "https://www.linkedin.com/company/nozomiolabs/"
     }
+  },
+  "seo": {
+    "indexing": "all"
   }
 }

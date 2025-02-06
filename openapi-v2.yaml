@@ -1,0 +1,274 @@
+openapi: 3.1.0
+info:
+  title: Nia AI API
+  version: '2.0.0'
+  description: |
+    Nia AI API allows developers to index and query code repositories using advanced AI understanding.
+    The API provides capabilities for repository indexing, status checking, and AI-powered code querying.
+  
+servers:
+  - url: https://api.trynia.ai/v2
+    description: Production API
+  - url: http://localhost:8000/v2
+    description: Local development
+
+security:
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: API key must be provided in the Authorization header
+
+  schemas:
+    RepositoryRequest:
+      type: object
+      required:
+        - repository
+      properties:
+        repository:
+          type: string
+          description: Repository identifier in owner/repo format
+          example: "microsoft/vscode"
+        branch:
+          type: string
+          description: Branch to index (defaults to repository's default branch)
+          example: "main"
+
+    QueryRequest:
+      type: object
+      required:
+        - messages
+        - repositories
+      properties:
+        messages:
+          type: array
+          items:
+            type: object
+            required:
+              - role
+              - content
+            properties:
+              role:
+                type: string
+                enum: [user, assistant]
+              content:
+                type: string
+          description: Chat messages for context and query
+          example:
+            - role: user
+              content: "How does the error handling work in this codebase?"
+        repositories:
+          type: array
+          items:
+            type: object
+            required:
+              - repository
+            properties:
+              repository:
+                type: string
+                description: Repository identifier
+          description: List of repositories to query
+        stream:
+          type: boolean
+          default: false
+          description: Whether to stream the response
+
+    RepositoryStatus:
+      type: object
+      required:
+        - repository
+        - branch
+        - status
+      properties:
+        repository:
+          type: string
+          description: Repository identifier
+        branch:
+          type: string
+          description: Branch being indexed
+        status:
+          type: string
+          enum: [indexing, completed, error]
+          description: Current indexing status
+        progress:
+          type: object
+          description: Detailed progress information
+          properties:
+            stage:
+              type: string
+            message:
+              type: string
+            progress:
+              type: number
+        error:
+          type: string
+          description: Error message if status is 'error'
+
+    Error:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message
+
+  responses:
+    UnauthorizedError:
+      description: API key is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    RateLimitError:
+      description: Rate limit has been exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Rate limit ceiling for the endpoint
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Number of requests remaining in the time window
+        X-RateLimit-Reset:
+          schema:
+            type: string
+            format: date-time
+          description: Time when the rate limit resets
+        X-Monthly-Limit:
+          schema:
+            type: integer
+          description: Monthly request limit
+        X-Monthly-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests for the month
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+paths:
+  /repositories:
+    post:
+      summary: Index a new repository
+      description: |
+        Start indexing a GitHub repository. The repository must be public or the request must include
+        a GitHub token with appropriate access rights.
+      operationId: indexRepository
+      tags:
+        - Repositories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RepositoryRequest'
+      responses:
+        '200':
+          description: Repository indexing started successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      repository_id:
+                        type: string
+                      status:
+                        type: string
+                      status_url:
+                        type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /repositories/{repository_id}:
+    get:
+      summary: Get repository indexing status
+      description: Check the current status of repository indexing
+      operationId: getRepositoryStatus
+      tags:
+        - Repositories
+      parameters:
+        - name: repository_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the repository returned from the index endpoint
+      responses:
+        '200':
+          description: Repository status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepositoryStatus'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Repository not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /query:
+    post:
+      summary: Query indexed repositories
+      description: |
+        Send a query to get AI-powered insights about the indexed repositories.
+        Supports both streaming and non-streaming responses.
+      operationId: queryRepositories
+      tags:
+        - Query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: Query processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: string
+                  sources:
+                    type: array
+                    items:
+                      type: string
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  Stream of Server-Sent Events (SSE) with the following event types:
+                  - sources: List of relevant code sources
+                  - content: Chunks of the AI response
+                  - error: Any errors that occur during streaming
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+tags:
+  - name: Repositories
+    description: Repository indexing and status operations
+  - name: Query
+    description: AI-powered code querying operations 
