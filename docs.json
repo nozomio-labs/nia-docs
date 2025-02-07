@@ -18,18 +18,19 @@
             "pages": [
               "introduction",
               "quickstart",
-              "development"
+              "pricing"
+              
             ]
           },
           {
-            "group": "Essentials",
+            "group": "integrations",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              "integrations/markdown",
+              "integrations/code",
+              "integrations/images",
+              "integrations/settings",
+              "integrations/navigation",
+              "integrations/reusable-snippets"
             ]
           }
         ]
