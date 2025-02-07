@@ -1,72 +1,285 @@
 ---
-title: "Quickstart!"
-description: "Start building awesome documentation in under 5 minutes"
+title: 'Quickstart Guide'
+description: 'Get started with Nia AI in minutes'
 ---
 
-## Setup your development
+<Note>
+  This guide will help you get up and running with Nia AI quickly, from authentication to asking your first questions about your codebase.
+</Note>
 
-Learn how to update your docs locally and deploy them to the public.
+## Getting Started
 
-### Edit and preview
+<Steps>
+  <Step title="Sign Up">
+    1. Visit [Nia AI](https://app.trynia.ai)
 
-<AccordionGroup>
-  <Accordion icon="github" title="Clone your docs locally">
-    During the onboarding process, we created a repository on your Github with
-    your docs content. You can find this repository on our
-    [dashboard](https://dashboard.mintlify.com). To clone the repository
-    locally, follow these
-    [instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-    in your terminal.
-  </Accordion>
+    2. Click "Sign In" or "Sign Up"
 
-  <Accordion icon="rectangle-terminal" title="Preview changes">
-    Previewing helps you make sure your changes look as intended. We built a
-    command line interface to render these changes locally. 1. Install the
-    [Mintlify CLI](https://www.npmjs.com/package/mintlify) to preview the
-    documentation changes locally with this command: `npm i -g mintlify`
-    2\. Run the following command at the root of your documentation (where
-    `mint.json` is): `mintlify dev`
-  </Accordion>
-</AccordionGroup>
+    3. Use your GitHub account or email for authentication
 
-### Deploy your changes
+    <Tip>
+      Using GitHub authentication gives you immediate access to your repositories.
+    </Tip>
+  </Step>
 
-<AccordionGroup>
-  <Accordion icon="message-bot" title="Install our Github app">
-    Our Github app automatically deploys your changes to your docs site, so you
-    don't need to manage deployments yourself. You can find the link to install on
-    your [dashboard](https://dashboard.mintlify.com). Once the bot has been
-    successfully installed, there should be a check mark next to the commit hash
-    of the repo.
-  </Accordion>
+  <Step title="Create Your First Project">
+    After logging in:
 
-  <Accordion icon="rocket" title="Push your changes">
-    [Commit and push your changes to
-    Git](https://docs.github.com/en/get-started/using-git/pushing-commits-to-a-remote-repository#about-git-push)
-    for your changes to update in your docs site. If you push and don't see that
-    the Github app successfully deployed your changes, you can also manually
-    update your docs through our [dashboard](https://dashboard.mintlify.com).
-  </Accordion>
-</AccordionGroup>
+    1. Click "New Project" button
 
-## Update your docs
+    2. Enter a project name (e.g., "My Backend API")
 
-Add content directly in your files with MDX syntax and React components. You can use any of our components, or even build your own.
+    3. Select the repository you want to analyze
 
-<CardGroup>
-  <Card title="Style Your Docs" icon="paintbrush" href="/settings/global">
-    Add flair to your docs with personalized branding.
+    <Note>
+      You can connect multiple repositories to different projects to keep your codebases organized.
+    </Note>
+  </Step>
+
+  <Step title="Index Your Repository">
+    ```bash
+    # You can specify:
+    - Main branch (default)
+    - Specific branch
+    - Commit hash
+    ```
+
+    <Warning>
+      Initial indexing might take a few minutes depending on repository size.
+    </Warning>
+  </Step>
+</Steps>
+
+## Asking Questions
+
+<CardGroup cols={2}>
+  <Card title="Effective Questions">
+    ✅ **Do Ask About**:
+
+    * Code architecture
+
+    * Implementation details
+
+    * Function purposes
+
+    * Dependencies
+
+    * Best practices
   </Card>
 
-  <Card title="Add API Endpoints" icon="square-code" href="/api-playground/configuration">
-    Implement your OpenAPI spec and enable API user interaction.
-  </Card>
+  <Card title="Less Effective Questions">
+    ❌ **Avoid Asking**:
 
-  <Card title="Integrate Analytics" icon="chart-mixed" href="/analytics/supported-integrations">
-    Draw insights from user interactions with your documentation.
-  </Card>
+    * Runtime errors
 
-  <Card title="Host on a Custom Domain" icon="browser" href="/settings/custom-domain/subdomain">
-    Keep your docs on your own website's subdomain.
+    * System-specific issues
+
+    * Questions without context
+
+    * Non-code related queries
   </Card>
 </CardGroup>
+
+### Question Examples
+
+<AccordionGroup>
+  <Accordion title="Code Understanding">
+    ```markdown
+    # Great Questions:
+    - "How is user authentication implemented in this codebase?"
+    - "What's the data flow for processing user requests?"
+    - "Explain the error handling strategy in the API endpoints."
+    ```
+  </Accordion>
+
+  <Accordion title="Implementation Details">
+    ```markdown
+    # Specific Queries:
+    - "Show me how API rate limiting is implemented."
+    - "What validation is used for user input?"
+    - "How are database connections managed?"
+    ```
+  </Accordion>
+
+  <Accordion title="Architecture Questions">
+    ```markdown
+    # System Design:
+    - "Explain the project's folder structure and organization."
+    - "How are environment variables managed?"
+    - "What's the deployment pipeline look like?"
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+### Project Organization
+
+<Steps>
+  <Step title="Separate Projects">
+    Create different projects for:
+
+    * Frontend codebase
+
+    * Backend services
+
+    * Infrastructure code
+  </Step>
+
+  <Step title="Regular Indexing">
+    Re-index when you:
+
+    * Make major changes
+
+    * Switch branches
+
+    * Pull updates
+  </Step>
+
+  <Step title="Chat Organization">
+    * Use descriptive chat titles
+
+    * Keep related questions in same chat
+
+    * Create new chats for different topics
+  </Step>
+</Steps>
+
+### Getting Better Answers
+
+<CardGroup cols={2}>
+  <Card title="Be Specific">
+    * Reference specific files or functions
+
+    * Provide context for your questions
+
+    * Mention related components
+  </Card>
+
+  <Card title="Use Features">
+    * Follow up on previous answers
+
+    * Use code snippets when relevant
+
+    * Leverage chat history
+  </Card>
+</CardGroup>
+
+## Advanced Features
+
+<Tabs>
+  <Tab title="Model Selection">
+    Choose between different AI models:
+
+    * Claude 3 Sonnet (Default)
+
+    * GPT-4
+
+    * Gemini Pro
+
+    * Deepseek V3 & R1
+
+    Each model has different strengths for code analysis.
+  </Tab>
+
+  <Tab title="Repository Settings">
+    Customize your project:
+
+    * Branch selection
+
+    * Ignore patterns
+
+    * Access permissions
+
+    * Indexing preferences
+  </Tab>
+
+  <Tab title="Integrations">
+    Connect with:
+
+    * GitHub
+
+    * Slack
+
+    * VS Code (coming soon)
+  </Tab>
+</Tabs>
+
+## Tips for Success
+
+<CardGroup cols={3}>
+  <Card title="Keep Context">
+    Stay within the same chat for related questions to maintain context
+  </Card>
+
+  <Card title="Be Patient">
+    Allow time for thorough analysis of complex questions
+  </Card>
+
+  <Card title="Iterate">
+    Refine questions based on previous answers
+  </Card>
+</CardGroup>
+
+## Common Questions
+
+<AccordionGroup>
+  <Accordion title="How often should I re-index?">
+    Re-index your repository when:
+
+    * Making significant code changes
+
+    * Switching to a different branch
+
+    * After merging important PRs
+  </Accordion>
+
+  <Accordion title="What's the best way to start?">
+    1. Start with broad questions about architecture
+
+    2. Drill down into specific components
+
+    3. Ask for examples and explanations
+  </Accordion>
+
+  <Accordion title="Can I ask about multiple files?">
+    Yes! Nia AI understands relationships between files. Reference them in your question:
+    "How does auth.ts interact with the user service?"
+  </Accordion>
+</AccordionGroup>
+
+## Example Workflow
+
+<Steps>
+  <Step title="Initial Setup">
+    ```bash
+    1. Create new project "Backend API"
+    2. Connect GitHub repository
+    3. Index main branch
+    ```
+  </Step>
+
+  <Step title="First Questions">
+    ```markdown
+    Ask:
+    "Can you explain the overall architecture of this codebase?"
+    "What are the main components and their responsibilities?"
+    ```
+  </Step>
+
+  <Step title="Detailed Exploration">
+    ```markdown
+    Follow up with:
+    "How is authentication implemented?"
+    "Show me the API endpoints structure"
+    ```
+  </Step>
+
+  <Step title="Specific Features">
+    ```markdown
+    Deep dive:
+    "Explain the error handling in the user service"
+    "How are database connections managed?"
+    ```
+  </Step>
+</Steps>

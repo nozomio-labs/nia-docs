@@ -25,6 +25,7 @@
           {
             "group": "integrations",
             "pages": [
+              "integrations/overview",
               "integrations/github",
               "integrations/slack"
             ]
