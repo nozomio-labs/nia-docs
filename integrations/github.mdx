@@ -1,0 +1,255 @@
+---
+title: 'GitHub Integration'
+description: 'Learn how to enable private repository access for Nia AI'
+---
+
+<Note>
+  This guide explains how to set up and use GitHub integration with Nia AI, allowing secure access to your private repositories.
+</Note>
+
+## Overview
+
+Nia AI supports seamless integration with GitHub, enabling you to:
+
+* Access and index private repositories
+
+* Maintain secure authentication
+
+* Manage repository permissions
+
+* Handle real-time updates
+
+## Authentication Flow
+
+<Steps>
+  <Step title="Install GitHub App">
+    1. Navigate to your Nia AI dashboard
+
+    2. Click "Connect GitHub" button
+
+    3. You'll be redirected to GitHub's authorization page
+  </Step>
+
+  <Step title="Grant Permissions">
+    Select the repositories you want to give Nia AI access to:
+
+    * Choose specific repositories
+
+    * Or grant access to all repositories
+  </Step>
+
+  <Step title="Verify Installation">
+    After installation, Nia AI will:
+
+    1. Generate a unique installation token
+
+    2. Validate the connection
+
+    3. Show connected repositories in your dashboard
+  </Step>
+</Steps>
+
+## Repository Access
+
+<Tabs>
+  <Tab title="List Repositories">
+    ```typescript
+    // GET /github/list-repos
+    const response = await fetch('/github/list-repos?user_id=YOUR_USER_ID');
+    const repos = await response.json();
+    ```
+  </Tab>
+
+  <Tab title="Index Repository">
+    ```typescript
+    // POST /projects/{project_id}/index
+    const response = await fetch(`/projects/${projectId}/index`, {
+      method: 'POST',
+      body: JSON.stringify({
+        user_id: 'YOUR_USER_ID',
+        branchOrCommit: 'main' // optional
+      })
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## Security Model
+
+<AccordionGroup>
+  <Accordion title="Installation Tokens">
+    Nia AI uses GitHub App installation tokens for authentication:
+
+    * Tokens are automatically rotated every hour
+
+    * Scoped to specific repositories
+
+    * Encrypted at rest
+  </Accordion>
+
+  <Accordion title="Permission Scopes">
+    The GitHub App requires these permissions:
+
+    * `contents: read` - Read repository contents
+
+    * `metadata: read` - Read repository metadata
+
+    * `issues: read` - Read repository issues (optional)
+  </Accordion>
+</AccordionGroup>
+
+## API Reference
+
+### List Repositories
+
+<ResponseField name="GET /github/list-repos" type="endpoint">
+  Returns a list of repositories the user has granted access to.
+
+  <Expandable title="Response">
+    ```json
+    {
+      "repositories": [
+        {
+          "name": "repo-name",
+          "full_name": "owner/repo-name",
+          "private": true,
+          "html_url": "https://github.com/owner/repo-name"
+        }
+      ]
+    }
+    ```
+  </Expandable>
+</ResponseField>
+
+### Save Installation
+
+<ResponseField name="POST /user/github/installation" type="endpoint">
+  Saves a new GitHub App installation for a user.
+
+  <Expandable title="Request">
+    ```json
+    {
+      "user_id": "string",
+      "installation_id": "number"
+    }
+    ```
+  </Expandable>
+</ResponseField>
+
+### Uninstall App
+
+<ResponseField name="POST /user/github/uninstall" type="endpoint">
+  Removes a GitHub App installation.
+
+  <Expandable title="Request">
+    ```json
+    {
+      "user_id": "string",
+      "installation_id": "string"
+    }
+    ```
+  </Expandable>
+</ResponseField>
+
+## Error Handling
+
+<Card title="Common Error Codes">
+  | Code | Description                | Solution                                   |
+  | ---- | -------------------------- | ------------------------------------------ |
+  | 401  | Invalid installation token | Refresh token or reinstall app             |
+  | 403  | Repository access denied   | Check repository permissions               |
+  | 404  | Repository not found       | Verify repository exists and is accessible |
+  | 422  | Invalid repository format  | Use owner/repo format                      |
+</Card>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Repository Access">
+    * Grant access only to needed repositories
+
+    * Regularly review repository permissions
+
+    * Remove unused repository access
+  </Card>
+
+  <Card title="Security">
+    * Never share installation tokens
+
+    * Use branch protection rules
+
+    * Monitor GitHub audit logs
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Installation Failed">
+    If installation fails:
+
+    1. Check GitHub organization permissions
+
+    2. Verify you have admin access
+
+    3. Try reinstalling the app
+  </Accordion>
+
+  <Accordion title="Repository Not Visible">
+    If a repository is not visible:
+
+    1. Verify repository permissions
+
+    2. Check installation scope
+
+    3. Refresh repository list
+  </Accordion>
+
+  <Accordion title="Token Errors">
+    For token-related errors:
+
+    1. Check installation status
+
+    2. Verify repository access
+
+    3. Reinstall if necessary
+  </Accordion>
+</AccordionGroup>
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="How secure is the GitHub integration?">
+    Nia AI uses GitHub's official App integration with:
+
+    * Installation-specific tokens
+
+    * Encrypted storage
+
+    * Regular token rotation
+
+    * Limited repository scope
+  </Accordion>
+
+  <Accordion title="Can I limit repository access?">
+    Yes, you can:
+
+    * Choose specific repositories during installation
+
+    * Modify permissions after installation
+
+    * Remove access at any time
+  </Accordion>
+
+  <Accordion title="What happens if I uninstall the app?">
+    When you uninstall:
+
+    * All tokens are immediately revoked
+
+    * Repository access is removed
+
+    * Indexed data is preserved
+
+    * You can reinstall later
+  </Accordion>
+</AccordionGroup>

@@ -25,12 +25,8 @@
           {
             "group": "integrations",
             "pages": [
-              "integrations/markdown",
-              "integrations/code",
-              "integrations/images",
-              "integrations/settings",
-              "integrations/navigation",
-              "integrations/reusable-snippets"
+              "integrations/github",
+              "integrations/slack"
             ]
           }
         ]

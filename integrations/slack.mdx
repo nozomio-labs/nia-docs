@@ -1,0 +1,246 @@
+---
+title: 'Slack Integration'
+description: 'Learn how to install and use Nia AI in your Slack workspace'
+---
+
+<Note>
+  This guide explains how to set up Nia AI in your Slack workspace and use it to interact with your codebase directly from Slack.
+
+
+
+  * ***You have to index your repository on the*** [***webapp***](https://app.trynia.ai/) ***first.***
+</Note>
+
+## Installation
+
+<Steps>
+  <Step title="Add to Slack">
+    1. Visit [Nia AI Dashboard](https://app.trynia.ai/settings/code-providers)
+
+    2. Click "Add to Slack" button
+
+    3. You'll be redirected to Slack's authorization page
+  </Step>
+
+  <Step title="Authorize Access">
+    Select the channels where you want to use Nia AI:
+
+    * Choose specific channels
+
+    * Or allow access to all channels
+  </Step>
+
+  <Step title="Complete Setup">
+    After installation:
+
+    1. Nia AI bot will be added to your workspace
+
+    2. You'll be redirected back to dashboard
+
+    3. You can start using Nia AI in Slack
+  </Step>
+</Steps>
+
+## Usage
+
+<Tabs>
+  <Tab title="Basic Commands">
+    ```bash
+    # Get help
+    /nia
+
+    # Set active project
+    /nia list - list your available indexed projects
+
+    # Choose project to chat with
+    /nia use <project_id> - choose which project to chat with
+
+    # Ask questions
+    /nia chat <question> - ask a question about your current project
+    ```
+  </Tab>
+
+  <Tab title="Mentions">
+    ```bash
+    # Mention the bot in any channel
+    @Nia How do I implement the login flow?
+
+    # Use in threads
+    @Nia Can you explain this code?
+    ```
+  </Tab>
+</Tabs>
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Code Search">
+    * Search across your codebase
+
+    * Get relevant code snippets
+
+    * Understand code context
+  </Card>
+
+  <Card title="Project Management">
+    * Switch between projects
+
+    * View project status
+
+    * Manage project settings
+  </Card>
+
+  <Card title="Thread Support">
+    * Continue conversations in threads
+
+    * Keep discussions organized
+
+    * Maintain context
+  </Card>
+
+  <Card title="Code Explanations">
+    * Get detailed explanations
+
+    * Understand complex logic
+
+    * Receive best practices
+  </Card>
+</CardGroup>
+
+## Channel Configuration
+
+<Steps>
+  <Step title="List Projects">
+    ```bash
+    /nia list
+    ```
+
+    Sets the active project for the current channel
+  </Step>
+
+  <Step title="Verify Setup">
+    ```bash
+    /nia use <project_id>
+    ```
+
+    Confirms the project is properly configured
+  </Step>
+
+  <Step title="Start Using">
+    ```bash
+    /nia chat <question>
+    ```
+
+    Begin asking questions about your code
+  </Step>
+</Steps>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Channel Organization">
+    * Use dedicated channels for different projects
+
+    * Keep conversations in threads
+
+    * Use clear, specific questions
+  </Card>
+
+  <Card title="Question Format">
+    * Be specific about context
+
+    * Reference specific files when needed
+
+    * Use code blocks for code snippets
+  </Card>
+</CardGroup>
+
+## Security
+
+<AccordionGroup>
+  <Accordion title="Authentication">
+    * OAuth 2.0 based authentication
+
+    * Secure token storage
+
+    * Regular token rotation
+  </Accordion>
+
+  <Accordion title="Data Access">
+    * Channel-specific project access
+
+    * User-based permissions
+
+    * Encrypted communication
+  </Accordion>
+
+  <Accordion title="Privacy">
+    * No permanent message storage
+
+    * Code context isolation
+
+    * Workspace data separation
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Bot Not Responding">
+    1. Check if bot is in the channel
+
+    2. Verify project is set for channel
+
+    3. Confirm workspace authorization
+  </Accordion>
+
+  <Accordion title="Project Access Issues">
+    1. Check project permissions
+
+    2. Verify GitHub connection
+
+    3. Update project configuration
+  </Accordion>
+
+  <Accordion title="Rate Limit Errors">
+    1. Wait for rate limit reset
+
+    2. Use threads to optimize requests
+
+    3. Distribute queries across channels
+  </Accordion>
+</AccordionGroup>
+
+## Examples
+
+### Code Questions
+
+<CodeGroup>
+  ```bash Ask About Implementation
+  @Nia How is the user authentication implemented?
+  ```
+
+  ```bash Request Code Example
+  @Nia Can you show me an example of API error handling?
+  ```
+
+  ```bash Debug Issues
+  @Nia Why might this API endpoint be returning 403?
+  ```
+</CodeGroup>
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="Can I use Nia AI in private channels?">
+    Yes, you can add Nia AI to private channels. Just invite the bot using `/invite @Nia`
+  </Accordion>
+
+  <Accordion title="How do I change projects?">
+    Use `/nia use [project-id]` to switch to a different project in any channel
+  </Accordion>
+
+  <Accordion title="Are my code queries private?">
+    Yes, all queries are processed securely and not stored permanently
+  </Accordion>
+</AccordionGroup>
