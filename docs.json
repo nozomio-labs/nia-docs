@@ -36,15 +36,7 @@
       },
       {
         "tab": "API Reference (BETA)",
-        "openapi": "/openapi-v2.yaml",
-        "groups": [
-          {
-            "group": "API Documentation",
-            "pages": [
-              "api-reference/index-a-new-repository"
-            ]
-          }
-        ]
+        "openapi": "/openapi-v2.yaml"
       }
     ],
     "global": {
