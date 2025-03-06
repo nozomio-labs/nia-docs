@@ -4,11 +4,45 @@ description: "Integrations that are supported by Nia"
 ---
 
 <CardGroup cols="2">
-  <Card title="Slackbot" icon="SLack" href="/integrations/slack">
+  <Card title="Slackbot" icon="slack" href="/integrations/slack">
     Nia AI can answer questions about your codebase in Slack
   </Card>
 
   <Card title="Github" icon="github" href="/integrations/github">
     Nia AI can index your private repositories
+  </Card>
+  
+  <Card title="Cursor" icon="code" href="/integrations/cursor">
+    Use Nia AI's Nia Agent directly in Cursor code editor
+  </Card>
+  
+  <Card title="Continue" icon="terminal" href="/integrations/continue">
+    Integrate Nia AI with Continue coding assistant
+  </Card>
+</CardGroup>
+
+## Other Code Editor Integrations
+
+<Note>
+  You can use the Nia API with any IDE or developer tool that uses LLMs and allows you to use custom models that use the OpenAI chat/completions format.
+</Note>
+
+Simply override the base URL to `https://api.trynia.ai` and add your Nia API key.
+
+## Rate Limits
+
+All project API keys have a default rate limit of 60 requests per minute. This can be increased by contacting us if you're on the Pro plan.
+
+<CardGroup cols="3">
+  <Card title="VS Code">
+    Works with VS Code extensions that support custom OpenAI-compatible endpoints
+  </Card>
+  
+  <Card title="JetBrains IDEs">
+    Compatible with AI assistants in IntelliJ, PyCharm, and other JetBrains products
+  </Card>
+  
+  <Card title="Neovim">
+    Works with Neovim plugins that support OpenAI API format
   </Card>
 </CardGroup>

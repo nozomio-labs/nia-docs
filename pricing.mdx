@@ -18,20 +18,20 @@ description: 'Simple, transparent pricing for Nia AI'
       </div>
 
       <div className="space-y-2">
-        ### Included Features
+        ### For personal projects
 
-        * Up to 15MB repository size
-
-        * 100 API calls/month
-
-        * Single repository
-
-        * Basic AI assistance
-
-        * Community support
+        * Unlimited repos less than 20MB
+        
+        * Unlimited conversations with Nia, powered by Claude-3.7-Sonnet and o3-mini
+        
+        * Public repositories only
+        
+        * Free community repos access
+        
+        * Access to Claude Sonnet 3.7 & Deepseek
 
         <Button className="mt-4 w-full" variant="bordered">
-          Get Started
+          Subscribe
         </Button>
       </div>
     </div>
@@ -40,22 +40,26 @@ description: 'Simple, transparent pricing for Nia AI'
   <Card title="Pro" icon="⭐">
     <div className="flex flex-col gap-4">
       <div className="text-2xl font-bold">
-        $15
+        $14.99
         <span className="text-sm font-normal text-muted-foreground">/month</span>
       </div>
 
       <div className="space-y-2">
-        ### Everything in Free, plus:
+        ### For professional developers
 
-        * Unlimited repository size
-
-        * Multi-repository support
-
-        * Agentic AI capabilities
-
-        * Priority support
-
-        * Advanced integrations
+        * Everything in Free, plus...
+        
+        * Access to private repositories
+        
+        * Repository size up to 1024 MB
+        
+        * Multi-repository querying
+        
+        * Slack & GitHub integrations
+        
+        * Unlimited integration with Cursor and other tools
+        
+        * Priority waitlist for Nia Agent
 
         <Button className="mt-4 w-full" variant="primary">
           Upgrade to Pro
@@ -64,6 +68,39 @@ description: 'Simple, transparent pricing for Nia AI'
     </div>
   </Card>
 </CardGroup>
+
+## Rate Limits
+
+<Note>
+  All project API keys have a default rate limit of 60 requests per minute. This can be increased by contacting us.
+</Note>
+
+<Table>
+  <thead>
+    <tr>
+      <th>Plan</th>
+      <th>Default Rate Limit</th>
+      <th>Custom Limits</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Free</td>
+      <td>60 requests/minute</td>
+      <td>Not available</td>
+    </tr>
+    <tr>
+      <td>Pro</td>
+      <td>60 requests/minute</td>
+      <td>Available upon request</td>
+    </tr>
+    <tr>
+      <td>Enterprise</td>
+      <td>Custom</td>
+      <td>Tailored to your needs</td>
+    </tr>
+  </tbody>
+</Table>
 
 ## API Usage
 
@@ -101,14 +138,14 @@ description: 'Simple, transparent pricing for Nia AI'
   <tbody>
     <tr>
       <td>Repository Size</td>
-      <td>Up to 15MB</td>
-      <td>Unlimited</td>
+      <td>Up to 20MB</td>
+      <td>Up to 1024MB</td>
     </tr>
 
     <tr>
       <td>Number of Repositories</td>
-      <td>1</td>
-      <td>Unlimited</td>
+      <td>Unlimited (Public only)</td>
+      <td>Unlimited (Public & Private)</td>
     </tr>
 
     <tr>
@@ -119,14 +156,14 @@ description: 'Simple, transparent pricing for Nia AI'
 
     <tr>
       <td>AI Models</td>
-      <td>Claude 3 Sonnet</td>
+      <td>Claude 3.7 Sonnet, o3-mini, Deepseek</td>
       <td>All Models</td>
     </tr>
 
     <tr>
-      <td>Agentic AI</td>
-      <td>❌</td>
-      <td>✅</td>
+      <td>Cursor Integration</td>
+      <td>Pay-per-request</td>
+      <td>Unlimited</td>
     </tr>
 
     <tr>
@@ -149,14 +186,14 @@ description: 'Simple, transparent pricing for Nia AI'
 
     <tr>
       <td>API Rate Limits</td>
-      <td>5 req/min</td>
-      <td>15 req/min</td>
+      <td>60 req/min</td>
+      <td>60 req/min (customizable)</td>
     </tr>
 
     <tr>
-      <td>Team Members</td>
-      <td>1</td>
-      <td>Unlimited</td>
+      <td>Multi-repository querying</td>
+      <td>❌</td>
+      <td>✅</td>
     </tr>
   </tbody>
 </Table>
@@ -183,16 +220,16 @@ description: 'Simple, transparent pricing for Nia AI'
 ## Pro Features in Detail
 
 <AccordionGroup>
-  <Accordion title="Agentic AI">
-    Advanced AI capabilities:
+  <Accordion title="Unlimited Cursor Integration">
+    Enhanced coding experience:
 
-    * Autonomous code analysis
-
-    * Proactive suggestions
-
-    * Complex problem solving
-
-    * Multi-step reasoning
+    * No per-request charges
+    
+    * Seamless IDE integration
+    
+    * Advanced code assistance
+    
+    * Compatible with any OpenAI-format IDE
   </Accordion>
 
   <Accordion title="Multi-Repository Support">

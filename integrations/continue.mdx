@@ -1,0 +1,200 @@
+---
+title: 'Continue Integration'
+description: 'Learn how to use Nia AI with Continue code assistant'
+---
+
+<Note>
+  This guide explains how to set up Nia AI in Continue to enhance your coding experience with Nia Agent.
+  
+  * ***You need a personal Nia API key to get started.***
+</Note>
+
+## Overview
+
+Continue is a powerful AI coding assistant that helps you write, understand, and improve code. By integrating Nia AI with Continue, you can leverage Nia's advanced code understanding capabilities directly in your workflow.
+
+Messages sent in Continue will be logged in your External folder, allowing you to continue your conversations in the Nia web app.
+
+## API Key Options
+
+Nia offers two types of API keys for integration with Continue:
+
+1. **V2 API Key**: Costs 0.10 cents per request. Suitable for occasional use or testing.
+
+2. **IDE API Key**: Included in the Nia Pro plan ($14.99/month). Provides unlimited integration with Continue and other tools.
+
+Choose the option that best fits your usage needs.
+
+## Rate Limits
+
+All Nia API keys have a default rate limit of 60 requests per minute. This ensures optimal performance and fair usage across all users.
+
+<Note>
+  Pro plan users can request increased rate limits by contacting our support team.
+</Note>
+
+## Installation
+
+<Steps>
+  <Step title="Access Continue Settings">
+    1. Open Continue
+    
+    2. Click on the Settings icon in the bottom right corner of the extension
+    
+    3. Navigate to the `config.json` file
+  </Step>
+  
+  <Step title="Configure Nia AI">
+    Add the following JSON to the models array:
+    
+    ```json
+    {
+       "title": "Nia AI",
+       "provider": "openai",
+       "model": "gpt-4o",
+       "apiKey": "{$NIA_API_KEY}",
+       "apiBase": "https://api.trynia.ai"
+    }
+    ```
+    
+    Replace `{$NIA_API_KEY}` with your actual Nia API key.
+  </Step>
+  
+  <Step title="Save and Apply">
+    1. Save the `config.json` file
+    
+    2. Restart Continue if necessary
+    
+    3. Nia AI will now be available as a model in Continue
+  </Step>
+</Steps>
+
+## Usage
+
+<Tabs>
+  <Tab title="Basic Usage">
+    ```bash
+    # Select Nia AI from the model dropdown
+    
+    # Ask coding questions
+    
+    # Get context-aware responses
+    
+    # Receive code suggestions
+    ```
+  </Tab>
+  
+  <Tab title="Advanced Features">
+    ```bash
+    # Continue conversations from Continue in Nia web app
+    
+    # Access conversation history in your External folder
+    
+    # Leverage Nia Agent's enhanced context understanding
+    ```
+  </Tab>
+</Tabs>
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Enhanced Context">
+    * Improved code understanding
+    
+    * Project-wide context awareness
+    
+    * More relevant code suggestions
+  </Card>
+  
+  <Card title="Conversation Continuity">
+    * Seamless transition between Continue and Nia
+    
+    * Persistent conversation history
+    
+    * Cross-platform context retention
+  </Card>
+  
+  <Card title="Advanced Code Assistance">
+    * Deeper code analysis
+    
+    * More accurate bug detection
+    
+    * Better code completion
+  </Card>
+  
+  <Card title="Integrated Experience">
+    * Native-feeling integration
+    
+    * Familiar interface
+    
+    * Consistent user experience
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Performance Optimization">
+    * Be aware of higher latency due to context retrieval
+    
+    * Use specific, focused queries
+    
+    * Provide clear context when needed
+  </Card>
+  
+  <Card title="Effective Queries">
+    * Be specific about code sections
+    
+    * Reference file paths when relevant
+    
+    * Break complex questions into smaller parts
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Configuration Issues">
+    1. Verify your JSON syntax in the `config.json` file
+    
+    2. Ensure you've replaced `{$NIA_API_KEY}` with your actual API key
+    
+    3. Check that the `apiBase` is exactly `https://api.trynia.ai`
+  </Accordion>
+  
+  <Accordion title="High Latency Issues">
+    1. Expect some additional latency compared to foundational models
+    
+    2. This is normal due to additional context retrieval steps
+    
+    3. Consider optimizing your queries for more focused responses
+  </Accordion>
+  
+  <Accordion title="Model Not Appearing">
+    1. Verify the `config.json` was saved correctly
+    
+    2. Restart Continue completely
+    
+    3. Check for any error messages in the Continue logs
+  </Accordion>
+</AccordionGroup>
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="Why is there higher latency when using Nia AI?">
+    Nia AI performs additional context retrieval steps to provide more accurate and relevant responses, which can increase response time compared to foundational models.
+  </Accordion>
+  
+  <Accordion title="Can I switch between Nia AI and standard models?">
+    Yes, you can easily switch between Nia AI and other models in Continue by selecting a different model from the dropdown.
+  </Accordion>
+  
+  <Accordion title="Where can I find my conversation history?">
+    Your conversations will be logged in your External folder and can be accessed through the Nia web app.
+  </Accordion>
+  
+  <Accordion title="Which API key should I choose?">
+    If you're a professional developer using Continue regularly, the Pro plan with unlimited integration is more cost-effective. For occasional use, the pay-per-request V2 API key might be sufficient.
+  </Accordion>
+</AccordionGroup> 

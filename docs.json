@@ -23,17 +23,19 @@
             ]
           },
           {
-            "group": "integrations",
+            "group": "Integrations",
             "pages": [
               "integrations/overview",
               "integrations/github",
-              "integrations/slack"
+              "integrations/slack",
+              "integrations/cursor",
+              "integrations/continue"
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "API Reference (BETA)",
         "openapi": "/openapi-v2.yaml",
         "groups": [
           {
