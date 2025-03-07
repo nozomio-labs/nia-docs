@@ -73,7 +73,7 @@
     "primary": {
       "type": "button",
       "label": "Get your API key",
-      "href": "https://trynia.ai"
+      "href": "https://app.trynia.ai"
     }
   },
   "footer": {
