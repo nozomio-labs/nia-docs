@@ -76,6 +76,10 @@ components:
           type: boolean
           default: false
           description: Whether to stream the response
+        include_sources:
+          type: boolean
+          default: true
+          description: Whether to include full source texts in the response (when false, only file paths are returned)
 
     RepositoryStatus:
       type: object
@@ -254,12 +258,19 @@ paths:
                     type: array
                     items:
                       type: string
+                    description: Code snippets used to generate the response (included when include_sources=true)
+                  source_paths:
+                    type: array
+                    items:
+                      type: string
+                    description: File paths of the code snippets (included when include_sources=false)
             text/event-stream:
               schema:
                 type: string
                 description: |
                   Stream of Server-Sent Events (SSE) with the following event types:
-                  - sources: List of relevant code sources
+                  - sources: List of relevant code sources (when include_sources=true)
+                  - source_paths: List of file paths without content (when include_sources=false)
                   - content: Chunks of the AI response
                   - error: Any errors that occur during streaming
         '401':
