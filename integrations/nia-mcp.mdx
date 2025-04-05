@@ -1,0 +1,278 @@
+---
+title: 'Nia MCP Integration'
+description: 'Learn how to use Nia AI with Model Context Protocol (MCP) in AI assistants and code editors'
+---
+
+<Note>
+  This guide explains how to set up the Nia MCP server to enhance AI assistants with codebase understanding capabilities.
+  
+  * ***You need a Nia API key to get started.***
+</Note>
+
+## Overview
+
+The Nia Model Context Protocol (MCP) integration enables AI assistants and applications to access Nia's powerful codebase understanding capabilities through a standardized interface. Using the MCP server, AI assistants like Claude can seamlessly query and retrieve relevant code context from repositories indexed in Nia.
+
+<CardGroup cols={2}>
+  <Card title="AI Assistants" icon="robot">
+    Enhance AI assistants like Claude with deep codebase understanding
+  </Card>
+
+  <Card title="Code Editors" icon="code">
+    Integrate with AI-powered code editors like Cursor and Windsurf
+  </Card>
+
+  <Card title="Custom Applications" icon="gear">
+    Build custom applications with codebase understanding capabilities
+  </Card>
+
+  <Card title="Natural Language" icon="message">
+    Query your entire codebase using natural language
+  </Card>
+</CardGroup>
+
+## How It Works
+
+The Nia MCP server acts as a bridge between AI assistants and your codebase knowledge:
+
+<Steps>
+  <Step title="Setup">
+    The MCP server connects to Nia using your API key
+  </Step>
+  
+  <Step title="Query">
+    AI assistants send natural language queries about your code
+  </Step>
+  
+  <Step title="Retrieval">
+    The server retrieves relevant code snippets and context from Nia
+  </Step>
+  
+  <Step title="Response">
+    Context is returned in a structured format with source references
+  </Step>
+</Steps>
+
+## Installation
+
+You can use the Nia MCP server without installing it using npx:
+
+```bash
+npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY --transport=stdio
+```
+
+Or install it globally:
+
+```bash
+npm install -g nia-codebase-mcp
+```
+
+## Configuration Options
+
+<Tabs>
+  <Tab title="Command Line">
+    ```bash
+    # Basic usage with stdio transport (default)
+    npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY
+    
+    # Using SSE transport on custom port
+    npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY --transport=sse --port=3000
+    
+    # Enable debug mode
+    npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY --debug=true
+    ```
+  </Tab>
+  
+  <Tab title="Environment Variables">
+    ```bash
+    # Configure with environment variables
+    export NIA_API_KEY=your_api_key
+    export TRANSPORT=stdio
+    export PORT=3000
+    export DEBUG=false
+    export TOOL_TIMEOUT_MS=300000
+    
+    # Run the server
+    npx -y nia-codebase-mcp@1.0.1
+    ```
+  </Tab>
+</Tabs>
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--api-key` | Your Nia API key | Required |
+| `--transport` | Connection mode (`stdio` or `sse`) | `stdio` |
+| `--port` | Port for SSE server | 3000 |
+| `--debug` | Enable debug logging | `false` |
+| `--tool-timeout-ms` | Custom timeout for tool execution | 300000ms |
+
+## Integration with AI Assistants
+
+<Tabs>
+  <Tab title="Claude Desktop">
+    <Steps>
+      <Step title="Configure Claude Desktop">
+        Edit your Claude Desktop configuration at:
+        
+        - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+        - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+      </Step>
+      
+      <Step title="Add MCP Server Configuration">
+        Add the following to your configuration file:
+        
+        ```json
+        {
+          "mcpServers": {
+            "nia-codebase": {
+              "command": "npx",
+              "args": ["-y", "nia-codebase-mcp@1.0.1", "--api-key=YOUR_NIA_API_KEY"]
+            }
+          }
+        }
+        ```
+      </Step>
+      
+      <Step title="Restart Claude">
+        Restart Claude Desktop to apply the changes
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Cursor">
+    <Steps>
+      <Step title="Open Cursor Settings">
+        Navigate to Settings > Features > MCP Servers
+      </Step>
+      
+      <Step title="Add New MCP Server">
+        Configure with these settings:
+        
+        - Name: `nia-codebase`
+        - Type: `command`
+        - Command: `npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY`
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Other MCP-Compatible Editors">
+    <Steps>
+      <Step title="Configure MCP Server">
+        For editors that support the Model Context Protocol, configure the MCP server using:
+        
+        - Transport: stdio or SSE
+        - Command: `npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY`
+        - Connection Details: For SSE, connect to `http://localhost:3000` (or your specified port)
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Using the MCP Server
+
+Once configured, you can use prompts like these with your AI assistant:
+
+<CodeGroup>
+  ```bash Example 1
+  Using the lookup_codebase_context tool, please analyze my project structure and tell me what the main components are.
+  ```
+  
+  ```bash Example 2
+  Using the lookup_codebase_context tool, search the codebase to understand how the authentication system works and explain its key components.
+  ```
+  
+  ```bash Example 3
+  Using the lookup_codebase_context tool, find examples of how error handling is implemented in this codebase.
+  ```
+</CodeGroup>
+
+## Technical Details
+
+<CardGroup cols={2}>
+  <Card title="Tools Available">
+    * **lookup_codebase_context**: Look up context from a codebase indexed in Nia, retrieving relevant code snippets based on user queries
+  </Card>
+  
+  <Card title="Requirements">
+    * Node.js 18 or higher
+    * A valid Nia API key
+    * A codebase indexed in Nia
+  </Card>
+
+  <Card title="Transport Options">
+    * **stdio**: Default transport for most applications
+    * **SSE**: Server-Sent Events for web and network-based integrations
+  </Card>
+  
+  <Card title="Performance">
+    * Built-in retry logic
+    * Configurable timeout management
+    * Robust error handling
+  </Card>
+</CardGroup>
+
+## Security & Privacy
+
+The Nia MCP server maintains the same security standards as Nia:
+
+<CardGroup cols={2}>
+  <Card title="Encrypted Communication">
+    All communication with Nia's API is encrypted
+  </Card>
+  
+  <Card title="API Key Security">
+    Your API key is never exposed to the AI assistant
+  </Card>
+
+  <Card title="Secure Retrieval">
+    Code context is retrieved securely from your indexed repositories
+  </Card>
+  
+  <Card title="Privacy Controls">
+    Maintains all privacy controls from your Nia configuration
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Server Not Starting">
+    1. Verify your Nia API key is valid
+    2. Check Node.js version (must be 18+)
+    3. Ensure you have network connectivity to Nia's API
+  </Accordion>
+  
+  <Accordion title="AI Assistant Cannot Access Tool">
+    1. Verify the MCP server is running
+    2. Check the configuration in your AI assistant or editor
+    3. Ensure the transport method is correctly configured
+  </Accordion>
+  
+  <Accordion title="Debug Mode">
+    Enable debug mode for more detailed logs:
+    
+    ```bash
+    npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY --debug=true
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="What is Model Context Protocol (MCP)?">
+    Model Context Protocol is a standardized interface for AI assistants to access external tools and capabilities. It allows AI models to interact with external systems like the Nia codebase understanding engine.
+  </Accordion>
+  
+  <Accordion title="Can I use the MCP server with any AI assistant?">
+    The MCP server can be used with any AI assistant that supports the Model Context Protocol, including Claude, GPT-4, and others integrated into tools like Cursor and Windsurf.
+  </Accordion>
+  
+  <Accordion title="Do I need to index my codebase first?">
+    Yes, you need to have your codebase indexed in Nia before using the MCP server. You can index your codebase through the Nia web application or API.
+  </Accordion>
+  
+  <Accordion title="Is the MCP server open source?">
+    Yes, the Nia MCP server is open source and available on GitHub: [https://github.com/nozomio-labs/nia-mcp](https://github.com/nozomio-labs/nia-mcp)
+  </Accordion>
+</AccordionGroup> 

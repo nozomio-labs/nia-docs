@@ -29,7 +29,8 @@
               "integrations/github",
               "integrations/slack",
               "integrations/cursor",
-              "integrations/continue"
+              "integrations/continue",
+              "integrations/nia-mcp"
             ]
           }
         ]
