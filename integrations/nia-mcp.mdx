@@ -7,6 +7,7 @@ description: 'Learn how to use Nia AI with Model Context Protocol (MCP) in AI as
   This guide explains how to set up the Nia MCP server to enhance AI assistants with codebase understanding capabilities.
   
   * ***You need a Nia API key to get started.***
+  * ***For Cursor and Windsurf integrations, you must use your Cursor API key found in the API keys page of your account.***
 </Note>
 
 ## Overview
@@ -152,6 +153,10 @@ npm install -g nia-codebase-mcp
         - Type: `command`
         - Command: `npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY`
       </Step>
+      
+      <Step title="Note on API Key">
+        Remember to use your Cursor API key, not a standard Nia API key. The Cursor API key can be found in the API keys page of your Cursor account.
+      </Step>
     </Steps>
   </Tab>
   
@@ -167,6 +172,46 @@ npm install -g nia-codebase-mcp
     </Steps>
   </Tab>
 </Tabs>
+
+## MCP Configuration File Examples
+
+For code editors like Cursor and Windsurf that support MCP, you can use a configuration file to set up the Nia integration.
+
+<CodeGroup>
+  ```json mcp.json
+  {
+    "Nia": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "nia-codebase-mcp",
+        "--api-key=YOUR_CURSOR_API_KEY",
+        "--transport=stdio"
+      ]
+    }
+  }
+  ```
+  
+  ```json cursor-settings.json
+  {
+    "mcpServers": {
+      "Nia": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "nia-codebase-mcp",
+          "--api-key=YOUR_NIA-CURSOR_API_KEY",
+          "--transport=stdio"
+        ]
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<Note>
+  Replace `YOUR_CURSOR_API_KEY` with your actual Cursor API key. For Cursor and Windsurf integrations, you must use your Cursor API key specifically, not a standard Nia API key.
+</Note>
 
 ## Using the MCP Server
 
@@ -195,7 +240,7 @@ Once configured, you can use prompts like these with your AI assistant:
   
   <Card title="Requirements">
     * Node.js 18 or higher
-    * A valid Nia API key
+    * A valid Nia API key (Cursor API key for Cursor/Windsurf integrations)
     * A codebase indexed in Nia
   </Card>
 
@@ -270,6 +315,10 @@ The Nia MCP server maintains the same security standards as Nia:
   
   <Accordion title="Do I need to index my codebase first?">
     Yes, you need to have your codebase indexed in Nia before using the MCP server. You can index your codebase through the Nia web application or API.
+  </Accordion>
+  
+  <Accordion title="Which API key should I use?">
+    For general Nia MCP usage, use your Nia API key. For Cursor and Windsurf integrations specifically, you must use your Cursor API key, which can be found in the API keys page of your Cursor account.
   </Accordion>
   
   <Accordion title="Is the MCP server open source?">
