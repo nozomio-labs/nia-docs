@@ -19,7 +19,14 @@
               "introduction",
               "quickstart",
               "pricing"
-              
+            ]
+          },
+          {
+            "group": "Command Line Interface",
+            "pages": [
+              "cli/overview",
+              "cli/index",
+              "cli/setup"
             ]
           },
           {
@@ -49,7 +56,7 @@
         },
         {
           "anchor": "Community",
-          "href": "https://discord.gg/8M3T3mgn8k",
+          "href": "https://discord.gg/yCkHSpsTm2",
           "icon": "discord"
         },
         {

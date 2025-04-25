@@ -1,0 +1,538 @@
+---
+title: "Setting Up Nia CLI"
+description: "A step-by-step guide to installing, configuring, and using Nia CLI"
+---
+
+<Note>
+  This guide provides detailed instructions for getting started with Nia CLI, from installation to advanced usage.
+</Note>
+
+## Prerequisites
+
+Before installing Nia CLI, ensure you have:
+
+<CheckboxList>
+  <Checkbox checked>Python 3.7+ installed on your system</Checkbox>
+  <Checkbox checked>pip package manager</Checkbox>
+  <Checkbox checked>A Nia AI account with an API key</Checkbox>
+  <Checkbox checked>GitHub access for repository indexing</Checkbox>
+</CheckboxList>
+
+To verify your Python installation:
+
+```bash
+python --version
+# or
+python3 --version
+```
+
+## Installation
+
+<Steps>
+  <Step title="Install Nia CLI">
+    Using pip (recommended):
+    
+    ```bash
+    pip install nia-cli
+    ```
+    
+    Alternatively, use pipx for an isolated installation:
+    
+    ```bash
+    # Install pipx if you don't have it
+    pip install pipx
+    pipx ensurepath
+    
+    # Install Nia CLI in isolated environment
+    pipx install nia-cli
+    ```
+    
+    <Note>
+      If you're using a virtual environment, make sure it's activated before installation.
+    </Note>
+  </Step>
+  
+  <Step title="Verify installation">
+    Confirm that Nia CLI was installed correctly:
+    
+    ```bash
+    nia --version
+    ```
+    
+    You should see the version number of the installed CLI.
+  </Step>
+  
+  <Step title="Get your API key">
+    If you don't already have a Nia API key:
+    
+    1. Go to [app.trynia.ai](https://app.trynia.ai)
+    2. Sign up or log in to your account
+    3. Navigate to API settings
+    4. Generate a new API key
+    
+    <Warning>
+      Keep your API key secure. Do not share it or expose it in public repositories.
+    </Warning>
+  </Step>
+  
+  <Step title="Login to Nia">
+    Authenticate your CLI with your API key:
+    
+    ```bash
+    nia login
+    ```
+    
+    When prompted, enter your API key. Alternatively, provide it directly:
+    
+    ```bash
+    nia login YOUR_API_KEY
+    ```
+    
+    Your API key will be securely stored in `~/.nia/config.json`.
+  </Step>
+</Steps>
+
+## Basic Configuration
+
+After installation and authentication, let's set up your working environment:
+
+<Steps>
+  <Step title="View available repositories">
+    If you've already indexed repositories through the Nia web interface, you can list them:
+    
+    ```bash
+    nia list
+    ```
+    
+    This will show all repositories you have access to, including their IDs, names, branches, and indexing status.
+  </Step>
+  
+  <Step title="Index a new repository">
+    To add a GitHub repository for Nia to analyze:
+    
+    ```bash
+    nia create owner/repo
+    ```
+    
+    For example:
+    
+    ```bash
+    nia create nozomio-labs/sample-project
+    ```
+    
+    By default, Nia will index the "main" branch. To specify a different branch:
+    
+    ```bash
+    nia create owner/repo -b develop
+    ```
+    
+    <Warning>
+      Initial indexing may take several minutes depending on the size of the repository.
+    </Warning>
+  </Step>
+  
+  <Step title="Check indexing status">
+    Monitor the progress of repository indexing:
+    
+    ```bash
+    nia status REPOSITORY_ID
+    ```
+    
+    Replace `REPOSITORY_ID` with the ID returned when you created the repository.
+  </Step>
+  
+  <Step title="Set a default repository">
+    To avoid specifying a repository ID in every command:
+    
+    ```bash
+    nia select REPOSITORY_ID
+    ```
+    
+    Alternatively, run `nia select` without arguments to see a list of repositories to choose from.
+  </Step>
+</Steps>
+
+## Starting Your First Chat
+
+Now that you've set up Nia CLI and indexed a repository, let's start interacting with your code:
+
+<Steps>
+  <Step title="Begin a chat session">
+    Start chatting with your default repository:
+    
+    ```bash
+    nia chat
+    ```
+    
+    Or specify a repository:
+    
+    ```bash
+    nia chat REPOSITORY_ID
+    ```
+    
+    <Note>
+      The chat interface will open in your terminal.
+    </Note>
+  </Step>
+  
+  <Step title="Ask questions about your code">
+    Now you can ask Nia about your codebase. Try starting with these questions:
+    
+    ```
+    > What is the structure of this repository?
+    > How does the authentication system work?
+    > Where is the main entry point for the application?
+    > Explain the database schema and relationships
+    ```
+    
+    <Tip>
+      Be specific in your questions to get the most precise answers.
+    </Tip>
+  </Step>
+  
+  <Step title="Explore multi-repository functionality">
+    For projects that span multiple repositories, you can include additional repositories in your chat:
+    
+    ```bash
+    nia chat REPOSITORY_ID --additional REPO_ID2,REPO_ID3
+    ```
+    
+    This is particularly useful for microservice architectures or projects with shared dependencies.
+  </Step>
+  
+  <Step title="End your session">
+    When you're finished, exit the chat:
+    
+    ```
+    > exit
+    ```
+  </Step>
+</Steps>
+
+## Advanced Workflow
+
+<AccordionGroup>
+  <Accordion title="Working with Multiple Projects">
+    If you're working on multiple projects that use different repositories:
+    
+    1. Create separate terminal sessions for each project
+    2. In each session, select the appropriate default repository:
+       ```bash
+       nia select REPOSITORY_ID
+       ```
+    3. Start chat sessions in each terminal:
+       ```bash
+       nia chat
+       ```
+    
+    This allows you to maintain separate contexts for different projects.
+  </Accordion>
+  
+  <Accordion title="Re-indexing After Changes">
+    When your codebase undergoes significant changes:
+    
+    1. Re-index the repository to ensure Nia has the latest code:
+       ```bash
+       nia create owner/repo -b branch
+       ```
+    2. Wait for indexing to complete:
+       ```bash
+       nia status REPOSITORY_ID
+       ```
+    3. Resume your chat with the updated codebase:
+       ```bash
+       nia chat REPOSITORY_ID
+       ```
+    
+    <Tip>
+      Re-index after major feature additions, refactoring, or architecture changes.
+    </Tip>
+  </Accordion>
+  
+  <Accordion title="Using Environment Variables">
+    For custom configurations or debugging:
+    
+    ```bash
+    # Override API endpoint (useful for self-hosted instances)
+    export NIA_API_URL="http://your-custom-instance:8000"
+    
+    # Enable detailed logging
+    export DEBUG=1
+    
+    # Apply for a single command
+    DEBUG=1 nia chat
+    ```
+    
+    These variables can be added to your shell profile for persistence.
+  </Accordion>
+  
+  <Accordion title="Shell Integration">
+    Add these to your `.bashrc` or `.zshrc` for enhanced functionality:
+    
+    ```bash
+    # Nia CLI shortcuts
+    alias nc="nia chat"
+    alias nl="nia list"
+    alias ns="nia status"
+    
+    # Quick repository selection
+    nselect() {
+      nia select "$@"
+    }
+    ```
+    
+    This allows for faster workflow with shortened commands.
+  </Accordion>
+</AccordionGroup>
+
+## Effective Chat Strategies
+
+<CardGroup cols={2}>
+  <Card title="Start Broad, Then Narrow" icon="layer-group">
+    Begin with general questions about architecture before diving into specific components
+  </Card>
+  
+  <Card title="Reference Specific Files" icon="file">
+    When asking about implementation details, mention file paths for more precise answers
+  </Card>
+  
+  <Card title="Chain Your Questions" icon="link">
+    Build on previous questions to maintain context through your exploration
+  </Card>
+  
+  <Card title="Use Multiple Sessions" icon="window-restore">
+    Create different chat sessions for different aspects of your codebase
+  </Card>
+</CardGroup>
+
+### Example Chat Sequence
+
+<AccordionGroup>
+  <Accordion title="Understanding Project Architecture">
+    ```
+    > What's the overall architecture of this project?
+    
+    > How do the main components interact with each other?
+    
+    > What design patterns are used throughout the codebase?
+    ```
+  </Accordion>
+  
+  <Accordion title="Exploring Specific Features">
+    ```
+    > How is user authentication implemented?
+    
+    > Where is the login flow handled?
+    
+    > Explain the session management process.
+    ```
+  </Accordion>
+  
+  <Accordion title="Debugging Issues">
+    ```
+    > How does error handling work in this codebase?
+    
+    > Where are API errors logged?
+    
+    > How are database transaction failures handled?
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Configuration File Reference
+
+The Nia CLI configuration file is located at `~/.nia/config.json`. Here's a sample configuration with explanations:
+
+```json
+{
+  "api_key": "nia_api_key_example123456789",  // Your Nia API key
+  "default_repo": "repo_abcdefg123456",       // Currently selected default repository
+  "api_url": "https://api.trynia.ai",         // API endpoint (can be customized)
+  "user": {
+    "name": "Your Name",                      // User information
+    "email": "your.email@example.com"
+  },
+  "model_preferences": {
+    "default": "claude-3-sonnet"              // Default model for chat
+  },
+  "terminal": {
+    "colored_output": true,                   // Enable colored output in terminal
+    "max_width": 100                          // Maximum width for text display
+  }
+}
+```
+
+You can manually edit this file if needed, but it's recommended to use the CLI commands for configuration.
+
+## Resolving Common Issues
+
+<AccordionGroup>
+  <Accordion title="Installation Problems">
+    <Steps>
+      <Step title="Check Python version">
+        Ensure you have Python 3.7+ installed:
+        ```bash
+        python --version
+        ```
+      </Step>
+      
+      <Step title="Update pip">
+        Ensure you have the latest pip version:
+        ```bash
+        pip install --upgrade pip
+        ```
+      </Step>
+      
+      <Step title="Installation with specific pip">
+        If you have multiple Python versions:
+        ```bash
+        python3 -m pip install nia-cli
+        ```
+      </Step>
+      
+      <Step title="Virtual environment">
+        Try installing in a clean virtual environment:
+        ```bash
+        python -m venv nia-env
+        source nia-env/bin/activate  # On Windows: nia-env\Scripts\activate
+        pip install nia-cli
+        ```
+      </Step>
+    </Steps>
+  </Accordion>
+  
+  <Accordion title="Authentication Failures">
+    <Steps>
+      <Step title="Verify API key">
+        Double-check your API key in the Nia web interface
+      </Step>
+      
+      <Step title="Check configuration file">
+        Inspect your configuration file:
+        ```bash
+        cat ~/.nia/config.json
+        ```
+      </Step>
+      
+      <Step title="Reset authentication">
+        Remove the configuration and start fresh:
+        ```bash
+        rm ~/.nia/config.json
+        nia login
+        ```
+      </Step>
+    </Steps>
+  </Accordion>
+  
+  <Accordion title="Indexing Errors">
+    <Steps>
+      <Step title="Repository access">
+        Ensure Nia has access to the repository (check GitHub permissions)
+      </Step>
+      
+      <Step title="Branch name">
+        Verify the branch name exists:
+        ```bash
+        nia create owner/repo -b correct-branch-name
+        ```
+      </Step>
+      
+      <Step title="Repository size">
+        Very large repositories may time out during indexing. Contact Nia support for assistance with repositories over 500MB.
+      </Step>
+    </Steps>
+  </Accordion>
+  
+  <Accordion title="Chat Response Issues">
+    <Steps>
+      <Step title="Indexing completion">
+        Ensure indexing is complete before chatting:
+        ```bash
+        nia status REPOSITORY_ID
+        ```
+      </Step>
+      
+      <Step title="Network connectivity">
+        Check your internet connection
+      </Step>
+      
+      <Step title="Debug mode">
+        Enable debug mode for more information:
+        ```bash
+        DEBUG=1 nia chat
+        ```
+      </Step>
+    </Steps>
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<CardGroup cols={3}>
+  <Card title="Regular Updates" icon="arrows-rotate">
+    Keep Nia CLI up-to-date:
+    ```bash
+    pip install --upgrade nia-cli
+    ```
+  </Card>
+  
+  <Card title="Repository Freshness" icon="code-branch">
+    Re-index after major code changes to ensure accurate answers
+  </Card>
+  
+  <Card title="Specific Questions" icon="magnifying-glass">
+    Ask focused questions rather than overly broad ones
+  </Card>
+  
+  <Card title="Terminal Session" icon="terminal">
+    Use a terminal with good Unicode support for optimal display
+  </Card>
+  
+  <Card title="Secure Storage" icon="lock">
+    Never share your API key or include it in scripts
+  </Card>
+  
+  <Card title="Multiple Repositories" icon="folder-tree">
+    Set up different projects for different codebases
+  </Card>
+</CardGroup>
+
+## Going Further
+
+<Steps>
+  <Step title="Explore integrations">
+    Beyond the CLI, Nia AI offers integrations with:
+    - Slack for team-wide code assistance
+    - GitHub for automated code reviews
+    - VS Code and other editors through extensions
+    
+    Check the [Integrations Overview](/integrations/overview) for details.
+  </Step>
+  
+  <Step title="Automate workflows">
+    Incorporate Nia CLI into your development workflows:
+    - Add repository indexing to CI/CD pipelines
+    - Create scripts to automate common queries
+    - Integrate with project documentation tools
+  </Step>
+  
+  <Step title="Alternative Access Methods">
+    If you prefer not to use the CLI, Nia provides multiple ways to access its functionality:
+    
+    - [Web Application](https://app.trynia.ai): User-friendly interface for code chat
+    - [REST API](/api-reference/repositories/index-a-new-repository): Programmatic access for custom integrations
+    - [Slack Integration](/integrations/slack): Chat with your code directly in Slack
+    - [IDE Extensions](/integrations/cursor): Use Nia directly in your code editor
+  </Step>
+  
+  <Step title="Join the community">
+    Connect with other Nia users:
+    - Join our [Discord community](https://discord.gg/yCkHSpsTm2)
+    - Share your use cases and feedback
+    - Learn from how others are using Nia
+  </Step>
+</Steps>
+
+<Note>
+  For any issues not covered in this guide, contact Nia support at arlan@nozomio.com or visit our [Discord community](https://discord.gg/yCkHSpsTm2).
+</Note> 

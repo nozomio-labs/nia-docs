@@ -292,7 +292,7 @@ Deployment happens automatically when changes are merged to main:
 
 ## 📞 Support
 
-* Join our [Discord](https://discord.gg/your-server)
+* Join our [Discord](https://discord.gg/yCkHSpsTm2)
 
 * Create an issue
 

@@ -80,6 +80,13 @@ components:
           type: boolean
           default: true
           description: Whether to include full source texts in the response (when false, only file paths are returned)
+        use_graph_rag:
+          type: boolean
+          description: Whether to use GraphRAG for enhanced code structure understanding
+        graph_query_mode:
+          type: string
+          enum: [auto, global, local, drift]
+          description: GraphRAG query mode for code navigation
 
     RepositoryStatus:
       type: object
@@ -257,7 +264,14 @@ paths:
                   sources:
                     type: array
                     items:
-                      type: string
+                      oneOf:
+                        - type: string
+                        - type: object
+                          properties:
+                            file_path:
+                              type: string
+                            content:
+                              type: string
                     description: Code snippets used to generate the response (included when include_sources=true)
                   source_paths:
                     type: array
