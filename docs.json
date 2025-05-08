@@ -43,7 +43,7 @@
         ]
       },
       {
-        "tab": "API Reference (BETA)",
+        "tab": "API Reference",
         "openapi": "/openapi-v2.yaml"
       }
     ],
@@ -58,11 +58,6 @@
           "anchor": "Community",
           "href": "https://discord.gg/yCkHSpsTm2",
           "icon": "discord"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://www.nozomio.com/blog",
-          "icon": "newspaper"
         }
       ]
     }

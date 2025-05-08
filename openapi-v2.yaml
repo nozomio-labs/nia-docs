@@ -9,8 +9,6 @@ info:
 servers:
   - url: https://api.trynia.ai/v2
     description: Production API
-  - url: http://localhost:8000/v2
-    description: Local development
 
 security:
   - ApiKeyAuth: []
