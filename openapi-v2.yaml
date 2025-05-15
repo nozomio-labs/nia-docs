@@ -7,7 +7,7 @@ info:
     The API provides capabilities for repository indexing, status checking, and AI-powered code querying.
   
 servers:
-  - url: https://api.trynia.ai/v2
+  - url: https://apigcp.trynia.ai/v2
     description: Production API
 
 security:
