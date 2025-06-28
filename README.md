@@ -296,7 +296,7 @@ Deployment happens automatically when changes are merged to main:
 
 * Create an issue
 
-* Email: [docs@trynia.ai](mailto:docs@trynia.ai)
+* Email: [founders@nozomio.com](mailto:founders@nozomio.com)
 
 ## 📄 License
 

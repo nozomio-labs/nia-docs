@@ -1,6 +1,6 @@
 ---
 title: 'Pricing'
-description: 'Simple, transparent pricing for Nia AI'
+description: 'Simple, transparent pricing for Nia AI - Choose the plan that scales with your needs'
 ---
 
 <Note>
@@ -9,8 +9,8 @@ description: 'Simple, transparent pricing for Nia AI'
 
 ## Plans
 
-<CardGroup cols={2}>
-  <Card title="Free" icon="✨">
+<CardGroup cols={3}>
+  <Card title="Hacker" icon="⚡">
     <div className="flex flex-col gap-4">
       <div className="text-2xl font-bold">
         $0
@@ -18,36 +18,45 @@ description: 'Simple, transparent pricing for Nia AI'
       </div>
 
       <div className="space-y-2">
-        ### For personal projects
+        <p className="text-sm text-muted-foreground">Perfect for exploring Nia's capabilities</p>
 
-        * Unlimited repos less than 20MB
+        * Repositories up to 20MB
         
-        * Unlimited conversations with Nia, powered by Claude-3.7-Sonnet and o3-mini
+        * Unlimited conversations with Nia AI
         
         * Public repositories only
         
         * Free community repos access
         
         * Access to Claude Sonnet 3.7 & Deepseek
+        
+        * 25 lifetime API requests
+        
+        * Basic support
 
         <Button className="mt-4 w-full" variant="bordered">
-          Subscribe
+          Start for free
         </Button>
       </div>
     </div>
   </Card>
 
-  <Card title="Pro" icon="⭐">
+  <Card title="Cracked" icon="🔥">
     <div className="flex flex-col gap-4">
-      <div className="text-2xl font-bold">
-        $14.99
-        <span className="text-sm font-normal text-muted-foreground">/month</span>
+      <div className="flex items-center gap-2">
+        <div className="text-2xl font-bold">
+          $14.99
+          <span className="text-sm font-normal text-muted-foreground">/month</span>
+        </div>
+        <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
+          Popular
+        </div>
       </div>
 
       <div className="space-y-2">
-        ### For professional developers
+        <p className="text-sm text-muted-foreground">For professional developers</p>
 
-        * Everything in Free, plus...
+        * Everything in Hacker, plus...
         
         * Access to private repositories
         
@@ -59,70 +68,52 @@ description: 'Simple, transparent pricing for Nia AI'
         
         * Unlimited integration with Cursor and other tools
         
-        * Priority waitlist for Nia Agent
+        * Dedicated Slack channel by request
+        
+        * Unlimited MCP integration and API usage
 
         <Button className="mt-4 w-full" variant="primary">
-          Upgrade to Pro
+          Subscribe
+        </Button>
+      </div>
+    </div>
+  </Card>
+
+  <Card title="Startups" icon="🚀">
+    <div className="flex flex-col gap-4">
+      <div className="text-2xl font-bold">
+        Custom
+        <span className="text-sm font-normal text-muted-foreground">/month</span>
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">For growing teams</p>
+
+        * Everything in Cracked, plus...
+        
+        * Self hosting
+        
+        * Managed Team Billing
+        
+        * Custom usage limits
+        
+        * Custom PM integrations
+        
+        * Custom models
+        
+        * Dedicated support
+        
+        * Invitation to our members-only Slack channel
+        
+        * Usage monitoring
+
+        <Button className="mt-4 w-full" variant="secondary">
+          Talk to Founder
         </Button>
       </div>
     </div>
   </Card>
 </CardGroup>
-
-## Rate Limits
-
-<Note>
-  All project API keys have a default rate limit of 60 requests per minute. This can be increased by contacting us.
-</Note>
-
-<Table>
-  <thead>
-    <tr>
-      <th>Plan</th>
-      <th>Default Rate Limit</th>
-      <th>Custom Limits</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Free</td>
-      <td>60 requests/minute</td>
-      <td>Not available</td>
-    </tr>
-    <tr>
-      <td>Pro</td>
-      <td>60 requests/minute</td>
-      <td>Available upon request</td>
-    </tr>
-    <tr>
-      <td>Enterprise</td>
-      <td>Custom</td>
-      <td>Tailored to your needs</td>
-    </tr>
-  </tbody>
-</Table>
-
-## API Usage
-
-<Tabs>
-  <Tab title="Pay As You Go">
-    ```markdown
-    $0.10 per API call
-    - Billed monthly
-    - No minimum commitment
-    - Automatic volume discounts
-    ```
-  </Tab>
-
-  <Tab title="Pro Plan Credits">
-    ```markdown
-    Pro Plan includes:
-    - 200 API calls/month
-    - Additional calls at $0.08 each
-    - Unused credits roll over (up to 3 months)
-    ```
-  </Tab>
-</Tabs>
 
 ## Feature Comparison
 
@@ -130,8 +121,9 @@ description: 'Simple, transparent pricing for Nia AI'
   <thead>
     <tr>
       <th>Feature</th>
-      <th>Free</th>
-      <th>Pro</th>
+      <th>Hacker</th>
+      <th>Cracked</th>
+      <th>Startups</th>
     </tr>
   </thead>
 
@@ -140,218 +132,215 @@ description: 'Simple, transparent pricing for Nia AI'
       <td>Repository Size</td>
       <td>Up to 20MB</td>
       <td>Up to 1024MB</td>
+      <td>Custom</td>
     </tr>
 
     <tr>
-      <td>Number of Repositories</td>
-      <td>Unlimited (Public only)</td>
-      <td>Unlimited (Public & Private)</td>
+      <td>Repository Access</td>
+      <td>Public only</td>
+      <td>Public & Private</td>
+      <td>Public & Private</td>
     </tr>
 
     <tr>
-      <td>API Calls</td>
-      <td>100/month</td>
-      <td>200/month + PAYG</td>
+      <td>API Requests</td>
+      <td>25 lifetime</td>
+      <td>Unlimited</td>
+      <td>Custom limits</td>
     </tr>
 
     <tr>
       <td>AI Models</td>
-      <td>Claude 3.7 Sonnet, o3-mini, Deepseek</td>
+      <td>Claude 3.7 Sonnet, Deepseek</td>
       <td>All Models</td>
+      <td>Custom models</td>
+    </tr>
+
+    <tr>
+      <td>MCP Integration</td>
+      <td>Limited (25 requests)</td>
+      <td>Unlimited</td>
+      <td>Unlimited + Custom</td>
     </tr>
 
     <tr>
       <td>Cursor Integration</td>
-      <td>Pay-per-request</td>
+      <td>Limited</td>
       <td>Unlimited</td>
+      <td>Unlimited + Custom</td>
     </tr>
 
     <tr>
       <td>GitHub Integration</td>
-      <td>Basic</td>
-      <td>Advanced</td>
+      <td>❌</td>
+      <td>✅</td>
+      <td>✅ + Custom</td>
     </tr>
 
     <tr>
       <td>Slack Integration</td>
       <td>❌</td>
       <td>✅</td>
-    </tr>
-
-    <tr>
-      <td>Support</td>
-      <td>Community</td>
-      <td>Priority</td>
-    </tr>
-
-    <tr>
-      <td>API Rate Limits</td>
-      <td>60 req/min</td>
-      <td>60 req/min (customizable)</td>
+      <td>✅ + Custom</td>
     </tr>
 
     <tr>
       <td>Multi-repository querying</td>
       <td>❌</td>
       <td>✅</td>
+      <td>✅</td>
+    </tr>
+
+    <tr>
+      <td>Support</td>
+      <td>Basic</td>
+      <td>Dedicated Slack channel</td>
+      <td>Dedicated support</td>
+    </tr>
+
+    <tr>
+      <td>Self Hosting</td>
+      <td>❌</td>
+      <td>❌</td>
+      <td>✅</td>
+    </tr>
+
+    <tr>
+      <td>Team Billing</td>
+      <td>❌</td>
+      <td>❌</td>
+      <td>✅ Managed</td>
     </tr>
   </tbody>
 </Table>
 
-## Volume Discounts
+## Plan Details
 
-<CardGroup cols={3}>
-  <Card title="1,000+ calls">
-    $0.08 per call
-    <br />20% savings
+<AccordionGroup>
+  <Accordion title="Hacker Plan - Perfect for Getting Started">
+    **Ideal for:**
+    * Individual developers exploring Nia's capabilities
+    * Small personal projects
+    * Learning and experimentation
+
+    **Key Features:**
+    * 25 lifetime API requests to test all features
+    * Access to public repositories up to 20MB
+    * Full conversation capabilities with Nia AI
+    * Community repository access
+    * Support for Claude Sonnet 3.7 & Deepseek models
+
+    **Limitations:**
+    * No private repository access
+    * Limited API usage
+    * Basic community support only
+  </Accordion>
+
+  <Accordion title="Cracked Plan - Most Popular Choice" defaultOpen>
+    **Ideal for:**
+    * Professional developers
+    * Small to medium development teams
+    * Production projects requiring private repo access
+
+    **Key Features:**
+    * Unlimited API usage and MCP integration
+    * Private repository access up to 1024MB
+    * Multi-repository querying capabilities
+    * Full Slack and GitHub integrations
+    * Unlimited Cursor and tool integrations
+    * Dedicated Slack channel support
+    * All AI models included
+
+    **Perfect for developers who need:**
+    * Privacy for proprietary code
+    * Integration with development workflows
+    * Professional-grade support
+  </Accordion>
+
+  <Accordion title="Startups Plan - Enterprise Solution">
+    **Ideal for:**
+    * Growing development teams
+    * Companies with specific compliance needs
+    * Organizations requiring custom integrations
+
+    **Key Features:**
+    * Everything in Cracked plan
+    * Self-hosting capabilities
+    * Managed team billing and administration
+    * Custom usage limits and monitoring
+    * Custom model integrations
+    * White-glove dedicated support
+    * Members-only Slack community access
+    * Custom PM tool integrations
+
+    **Enterprise Benefits:**
+    * Full control over data and hosting
+    * Tailored solutions for your workflow
+    * Priority feature development
+    * Direct access to founders and engineering team
+  </Accordion>
+</AccordionGroup>
+
+## Why Choose Nia?
+
+<CardGroup cols={2}>
+  <Card title="Powerful AI Understanding" icon="brain">
+    Advanced code comprehension that understands context, relationships, and patterns across your entire codebase
   </Card>
 
-  <Card title="5,000+ calls">
-    $0.06 per call
-    <br />40% savings
+  <Card title="Seamless Integrations" icon="plug">
+    Works with your favorite tools - Cursor, Slack, GitHub, and any MCP-compatible application
   </Card>
 
-  <Card title="10,000+ calls">
-    $0.05 per call
-    <br />50% savings
+  <Card title="Privacy First" icon="shield">
+    Your code stays secure with enterprise-grade security and optional self-hosting
+  </Card>
+
+  <Card title="Developer Focused" icon="code">
+    Built by developers, for developers. Features designed to actually improve your coding workflow
   </Card>
 </CardGroup>
 
-## Pro Features in Detail
+## Frequently Asked Questions
 
 <AccordionGroup>
-  <Accordion title="Unlimited Cursor Integration">
-    Enhanced coding experience:
-
-    * No per-request charges
-    
-    * Seamless IDE integration
-    
-    * Advanced code assistance
-    
-    * Compatible with any OpenAI-format IDE
-  </Accordion>
-
-  <Accordion title="Multi-Repository Support">
-    Work with multiple codebases:
-
-    * Cross-repository analysis
-
-    * Unified search
-
-    * Dependency tracking
-
-    * Relationship mapping
-  </Accordion>
-
-  <Accordion title="Priority Support">
-    Enhanced support options:
-
-    * 24/7 email support
-
-    * 4-hour response time
-
-    * Direct Slack channel
-
-    * Monthly check-ins
-  </Accordion>
-
-  <Accordion title="Advanced Integrations">
-    Enterprise-grade integrations:
-
-    * GitHub Enterprise
-
-    * Slack workspace
-
-    * Custom webhooks
-
-    * API access
-  </Accordion>
-</AccordionGroup>
-
-## FAQ
-
-<AccordionGroup>
-  <Accordion title="How are API calls counted?">
-    API calls are counted when:
-
-    * Asking questions about code
-
-    * Indexing repositories
-
-    * Using integrations
-
-    * Running analysis
-  </Accordion>
-
-  <Accordion title="What happens if I exceed my API limit?">
-    Free plan: Access paused until next month
-    Pro plan: Charged $0.10 per additional call
-  </Accordion>
-
   <Accordion title="Can I upgrade or downgrade anytime?">
-    Yes! Plan changes take effect immediately:
-
-    * Upgrading: Instant access to Pro features
-
-    * Downgrading: Active until end of billing period
+    Yes! You can change your plan at any time. Upgrades take effect immediately, and downgrades take effect at the end of your current billing cycle.
   </Accordion>
 
-  <Accordion title="Do unused API calls roll over?">
-    Pro plan only:
+  <Accordion title="What happens to my data if I downgrade?">
+    Your indexed repositories remain accessible, but features like private repo access or unlimited API usage will be restricted based on your new plan limits.
+  </Accordion>
 
-    * Up to 3 months rollover
+  <Accordion title="Do you offer refunds?">
+    We offer a 30-day money-back guarantee for all paid plans. If you're not satisfied, contact us for a full refund.
+  </Accordion>
 
-    * Maximum 600 rolled-over calls
+  <Accordion title="Is there a free trial for paid plans?">
+    The Hacker plan serves as an extended free trial with 25 lifetime API requests. This gives you plenty of opportunity to test all features before upgrading.
+  </Accordion>
 
-    * Used before new month's allocation
+  <Accordion title="How does billing work for the Startups plan?">
+    Startups plan pricing is custom based on your specific needs, team size, and usage requirements. Contact our founder to discuss your requirements and get a personalized quote.
+  </Accordion>
+
+  <Accordion title="Can I use Nia with my existing development tools?">
+    Yes! Nia integrates with popular tools like Cursor, Claude Desktop, VS Code (via Cline), Continue.dev, and any application that supports the Model Context Protocol (MCP).
   </Accordion>
 </AccordionGroup>
 
-## Enterprise
-
-<Card title="Custom Enterprise Plans">
-  For larger teams and organizations:
-
-  * Custom pricing for high-volume usage
-
-  * Dedicated support manager
-
-  * Custom AI model training
-
-  * On-premise deployment options
-
-  * SSO and advanced security
-
-  * Custom integrations
-
-  <Button className="mt-4">
-    Contact Sales
-  </Button>
-</Card>
-
-## Money Back Guarantee
+## Ready to Get Started?
 
 <Note>
-  Try Pro risk-free for 14 days. If you're not satisfied, we'll refund your subscription - no questions asked.
+  Start with the **Hacker plan** to explore Nia's capabilities, then upgrade to **Cracked** when you're ready for unlimited usage and private repositories. Growing teams should consider our **Startups plan** for custom solutions.
 </Note>
 
-## Need Help Choosing?
-
 <CardGroup cols={2}>
-  <Card title="Schedule a Demo" href="trynia.ai">
-    See Nia AI in action with a personalized demo
-
-    <Button variant="bordered">
-      Book Demo
-    </Button>
+  <Card title="Get Started Now" icon="rocket" href="https://app.trynia.ai">
+    Sign up for free and start indexing your first repository in minutes
   </Card>
 
-  <Card title="Talk to Sales" href="trynia.ai">
-    Discuss your specific needs with our team
-
-    <Button variant="bordered">
-      Contact Sales
-    </Button>
+  <Card title="Talk to Our Founder" icon="calendar" href="mailto:founders@nozomio.com">
+    Have questions? Need a custom solution? Let's chat about how Nia can help your team
   </Card>
 </CardGroup>

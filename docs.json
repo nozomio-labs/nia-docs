@@ -16,8 +16,6 @@
           {
             "group": "Get Started",
             "pages": [
-              "introduction",
-              "quickstart",
               "pricing"
             ]
           },
@@ -25,19 +23,15 @@
             "group": "Command Line Interface",
             "pages": [
               "cli/overview",
-              "cli/index",
               "cli/setup"
             ]
           },
           {
             "group": "Integrations",
             "pages": [
+              "integrations/nia-mcp",
               "integrations/overview",
-              "integrations/github",
-              "integrations/slack",
-              "integrations/cursor",
-              "integrations/continue",
-              "integrations/nia-mcp"
+              "integrations/slack"
             ]
           }
         ]
@@ -56,7 +50,7 @@
         },
         {
           "anchor": "Community",
-          "href": "https://discord.gg/yCkHSpsTm2",
+          "href": "https://discord.gg/BBSwUMrrfn",
           "icon": "discord"
         }
       ]

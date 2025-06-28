@@ -1,331 +1,372 @@
 ---
-title: 'Nia MCP Integration'
-description: 'Learn how to use Nia AI with Model Context Protocol (MCP) in AI assistants and code editors'
+title: 'Nia Context MCP'
+description: 'Supercharge Cursor, Cline, Windsurf, and other AI coding assistants with codebase understanding and documentation search'
 ---
 
 <Note>
-  This guide explains how to set up the Nia MCP server to enhance AI assistants with codebase understanding capabilities.
+  **Nia MCP to 10x any coding agent** (Cursor, Cline, Windsurf, etc.)
   
-  * ***You need a Nia API key to get started.***
-  * ***For Cursor and Windsurf integrations, you must use your Cursor API key found in the API keys page of your account.***
+  * ***Get your API key at [app.trynia.ai](http://app.trynia.ai/) - 25 requests are free!***
+  * ***Works with Cursor, Claude Desktop, Continue.dev, VS Code Cline, and any MCP-compatible tool***
 </Note>
 
-## Overview
+## ✨ What You Can Do
 
-The Nia Model Context Protocol (MCP) integration enables AI assistants and applications to access Nia's powerful codebase understanding capabilities through a standardized interface. Using the MCP server, AI assistants like Claude can seamlessly query and retrieve relevant code context from repositories indexed in Nia.
+Transform your coding experience by giving your AI assistant superpowers:
 
 <CardGroup cols={2}>
-  <Card title="AI Assistants" icon="robot">
-    Enhance AI assistants like Claude with deep codebase understanding
+  <Card title="Index GitHub Repos" icon="github">
+    Store entire repositories for instant code context and understanding
   </Card>
 
-  <Card title="Code Editors" icon="code">
-    Integrate with AI-powered code editors like Cursor and Windsurf
+  <Card title="Index Documentation" icon="book">
+    Search across any website or documentation with natural language
   </Card>
 
-  <Card title="Custom Applications" icon="gear">
-    Build custom applications with codebase understanding capabilities
+  <Card title="Chat with Entire Codebases" icon="message-code">
+    Talk to ENTIRE documentation and repos, not just individual pages (10x'ing Cursor!)
   </Card>
 
-  <Card title="Natural Language" icon="message">
-    Query your entire codebase using natural language
+  <Card title="Multi-Source Intelligence" icon="brain-circuit">
+    Get context from both code AND documentation in one query
   </Card>
 </CardGroup>
 
-## How It Works
+## 🎯 Real-World Use Cases
 
-The Nia MCP server acts as a bridge between AI assistants and your codebase knowledge:
+<Accordion title="Index Additional Repos + Company Docs" defaultOpen>
+Ask Cursor: *"Use nia mcp to search across our backend repo and API docs, then come back and implement this feature"*
+</Accordion>
 
-<Steps>
-  <Step title="Setup">
-    The MCP server connects to Nia using your API key
-  </Step>
-  
-  <Step title="Query">
-    AI assistants send natural language queries about your code
-  </Step>
-  
-  <Step title="Retrieval">
-    The server retrieves relevant code snippets and context from Nia
-  </Step>
-  
-  <Step title="Response">
-    Context is returned in a structured format with source references
-  </Step>
-</Steps>
+<Accordion title="Create Personal Knowledge Base">
+Index all the frameworks you use - React, Next.js, TypeScript docs - and query them instantly
+</Accordion>
 
-## Installation
+<Accordion title="Search Multiple Codebases">
+Compare implementations across different projects or find patterns across your entire organization
+</Accordion>
 
-You can use the Nia MCP server without installing it using npx:
+<Accordion title="Code + Documentation Context">
+Get context from both source code AND documentation in one unified search
+</Accordion>
 
-```bash
-npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY --transport=stdio
-```
-
-Or install it globally:
-
-```bash
-npm install -g nia-codebase-mcp
-```
-
-## Configuration Options
+## 🎥 See It In Action
 
 <Tabs>
-  <Tab title="Command Line">
-    ```bash
-    # Basic usage with stdio transport (default)
-    npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY
-    
-    # Using SSE transport on custom port
-    npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY --transport=sse --port=3000
-    
-    # Enable debug mode
-    npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY --debug=true
-    ```
+  <Tab title="Documentation Tools">
+    <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', height: 0, overflow: 'hidden' }}>
+      <iframe 
+        src="https://www.youtube.com/embed/aiVbh-QO-Fg?si=04nUsm8jgmvE_Pft" 
+        title="Nia Documentation Tools Demo"
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+        frameBorder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerPolicy="strict-origin-when-cross-origin" 
+        allowFullScreen
+      />
+    </div>
   </Tab>
   
-  <Tab title="Environment Variables">
-    ```bash
-    # Configure with environment variables
-    export NIA_API_KEY=your_api_key
-    export TRANSPORT=stdio
-    export PORT=3000
-    export DEBUG=false
-    export TOOL_TIMEOUT_MS=300000
-    
-    # Run the server
-    npx -y nia-codebase-mcp@1.0.1
-    ```
+  <Tab title="Codebase Tools">
+    <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', height: 0, overflow: 'hidden' }}>
+      <iframe 
+        src="https://www.youtube.com/embed/uV8PmuTNL8E?si=9a40wsPN2h4GVjX7" 
+        title="Nia Codebase Tools Demo"
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+        frameBorder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerPolicy="strict-origin-when-cross-origin" 
+        allowFullScreen
+      />
+    </div>
   </Tab>
 </Tabs>
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--api-key` | Your Nia API key | Required |
-| `--transport` | Connection mode (`stdio` or `sse`) | `stdio` |
-| `--port` | Port for SSE server | 3000 |
-| `--debug` | Enable debug logging | `false` |
-| `--tool-timeout-ms` | Custom timeout for tool execution | 300000ms |
+## 📦 Installation
 
-## Integration with AI Assistants
+<Steps>
+  <Step title="Prerequisites">
+    - Python 3.8+ 
+    - `uvx` (recommended) or `pip`
+    - Your NIA API key from [app.trynia.ai](http://app.trynia.ai/)
+  </Step>
+  
+  <Step title="Install the Package">
+    <CodeGroup>
+      ```bash Option A: Using uvx (Recommended)
+      # uvx will automatically handle the installation when you run it
+      # No need to pre-install if you have uvx
+      ```
+      
+      ```bash Option B: Using pip (If needed)
+      pip install nia-mcp-server
+      ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Configure Your MCP Client">
+    Choose your coding assistant below for specific configuration steps
+  </Step>
+  
+  <Step title="Replace Your API Key">
+    Get your API key from [app.trynia.ai](http://app.trynia.ai/) and replace `YOUR_API_KEY` in the configuration
+  </Step>
+  
+  <Step title="Restart Your Client">
+    Restart your coding assistant to load the new MCP server
+  </Step>
+</Steps>
+
+## ⚙️ Configuration for Your Coding Assistant
 
 <Tabs>
-  <Tab title="Claude Desktop">
+  <Tab title="Cursor">
     <Steps>
-      <Step title="Configure Claude Desktop">
-        Edit your Claude Desktop configuration at:
-        
-        - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-        - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+      <Step title="Open MCP Configuration">
+        Open your Cursor MCP configuration file:
+        - **macOS**: `~/.cursor/mcp.json`
+        - **Windows**: `%APPDATA%\Cursor\mcp.json`
+        - **Linux**: `~/.config/cursor/mcp.json`
       </Step>
       
-      <Step title="Add MCP Server Configuration">
-        Add the following to your configuration file:
-        
+      <Step title="Add NIA Configuration">
         ```json
         {
           "mcpServers": {
-            "nia-codebase": {
-              "command": "npx",
-              "args": [
-                "-y",
-                "nia-codebase-mcp@1.0.1",
-                "--api-key=YOUR_NIA_API_KEY"
-              ]
+            "nia": {
+              "command": "uvx",
+              "args": ["nia-mcp-server"],
+              "env": {
+                "NIA_API_KEY": "YOUR_API_KEY",
+                "NIA_API_URL": "https://apigcp.trynia.ai/"
+              }
             }
           }
         }
         ```
       </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Claude Desktop">
+    <Steps>
+      <Step title="Open Configuration File">
+        Edit your Claude Desktop configuration:
+        - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+        - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+      </Step>
       
-      <Step title="Restart Claude">
-        Restart Claude Desktop to apply the changes
+      <Step title="Add NIA Configuration">
+        ```json
+        {
+          "mcpServers": {
+            "nia": {
+              "command": "nia-mcp-server",
+              "env": {
+                "NIA_API_KEY": "YOUR_API_KEY",
+                "NIA_API_URL": "https://apigcp.trynia.ai/"
+              }
+            }
+          }
+        }
+        ```
       </Step>
     </Steps>
   </Tab>
   
-  <Tab title="Cursor">
+  <Tab title="Continue.dev">
     <Steps>
-      <Step title="Open Cursor Settings">
-        Navigate to Settings > Features > MCP Servers
+      <Step title="Open Continue Configuration">
+        Edit your `~/.continue/config.json` file
       </Step>
       
-      <Step title="Add New MCP Server">
-        Configure with these settings:
-        
-        - Name: `nia-codebase`
-        - Type: `command`
-        - Command: `npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY`
-      </Step>
-      
-      <Step title="Note on API Key">
-        Remember to use your Cursor API key, not a standard Nia API key. The Cursor API key can be found in the API keys page of your Cursor account.
+      <Step title="Add NIA Configuration">
+        ```json
+        {
+          "models": [...],
+          "mcpServers": [
+            {
+              "name": "nia",
+              "command": "nia-mcp-server",
+              "env": {
+                "NIA_API_KEY": "YOUR_API_KEY",
+                "NIA_API_URL": "https://apigcp.trynia.ai/"
+              }
+            }
+          ]
+        }
+        ```
       </Step>
     </Steps>
   </Tab>
   
-  <Tab title="Other MCP-Compatible Editors">
+  <Tab title="VS Code Cline">
     <Steps>
-      <Step title="Configure MCP Server">
-        For editors that support the Model Context Protocol, configure the MCP server using:
-        
-        - Transport: stdio or SSE
-        - Command: `npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY`
-        - Connection Details: For SSE, connect to `http://localhost:3000` (or your specified port)
+      <Step title="Open Cline Settings">
+        Access your Cline MCP configuration in VS Code settings
+      </Step>
+      
+      <Step title="Add NIA Configuration">
+        ```json
+        {
+          "mcpServers": {
+            "nia": {
+              "command": "nia-mcp-server",
+              "env": {
+                "NIA_API_KEY": "YOUR_API_KEY",
+                "NIA_API_URL": "https://apigcp.trynia.ai/"
+              }
+            }
+          }
+        }
+        ```
       </Step>
     </Steps>
   </Tab>
 </Tabs>
 
-## MCP Configuration File Examples
+## 🧪 Testing the Installation
 
-For code editors like Cursor and Windsurf that support MCP, you can use a configuration file to set up the Nia integration.
+Once configured, try these commands in your AI assistant:
 
 <CodeGroup>
-  ```json mcp.json
-  {
-    "Nia": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "nia-codebase-mcp",
-        "--api-key=YOUR_CURSOR_API_KEY",
-        "--transport=stdio"
-      ]
-    }
-  }
+  ```bash Index a Repository
+  Index https://github.com/facebook/react
   ```
   
-  ```json cursor-settings.json
-  {
-    "mcpServers": {
-      "Nia": {
-        "command": "npx",
-        "args": [
-          "-y",
-          "nia-codebase-mcp",
-          "--api-key=YOUR_NIA-CURSOR_API_KEY",
-          "--transport=stdio"
-        ]
-      }
-    }
-  }
+  ```bash List Repositories
+  List my indexed repositories
+  ```
+  
+  ```bash Search Code
+  Search for "useState hook implementation" in my repositories
+  ```
+  
+  ```bash Index Documentation
+  Index the documentation at https://react.dev/docs
+  ```
+  
+  ```bash Cross-Search
+  Search across both React source code and documentation for "state management patterns"
   ```
 </CodeGroup>
 
-<Note>
-  Replace `YOUR_CURSOR_API_KEY` with your actual Cursor API key. For Cursor and Windsurf integrations, you must use your Cursor API key specifically, not a standard Nia API key.
-</Note>
-
-## Using the MCP Server
-
-Once configured, you can use prompts like these with your AI assistant:
-
-<CodeGroup>
-  ```bash Example 1
-  Using the lookup_codebase_context tool, please analyze my project structure and tell me what the main components are.
-  ```
-  
-  ```bash Example 2
-  Using the lookup_codebase_context tool, search the codebase to understand how the authentication system works and explain its key components.
-  ```
-  
-  ```bash Example 3
-  Using the lookup_codebase_context tool, find examples of how error handling is implemented in this codebase.
-  ```
-</CodeGroup>
-
-## Technical Details
+## 🛠️ Available Tools
 
 <CardGroup cols={2}>
-  <Card title="Tools Available">
-    * **lookup_codebase_context**: Look up context from a codebase indexed in Nia, retrieving relevant code snippets based on user queries
-  </Card>
-  
-  <Card title="Requirements">
-    * Node.js 18 or higher
-    * A valid Nia API key (Cursor API key for Cursor/Windsurf integrations)
-    * A codebase indexed in Nia
+  <Card title="Repository Tools" icon="github">
+    - **`index_repository`** - Index any GitHub repository
+    - **`search_codebase`** - Search code with natural language
+    - **`list_repositories`** - List all indexed repositories
   </Card>
 
-  <Card title="Transport Options">
-    * **stdio**: Default transport for most applications
-    * **SSE**: Server-Sent Events for web and network-based integrations
-  </Card>
-  
-  <Card title="Performance">
-    * Built-in retry logic
-    * Configurable timeout management
-    * Robust error handling
+  <Card title="Documentation Tools" icon="book">
+    - **`index_documentation`** - Index any website or docs
+    - **`search_documentation`** - Search docs with natural language  
+    - **`list_documentation`** - List all indexed documentation
   </Card>
 </CardGroup>
 
-## Security & Privacy
-
-The Nia MCP server maintains the same security standards as Nia:
-
-<CardGroup cols={2}>
-  <Card title="Encrypted Communication">
-    All communication with Nia's API is encrypted
-  </Card>
-  
-  <Card title="API Key Security">
-    Your API key is never exposed to the AI assistant
-  </Card>
-
-  <Card title="Secure Retrieval">
-    Code context is retrieved securely from your indexed repositories
-  </Card>
-  
-  <Card title="Privacy Controls">
-    Maintains all privacy controls from your Nia configuration
-  </Card>
-</CardGroup>
-
-## Troubleshooting
+## 🎯 Pro Tips for Maximum Productivity
 
 <AccordionGroup>
-  <Accordion title="Server Not Starting">
-    1. Verify your Nia API key is valid
-    2. Check Node.js version (must be 18+)
-    3. Ensure you have network connectivity to Nia's API
-  </Accordion>
-  
-  <Accordion title="AI Assistant Cannot Access Tool">
-    1. Verify the MCP server is running
-    2. Check the configuration in your AI assistant or editor
-    3. Ensure the transport method is correctly configured
-  </Accordion>
-  
-  <Accordion title="Debug Mode">
-    Enable debug mode for more detailed logs:
+  <Accordion title="Multi-Source Queries">
+    Combine searches across repositories and documentation:
     
-    ```bash
-    npx -y nia-codebase-mcp@1.0.1 --api-key=YOUR_NIA_API_KEY --debug=true
-    ```
+    *"Search both the Next.js repo and docs for server-side rendering patterns, then implement a similar solution for our project"*
+  </Accordion>
+  
+  <Accordion title="Context-Aware Development">
+    Use specific, detailed queries:
+    
+    *"Find error handling patterns in our backend repo, compare with best practices from indexed documentation, then refactor this function"*
+  </Accordion>
+  
+  <Accordion title="Knowledge Base Building">
+    Index frequently used resources:
+    - Framework documentation (React, Vue, Angular)
+    - Company internal docs
+    - Best practice guides
+    - Reference implementations
+  </Accordion>
+  
+  <Accordion title="Cross-Project Learning">
+    Index multiple projects to:
+    - Find reusable patterns
+    - Compare implementations
+    - Learn from different approaches
+    - Maintain consistency across projects
   </Accordion>
 </AccordionGroup>
 
-## FAQ
+## ⚠️ Troubleshooting
 
 <AccordionGroup>
-  <Accordion title="What is Model Context Protocol (MCP)?">
-    Model Context Protocol is a standardized interface for AI assistants to access external tools and capabilities. It allows AI models to interact with external systems like the Nia codebase understanding engine.
+  <Accordion title='"No API key provided"'>
+    **Solution:** Make sure you've replaced `YOUR_API_KEY` with your actual API key from [app.trynia.ai](http://app.trynia.ai/)
+    
+    Double-check the environment variable is correctly set in your MCP configuration.
   </Accordion>
   
-  <Accordion title="Can I use the MCP server with any AI assistant?">
-    The MCP server can be used with any AI assistant that supports the Model Context Protocol, including Claude, GPT-4, and others integrated into tools like Cursor and Windsurf.
+  <Accordion title='"Command not found: nia-mcp-server"'>
+    **Solution:** Try installing with pip first:
+    ```bash
+    pip install nia-mcp-server
+    ```
+    
+    Or ensure `uvx` is properly installed and in your PATH.
   </Accordion>
   
-  <Accordion title="Do I need to index my codebase first?">
-    Yes, you need to have your codebase indexed in Nia before using the MCP server. You can index your codebase through the Nia web application or API.
+  <Accordion title='"Invalid API key"'>
+    **Solution:** 
+    - Double-check your API key at [app.trynia.ai](http://app.trynia.ai/)
+    - Ensure there are no extra spaces or characters
+    - Verify the API endpoint is set to `https://apigcp.trynia.ai/`
   </Accordion>
   
-  <Accordion title="Which API key should I use?">
-    For general Nia MCP usage, use your Nia API key. For Cursor and Windsurf integrations specifically, you must use your Cursor API key, which can be found in the API keys page of your Cursor account.
+  <Accordion title='"Rate limit exceeded"'>
+    **Solution:** You've used your 25 free requests. Check your usage and upgrade your plan at [app.trynia.ai](http://app.trynia.ai/)
   </Accordion>
   
-  <Accordion title="Is the MCP server open source?">
-    Yes, the Nia MCP server is open source and available on GitHub: [https://github.com/nozomio-labs/nia-mcp](https://github.com/nozomio-labs/nia-mcp)
+  <Accordion title="MCP Server Not Responding">
+    **Solution:**
+    1. Check if the server is running properly
+    2. Verify your MCP client configuration
+    3. Restart your coding assistant
+    4. Check the console for error messages
   </Accordion>
-</AccordionGroup> 
+</AccordionGroup>
+
+## 🚀 What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Build Your Knowledge Base" icon="database">
+    Start by indexing your most-used repositories and documentation sources
+  </Card>
+  
+  <Card title="Experiment with Queries" icon="magnifying-glass">
+    Try different search approaches to find what works best for your workflow
+  </Card>
+  
+  <Card title="Share with Your Team" icon="users">
+    Set up shared knowledge bases for your development team
+  </Card>
+  
+  <Card title="Optimize Your Workflow" icon="rocket">
+    Integrate Nia MCP into your daily coding routine for maximum productivity
+  </Card>
+</CardGroup>
+
+## 💬 Feedback & Support
+
+<Note>
+We'd love your feedback! Help us improve Nia MCP and make coding agents even more powerful. Share your experience, suggestions, or even roast the product if you want - we really want to help developers code way, way faster!
+
+**Nia - AI that understands your entire codebase** 
+</Note>
+
+---
+
+<Warning>
+**Need Help?** Join our community or reach out through [app.trynia.ai](http://app.trynia.ai/) for support and updates.
+</Warning> 

@@ -3,12 +3,19 @@ info:
   title: Nia AI API
   version: '2.0.0'
   description: |
-    Nia AI API allows developers to index and query code repositories using advanced AI understanding.
-    The API provides capabilities for repository indexing, status checking, and AI-powered code querying.
+    Nia AI API allows developers to index and query code repositories and documentation using advanced AI understanding.
+    The API provides capabilities for:
+    - Repository indexing and management
+    - Documentation/website indexing and management
+    - AI-powered unified search across code and documentation
+    - Real-time status checking for indexing operations
+    - Streaming responses for interactive applications
   
 servers:
   - url: https://apigcp.trynia.ai/v2
     description: Production API
+  - url: http://localhost:8000/v2
+    description: Local development
 
 security:
   - ApiKeyAuth: []
@@ -40,7 +47,6 @@ components:
       type: object
       required:
         - messages
-        - repositories
       properties:
         messages:
           type: array
@@ -68,8 +74,24 @@ components:
             properties:
               repository:
                 type: string
-                description: Repository identifier
+                description: Repository identifier in owner/repo format
           description: List of repositories to query
+        data_sources:
+          type: array
+          items:
+            type: object
+            required:
+              - source_id
+            properties:
+              source_id:
+                type: string
+                description: Data source identifier
+          description: List of documentation/web sources to query
+        search_mode:
+          type: string
+          enum: [unified, repositories, sources]
+          default: unified
+          description: "Search mode: 'unified' searches both repos and docs, 'repositories' searches only code, 'sources' searches only documentation"
         stream:
           type: boolean
           default: false
@@ -126,6 +148,73 @@ components:
           type: string
           description: Error message
 
+    DataSourceRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL to index (documentation or website)
+          example: "https://docs.example.com"
+        url_patterns:
+          type: array
+          items:
+            type: string
+          description: URL patterns to include in crawling (supports wildcards)
+          example: ["https://docs.example.com/api/*", "https://docs.example.com/guides/*"]
+        project_id:
+          type: string
+          description: Optional project ID to associate with
+        max_age:
+          type: integer
+          description: Maximum age of cached content in seconds (for fast scraping)
+        formats:
+          type: array
+          items:
+            type: string
+          description: Content formats to return
+          example: ["markdown", "html"]
+        only_main_content:
+          type: boolean
+          default: true
+          description: Extract only main content (removes nav, ads, etc.)
+
+    DataSourceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the data source
+        url:
+          type: string
+          description: The indexed URL
+        status:
+          type: string
+          enum: [pending, processing, completed, error]
+          description: Current indexing status
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        page_count:
+          type: integer
+          default: 0
+          description: Number of pages indexed
+        project_id:
+          type: string
+          description: Associated project ID if any
+        source_type:
+          type: string
+          enum: [web, text]
+          default: web
+        is_active:
+          type: boolean
+          default: true
+
   responses:
     UnauthorizedError:
       description: API key is missing or invalid
@@ -164,6 +253,50 @@ components:
 
 paths:
   /repositories:
+    get:
+      summary: List all repositories
+      description: List all indexed repositories for the authenticated user
+      operationId: listRepositories
+      tags:
+        - Repositories
+      responses:
+        '200':
+          description: List of repositories retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    repository_id:
+                      type: string
+                      description: Unique identifier for the repository
+                    repository:
+                      type: string
+                      description: Repository identifier in owner/repo format
+                    branch:
+                      type: string
+                      description: Indexed branch
+                    status:
+                      type: string
+                      enum: [indexing, indexed, error]
+                    progress:
+                      type: object
+                      properties:
+                        percentage:
+                          type: number
+                        stage:
+                          type: string
+                        message:
+                          type: string
+                    error:
+                      type: string
+                      description: Error message if status is 'error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
     post:
       summary: Index a new repository
       description: |
@@ -233,14 +366,59 @@ paths:
                 $ref: '#/components/schemas/Error'
         '429':
           $ref: '#/components/responses/RateLimitError'
+    delete:
+      summary: Delete a repository
+      description: Remove an indexed repository from your account
+      operationId: deleteRepository
+      tags:
+        - Repositories
+      parameters:
+        - name: repository_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the repository to delete
+      responses:
+        '200':
+          description: Repository deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to repository
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Repository not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
 
   /query:
     post:
-      summary: Query indexed repositories
+      summary: Query indexed repositories and documentation
       description: |
-        Send a query to get AI-powered insights about the indexed repositories.
+        Send a query to get AI-powered insights about indexed repositories and/or documentation sources.
+        Supports three search modes:
+        - 'unified': Search across both repositories and documentation (default)
+        - 'repositories': Search only code repositories
+        - 'sources': Search only documentation sources
         Supports both streaming and non-streaming responses.
-      operationId: queryRepositories
+      operationId: query
       tags:
         - Query
       requestBody:
@@ -290,8 +468,135 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
+  /data-sources:
+    get:
+      summary: List all data sources
+      description: List all indexed documentation and web sources for the authenticated user
+      operationId: listDataSources
+      tags:
+        - Data Sources
+      responses:
+        '200':
+          description: List of data sources retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataSourceResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+    post:
+      summary: Index a new data source
+      description: |
+        Start indexing a documentation website or any web content.
+        Supports advanced crawling options like URL patterns and content filtering.
+      operationId: createDataSource
+      tags:
+        - Data Sources
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataSourceRequest'
+      responses:
+        '200':
+          description: Data source indexing started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSourceResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /data-sources/{source_id}:
+    get:
+      summary: Get data source details
+      description: Get detailed information about a specific data source
+      operationId: getDataSource
+      tags:
+        - Data Sources
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the data source
+      responses:
+        '200':
+          description: Data source details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSourceResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to data source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+    delete:
+      summary: Delete a data source
+      description: Remove an indexed data source from your account
+      operationId: deleteDataSource
+      tags:
+        - Data Sources
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the data source to delete
+      responses:
+        '200':
+          description: Data source deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to data source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
 tags:
   - name: Repositories
     description: Repository indexing and status operations
   - name: Query
-    description: AI-powered code querying operations 
+    description: AI-powered code and documentation querying operations
+  - name: Data Sources
+    description: Documentation and web content indexing operations ]
