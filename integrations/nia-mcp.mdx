@@ -23,12 +23,20 @@ Transform your coding experience by giving your AI assistant superpowers:
     Search across any website or documentation with natural language
   </Card>
 
+  <Card title="Web Search & Discovery" icon="magnifying-glass">
+    Find trending repos, libraries, and documentation with AI-powered search
+  </Card>
+
+  <Card title="Deep Research Agent" icon="brain-circuit">
+    Perform comprehensive research and analysis on complex technical topics
+  </Card>
+
   <Card title="Chat with Entire Codebases" icon="message-code">
     Talk to ENTIRE documentation and repos, not just individual pages (10x'ing Cursor!)
   </Card>
 
-  <Card title="Multi-Source Intelligence" icon="brain-circuit">
-    Get context from both code AND documentation in one query
+  <Card title="Multi-Source Intelligence" icon="database">
+    Get context from code, documentation, and web sources in one query
   </Card>
 </CardGroup>
 
@@ -36,6 +44,10 @@ Transform your coding experience by giving your AI assistant superpowers:
 
 <Accordion title="Index Additional Repos + Company Docs" defaultOpen>
 Ask Cursor: *"Use nia mcp to search across our backend repo and API docs, then come back and implement this feature"*
+</Accordion>
+
+<Accordion title="Discover & Research Technologies">
+*"Find the best React state management libraries, research their pros and cons, then index the top 2 for deeper analysis"*
 </Accordion>
 
 <Accordion title="Create Personal Knowledge Base">
@@ -72,6 +84,20 @@ Get context from both source code AND documentation in one unified search
       <iframe 
         src="https://www.youtube.com/embed/uV8PmuTNL8E?si=9a40wsPN2h4GVjX7" 
         title="Nia Codebase Tools Demo"
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+        frameBorder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerPolicy="strict-origin-when-cross-origin" 
+        allowFullScreen
+      />
+    </div>
+  </Tab>
+
+  <Tab title="Deep Research">
+    <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', height: 0, overflow: 'hidden' }}>
+      <iframe 
+        src="https://www.youtube.com/embed/Y-cLJ4N-GDQ?si=ODH4cINcXbUvo3Gw" 
+        title="Nia Deep Research Demo"
         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
         frameBorder="0" 
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -135,7 +161,35 @@ Get context from both source code AND documentation in one unified search
           "mcpServers": {
             "nia": {
               "command": "uvx",
-              "args": ["nia-mcp-server"],
+              "args": ["-y", "nia-mcp-server@latest"],
+              "env": {
+                "NIA_API_KEY": "YOUR_API_KEY",
+                "NIA_API_URL": "https://apigcp.trynia.ai/"
+              }
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Windsurf">
+    <Steps>
+      <Step title="Open MCP Configuration">
+        Open your Windsurf MCP configuration file:
+        - **macOS**: `~/.windsurf/mcp.json`
+        - **Windows**: `%APPDATA%\Windsurf\mcp.json`
+        - **Linux**: `~/.config/windsurf/mcp.json`
+      </Step>
+      
+      <Step title="Add NIA Configuration">
+        ```json
+        {
+          "mcpServers": {
+            "mcp-server-nia": {
+              "command": "uvx",
+              "args": ["-y", "nia-mcp-server@latest"],
               "env": {
                 "NIA_API_KEY": "YOUR_API_KEY",
                 "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -160,11 +214,39 @@ Get context from both source code AND documentation in one unified search
         ```json
         {
           "mcpServers": {
-            "nia": {
-              "command": "nia-mcp-server",
+            "mcp-server-nia": {
+              "command": "uvx",
+              "args": ["-y", "nia-mcp-server@latest"],
               "env": {
                 "NIA_API_KEY": "YOUR_API_KEY",
                 "NIA_API_URL": "https://apigcp.trynia.ai/"
+              }
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="VS Code">
+    <Steps>
+      <Step title="Open VS Code Settings">
+        Open your VS Code settings and locate the MCP configuration section, or create a `.vscode/settings.json` file in your workspace
+      </Step>
+      
+      <Step title="Add NIA Configuration">
+        ```json
+        {
+          "mcp": {
+            "servers": {
+              "nia": {
+                "command": "uvx",
+                "args": ["-y", "nia-mcp-server@latest"],
+                "env": {
+                  "NIA_API_KEY": "YOUR_API_KEY",
+                  "NIA_API_URL": "https://apigcp.trynia.ai/"
+                }
               }
             }
           }
@@ -187,7 +269,8 @@ Get context from both source code AND documentation in one unified search
           "mcpServers": [
             {
               "name": "nia",
-              "command": "nia-mcp-server",
+              "command": "uvx",
+              "args": ["-y", "nia-mcp-server@latest"],
               "env": {
                 "NIA_API_KEY": "YOUR_API_KEY",
                 "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -199,57 +282,7 @@ Get context from both source code AND documentation in one unified search
       </Step>
     </Steps>
   </Tab>
-  
-  <Tab title="VS Code Cline">
-    <Steps>
-      <Step title="Open Cline Settings">
-        Access your Cline MCP configuration in VS Code settings
-      </Step>
-      
-      <Step title="Add NIA Configuration">
-        ```json
-        {
-          "mcpServers": {
-            "nia": {
-              "command": "nia-mcp-server",
-              "env": {
-                "NIA_API_KEY": "YOUR_API_KEY",
-                "NIA_API_URL": "https://apigcp.trynia.ai/"
-              }
-            }
-          }
-        }
-        ```
-      </Step>
-    </Steps>
-  </Tab>
 </Tabs>
-
-## 🧪 Testing the Installation
-
-Once configured, try these commands in your AI assistant:
-
-<CodeGroup>
-  ```bash Index a Repository
-  Index https://github.com/facebook/react
-  ```
-  
-  ```bash List Repositories
-  List my indexed repositories
-  ```
-  
-  ```bash Search Code
-  Search for "useState hook implementation" in my repositories
-  ```
-  
-  ```bash Index Documentation
-  Index the documentation at https://react.dev/docs
-  ```
-  
-  ```bash Cross-Search
-  Search across both React source code and documentation for "state management patterns"
-  ```
-</CodeGroup>
 
 ## 🛠️ Available Tools
 
@@ -258,18 +291,39 @@ Once configured, try these commands in your AI assistant:
     - **`index_repository`** - Index any GitHub repository
     - **`search_codebase`** - Search code with natural language
     - **`list_repositories`** - List all indexed repositories
+    - **`check_repository_status`** - Check indexing progress
+    - **`delete_repository`** - Remove indexed repository
   </Card>
 
   <Card title="Documentation Tools" icon="book">
     - **`index_documentation`** - Index any website or docs
     - **`search_documentation`** - Search docs with natural language  
     - **`list_documentation`** - List all indexed documentation
+    - **`check_documentation_status`** - Check indexing progress
+    - **`delete_documentation`** - Remove indexed documentation
+  </Card>
+
+  <Card title="Discovery Tools" icon="magnifying-glass">
+    - **`nia_web_search`** - Find repos, docs, and content with AI search
+    - **`nia_deep_research_agent`** - Comprehensive research and analysis
+  </Card>
+
+  <Card title="Management Tools" icon="gear">
+    - Status checking and progress monitoring
+    - Resource cleanup and management
+    - Multi-source unified search
   </Card>
 </CardGroup>
 
 ## 🎯 Pro Tips for Maximum Productivity
 
 <AccordionGroup>
+  <Accordion title="Discovery → Research → Index Workflow">
+    1. Use **`nia_web_search`** to find relevant libraries: *"Find popular React state management libraries"*
+    2. Use **`nia_deep_research_agent`** to analyze: *"Compare Redux vs Zustand vs Jotai with pros and cons"*
+    3. Index the top choices for deep code analysis: *"Index zustand repository"*
+  </Accordion>
+
   <Accordion title="Multi-Source Queries">
     Combine searches across repositories and documentation:
     
@@ -290,12 +344,12 @@ Once configured, try these commands in your AI assistant:
     - Reference implementations
   </Accordion>
   
-  <Accordion title="Cross-Project Learning">
-    Index multiple projects to:
-    - Find reusable patterns
-    - Compare implementations
-    - Learn from different approaches
-    - Maintain consistency across projects
+  <Accordion title="Research-Driven Development">
+    Use the deep research agent for:
+    - Technology selection decisions
+    - Architecture pattern analysis
+    - Performance optimization strategies
+    - Security best practices research
   </Accordion>
 </AccordionGroup>
 
