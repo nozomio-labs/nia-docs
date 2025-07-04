@@ -20,18 +20,18 @@
             ]
           },
           {
-            "group": "Command Line Interface",
-            "pages": [
-              "cli/overview",
-              "cli/setup"
-            ]
-          },
-          {
             "group": "Integrations",
             "pages": [
               "integrations/nia-mcp",
               "integrations/overview",
               "integrations/slack"
+            ]
+          },
+          {
+            "group": "Command Line Interface",
+            "pages": [
+              "cli/overview",
+              "cli/setup"
             ]
           }
         ]
