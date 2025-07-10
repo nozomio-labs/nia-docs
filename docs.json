@@ -26,13 +26,6 @@
               "integrations/overview",
               "integrations/slack"
             ]
-          },
-          {
-            "group": "Command Line Interface",
-            "pages": [
-              "cli/overview",
-              "cli/setup"
-            ]
           }
         ]
       },
