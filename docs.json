@@ -22,9 +22,7 @@
           {
             "group": "Integrations",
             "pages": [
-              "integrations/nia-mcp",
-              "integrations/overview",
-              "integrations/slack"
+              "integrations/nia-mcp"
             ]
           }
         ]

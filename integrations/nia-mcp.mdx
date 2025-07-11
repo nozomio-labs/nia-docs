@@ -152,6 +152,15 @@ Get context from both source code AND documentation in one unified search
 
 <Tabs>
   <Tab title="Cursor">
+    <div style={{ marginBottom: '20px' }}>
+      <a href="cursor://anysphere.cursor-deeplink/mcp/install?name=nia&config=eyJjb21tYW5kIjoidXZ4IG5pYS1tY3Atc2VydmVyIiwiZW52Ijp7Ik5JQV9BUElfS0VZIjoiWU9VUl9BUElfS0VZIiwiTklBX0FQSV9VUkwiOiJodHRwczovL2FwaWdjcC50cnluaWEuYWkvIn19">
+        <img 
+          src="https://cursor.com/deeplink/mcp-install-dark.png" 
+          alt="Add Nia MCP server to Cursor"
+          style={{ maxWidth: '200px', height: 'auto' }}
+        />
+      </a>
+    </div>
     <Steps>
       <Step title="Open MCP Configuration">
         Open your Cursor MCP configuration file:
@@ -381,33 +390,216 @@ Get context from both source code AND documentation in one unified search
 ## 🛠️ Available Tools
 
 <CardGroup cols={2}>
-  <Card title="Repository Tools" icon="github">
-    - **`index_repository`** - Index any GitHub repository
-    - **`search_codebase`** - Search code with natural language
-    - **`list_repositories`** - List all indexed repositories
-    - **`check_repository_status`** - Check indexing progress
-    - **`delete_repository`** - Remove indexed repository
+  <Card title="Repository Management" icon="github">
+    - **`index_repository`** - Index GitHub repositories for intelligent search
+    - **`list_repositories`** - List all indexed repositories with status
+    - **`check_repository_status`** - Monitor indexing progress
+    - **`delete_repository`** - Remove indexed repositories
+    - **`rename_repository`** - Rename repositories for better organization
+    - **`search_codebase`** - Search code with natural language queries
   </Card>
 
-  <Card title="Documentation Tools" icon="book">
-    - **`index_documentation`** - Index any website or docs
-    - **`search_documentation`** - Search docs with natural language  
-    - **`list_documentation`** - List all indexed documentation
-    - **`check_documentation_status`** - Check indexing progress
+  <Card title="Documentation Management" icon="book">
+    - **`index_documentation`** - Index websites and documentation
+    - **`list_documentation`** - List all indexed documentation sources
+    - **`check_documentation_status`** - Monitor documentation indexing
     - **`delete_documentation`** - Remove indexed documentation
+    - **`rename_documentation`** - Rename documentation sources
+    - **`search_documentation`** - Search docs with natural language
   </Card>
 
-  <Card title="Discovery Tools" icon="magnifying-glass">
-    - **`nia_web_search`** - Find repos, docs, and content with AI search
-    - **`nia_deep_research_agent`** - Comprehensive research and analysis
+  <Card title="Web Search & Research" icon="magnifying-glass">
+    - **`nia_web_search`** - AI-powered search for repos, docs, and content
+    - **`nia_deep_research_agent`** - Deep multi-step research and analysis
   </Card>
 
-  <Card title="Management Tools" icon="gear">
-    - Status checking and progress monitoring
-    - Resource cleanup and management
-    - Multi-source unified search
+  <Card title="Project Initialization" icon="gear">
+    - **`initialize_project`** - Set up NIA-enabled projects with IDE configs
+    - Support for Cursor, VS Code, Claude, Windsurf, Cline, and more
+    - Automatic creation of IDE-specific rules and configurations
   </Card>
 </CardGroup>
+
+## 📋 Complete Tool Reference
+
+<AccordionGroup>
+  <Accordion title="Repository Management Tools">
+    ### `index_repository`
+    Index a GitHub repository for intelligent code search.
+    
+    **Parameters**:
+    - `repo_url` (str): GitHub repository URL (e.g., https://github.com/owner/repo)
+    - `branch` (str, optional): Branch to index (defaults to main branch)
+    
+    **Usage**: When indexing starts, use `check_repository_status` to monitor progress.
+
+    ### `list_repositories`
+    List all indexed repositories with their status.
+    
+    **Parameters**: None
+    
+    **Returns**: List of repositories with status, branch, and indexing information.
+
+    ### `check_repository_status`
+    Check the indexing status of a repository.
+    
+    **Parameters**:
+    - `repository` (str): Repository in owner/repo format
+    
+    **Returns**: Current status, progress, and indexing details.
+
+    ### `delete_repository`
+    Delete an indexed repository.
+    
+    **Parameters**:
+    - `repository` (str): Repository in owner/repo format
+    
+    **Returns**: Confirmation of deletion.
+
+    ### `rename_repository`
+    Rename an indexed repository for better organization.
+    
+    **Parameters**:
+    - `repository` (str): Repository in owner/repo format
+    - `new_name` (str): New display name (1-100 characters)
+    
+    **Returns**: Confirmation of rename operation.
+
+    ### `search_codebase`
+    Search indexed repositories using natural language.
+    
+    **Parameters**:
+    - `query` (str): Natural language search query (use comprehensive questions for best results)
+    - `repositories` (List[str], optional): List of repositories to search (owner/repo format)
+    - `include_sources` (bool, default=True): Whether to include source code in results
+    
+    **Returns**: Search results with relevant code snippets and explanations.
+  </Accordion>
+
+  <Accordion title="Documentation Management Tools">
+    ### `index_documentation`
+    Index documentation or website for intelligent search.
+    
+    **Parameters**:
+    - `url` (str): URL of the documentation site to index
+    - `url_patterns` (List[str], optional): URL patterns to include in crawling (e.g., ["/docs/*", "/guide/*"])
+    - `max_age` (int, optional): Maximum age of cached content in seconds
+    - `only_main_content` (bool, default=True): Extract only main content (removes navigation, ads, etc.)
+    
+    **Usage**: When indexing starts, use `check_documentation_status` to monitor progress.
+
+    ### `list_documentation`
+    List all indexed documentation sources.
+    
+    **Parameters**: None
+    
+    **Returns**: List of documentation sources with status and metadata.
+
+    ### `check_documentation_status`
+    Check the indexing status of a documentation source.
+    
+    **Parameters**:
+    - `source_id` (str): Documentation source ID
+    
+    **Returns**: Current status, progress, and indexing details.
+
+    ### `delete_documentation`
+    Delete an indexed documentation source.
+    
+    **Parameters**:
+    - `source_id` (str): Documentation source ID to delete
+    
+    **Returns**: Confirmation of deletion.
+
+    ### `rename_documentation`
+    Rename a documentation source for better organization.
+    
+    **Parameters**:
+    - `source_id` (str): Documentation source ID
+    - `new_name` (str): New display name (1-100 characters)
+    
+    **Returns**: Confirmation of rename operation.
+
+    ### `search_documentation`
+    Search indexed documentation using natural language.
+    
+    **Parameters**:
+    - `query` (str): Natural language search query (use comprehensive questions for best results)
+    - `sources` (List[str], optional): List of documentation source IDs to search
+    - `include_sources` (bool, default=True): Whether to include source references in results
+    
+    **Returns**: Search results with relevant documentation excerpts.
+  </Accordion>
+
+  <Accordion title="Web Search & Research Tools">
+    ### `nia_web_search`
+    Search repositories, documentation, and other content using AI-powered search.
+    
+    **Use Cases**:
+    - Finding specific repos/docs/content
+    - Looking for examples or implementations
+    - Searching for what's available on a topic
+    - Simple, direct searches that need quick results
+    - Finding similar content to a known URL
+    
+    **Parameters**:
+    - `query` (str): Natural language search query
+    - `num_results` (int, default=5): Number of results to return (max: 10)
+    - `category` (str, optional): Filter by category ("github", "company", "research paper", "news", "tweet", "pdf")
+    - `days_back` (int, optional): Only show results from the last N days
+    - `find_similar_to` (str, optional): URL to find similar content to
+    
+    **Returns**: Search results with actionable next steps.
+
+    ### `nia_deep_research_agent`
+    Perform deep, multi-step research on a topic using advanced AI research capabilities.
+    
+    **Use Cases**:
+    - Comparing multiple options ("compare X vs Y vs Z")
+    - Analyzing pros and cons
+    - Questions with "best", "top", "which is better"
+    - Needing structured analysis or synthesis
+    - Complex questions requiring multiple sources
+    - Questions about trends, patterns, or developments
+    - Requests for comprehensive overviews
+    
+    **Parameters**:
+    - `query` (str): Research question (use comprehensive questions for best results)
+    - `output_format` (str, optional): Structure hint (e.g., "comparison table", "pros and cons list")
+    
+    **Returns**: Comprehensive research results with citations.
+
+    ### Tool Selection Guide
+
+    **Use `nia_web_search` for**:
+    - "Find RAG libraries" → Simple search
+    - "What's trending in Rust?" → Quick discovery
+    - "Show me repos like LangChain" → Similarity search
+
+    **Use `nia_deep_research_agent` for**:
+    - "Compare RAG vs GraphRAG approaches" → Comparative analysis
+    - "What are the best vector databases for production?" → Evaluation needed
+    - "Analyze the pros and cons of different LLM frameworks" → Structured analysis
+  </Accordion>
+
+  <Accordion title="Project Initialization Tools">
+    ### `initialize_project`
+    Initialize a NIA-enabled project with IDE-specific rules and configurations.
+    
+    **Parameters**:
+    - `project_root` (str): Absolute path to the project root directory
+    - `profiles` (List[str], optional): List of IDE profiles to set up (default: ["cursor"])
+    
+    **Supported Profiles**: cursor, vscode, claude, windsurf, cline, codex, zed, jetbrains, neovim, sublime
+    
+    **Returns**: Status of initialization with created files and next steps.
+    
+    **Examples**:
+    - Basic: `initialize_project("/path/to/project")`
+    - Multiple IDEs: `initialize_project("/path/to/project", profiles=["cursor", "vscode"])`
+    - Specific IDE: `initialize_project("/path/to/project", profiles=["windsurf"])`
+  </Accordion>
+</AccordionGroup>
 
 ## 🎯 Pro Tips for Maximum Productivity
 
@@ -510,7 +702,7 @@ Get context from both source code AND documentation in one unified search
 <Note>
 We'd love your feedback! Help us improve Nia MCP and make coding agents even more powerful. Share your experience, suggestions, or even roast the product if you want - we really want to help developers code way, way faster!
 
-**Nia - AI that understands your entire codebase** 
+**Nia - 10x your coding agent** 
 </Note>
 
 ---
