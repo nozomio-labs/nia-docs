@@ -113,20 +113,20 @@ Get context from both source code AND documentation in one unified search
 <Steps>
   <Step title="Prerequisites">
     - Python 3.8+ 
-    - `uvx` (recommended) or `pipx` or `pip`
+    - `pipx` (recommended) or `uvx` or `pip`
     - Your NIA API key from [app.trynia.ai](http://app.trynia.ai/)
   </Step>
   
   <Step title="Install the Package">
     <CodeGroup>
-      ```bash Option A: Using uvx (Recommended)
-      # uvx will automatically handle the installation when you run it
-      # No need to pre-install if you have uvx
+      ```bash Option A: Using pipx (Recommended)
+      # Install globally for use across all projects
+      pipx install nia-mcp-server
       ```
       
-      ```bash Option B: Using pipx
-      # pipx will automatically handle the installation when you run it
-      # No need to pre-install if you have pipx
+      ```bash Option B: Using uvx
+      # uvx will automatically handle the installation when you run it
+      # No need to pre-install if you have uvx
       ```
       
       ```bash Option C: Using pip (If needed)
@@ -171,12 +171,12 @@ Get context from both source code AND documentation in one unified search
       
       <Step title="Add NIA Configuration">
         <CodeGroup>
-          ```json Option A: Using uvx
+          ```json Option A: Using pipx (Recommended)
           {
             "mcpServers": {
               "nia": {
-                "command": "uvx",
-                "args": ["nia-mcp-server"],
+                "command": "pipx",
+                "args": ["run", "nia-mcp-server"],
                 "env": {
                   "NIA_API_KEY": "YOUR_API_KEY",
                   "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -186,12 +186,12 @@ Get context from both source code AND documentation in one unified search
           }
           ```
           
-          ```json Option B: Using pipx
+          ```json Option B: Using uvx
           {
             "mcpServers": {
               "nia": {
-                "command": "pipx",
-                "args": ["run", "nia-mcp-server"],
+                "command": "uvx",
+                "args": ["nia-mcp-server"],
                 "env": {
                   "NIA_API_KEY": "YOUR_API_KEY",
                   "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -216,12 +216,12 @@ Get context from both source code AND documentation in one unified search
       
       <Step title="Add NIA Configuration">
         <CodeGroup>
-          ```json Option A: Using uvx
+          ```json Option A: Using pipx (Recommended)
           {
             "mcpServers": {
               "mcp-server-nia": {
-                "command": "uvx",
-                "args": ["nia-mcp-server"],
+                "command": "pipx",
+                "args": ["run", "nia-mcp-server"],
                 "env": {
                   "NIA_API_KEY": "YOUR_API_KEY",
                   "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -231,12 +231,12 @@ Get context from both source code AND documentation in one unified search
           }
           ```
           
-          ```json Option B: Using pipx
+          ```json Option B: Using uvx
           {
             "mcpServers": {
               "mcp-server-nia": {
-                "command": "pipx",
-                "args": ["run", "nia-mcp-server"],
+                "command": "uvx",
+                "args": ["nia-mcp-server"],
                 "env": {
                   "NIA_API_KEY": "YOUR_API_KEY",
                   "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -260,12 +260,12 @@ Get context from both source code AND documentation in one unified search
       
       <Step title="Add NIA Configuration">
         <CodeGroup>
-          ```json Option A: Using uvx
+          ```json Option A: Using pipx (Recommended)
           {
             "mcpServers": {
               "mcp-server-nia": {
-                "command": "uvx",
-                "args": ["nia-mcp-server"],
+                "command": "pipx",
+                "args": ["run", "nia-mcp-server"],
                 "env": {
                   "NIA_API_KEY": "YOUR_API_KEY",
                   "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -275,12 +275,12 @@ Get context from both source code AND documentation in one unified search
           }
           ```
           
-          ```json Option B: Using pipx
+          ```json Option B: Using uvx
           {
             "mcpServers": {
               "mcp-server-nia": {
-                "command": "pipx",
-                "args": ["run", "nia-mcp-server"],
+                "command": "uvx",
+                "args": ["nia-mcp-server"],
                 "env": {
                   "NIA_API_KEY": "YOUR_API_KEY",
                   "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -302,13 +302,13 @@ Get context from both source code AND documentation in one unified search
       
       <Step title="Add NIA Configuration">
         <CodeGroup>
-          ```json Option A: Using uvx
+          ```json Option A: Using pipx (Recommended)
           {
             "mcp": {
               "servers": {
                 "nia": {
-                  "command": "uvx",
-                  "args": ["nia-mcp-server"],
+                  "command": "pipx",
+                  "args": ["run", "nia-mcp-server"],
                   "env": {
                     "NIA_API_KEY": "YOUR_API_KEY",
                     "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -319,13 +319,13 @@ Get context from both source code AND documentation in one unified search
           }
           ```
           
-          ```json Option B: Using pipx
+          ```json Option B: Using uvx
           {
             "mcp": {
               "servers": {
                 "nia": {
-                  "command": "pipx",
-                  "args": ["run", "nia-mcp-server"],
+                  "command": "uvx",
+                  "args": ["nia-mcp-server"],
                   "env": {
                     "NIA_API_KEY": "YOUR_API_KEY",
                     "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -348,14 +348,14 @@ Get context from both source code AND documentation in one unified search
       
       <Step title="Add NIA Configuration">
         <CodeGroup>
-          ```json Option A: Using uvx
+          ```json Option A: Using pipx (Recommended)
           {
             "models": [...],
             "mcpServers": [
               {
                 "name": "nia",
-                "command": "uvx",
-                "args": ["nia-mcp-server"],
+                "command": "pipx",
+                "args": ["run", "nia-mcp-server"],
                 "env": {
                   "NIA_API_KEY": "YOUR_API_KEY",
                   "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -365,14 +365,14 @@ Get context from both source code AND documentation in one unified search
           }
           ```
           
-          ```json Option B: Using pipx
+          ```json Option B: Using uvx
           {
             "models": [...],
             "mcpServers": [
               {
                 "name": "nia",
-                "command": "pipx",
-                "args": ["run", "nia-mcp-server"],
+                "command": "uvx",
+                "args": ["nia-mcp-server"],
                 "env": {
                   "NIA_API_KEY": "YOUR_API_KEY",
                   "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -390,12 +390,12 @@ Get context from both source code AND documentation in one unified search
     <Steps>
       <Step title="Add NIA Configuration">
         <CodeGroup>
-          ```bash Option A: Using uvx
-          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- uvx nia-mcp-server
+          ```bash Option A: Using pipx (Recommended)
+          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- pipx run nia-mcp-server
           ```
           
-          ```bash Option B: Using pipx
-          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- pipx run nia-mcp-server
+          ```bash Option B: Using uvx
+          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- uvx nia-mcp-server
           ```
         </CodeGroup>
       </Step>
@@ -665,12 +665,17 @@ Get context from both source code AND documentation in one unified search
   </Accordion>
   
   <Accordion title='"Command not found: nia-mcp-server"'>
-    **Solution:** Try installing with pip first:
+    **Solution:** Try installing with pipx first:
     ```bash
-    pip install nia-mcp-server
+    pipx install nia-mcp-server
     ```
     
-    Or ensure `uvx` is properly installed and in your PATH.
+    Or ensure `pipx` is properly installed:
+    ```bash
+    pip install pipx
+    ```
+    
+    Alternatively, you can use `uvx` or regular `pip` installation.
   </Accordion>
   
   <Accordion title='"Invalid API key"'>
