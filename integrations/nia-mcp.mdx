@@ -385,6 +385,22 @@ Get context from both source code AND documentation in one unified search
       </Step>
     </Steps>
   </Tab>
+  
+  <Tab title="Claude Code">
+    <Steps>
+      <Step title="Add NIA Configuration">
+        <CodeGroup>
+          ```bash Option A: Using uvx
+          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- uvx nia-mcp-server
+          ```
+          
+          ```bash Option B: Using pipx
+          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- pipx run nia-mcp-server
+          ```
+        </CodeGroup>
+      </Step>
+    </Steps>
+  </Tab>
 </Tabs>
 
 ## 🛠️ Available Tools
