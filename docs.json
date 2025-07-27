@@ -16,13 +16,13 @@
           {
             "group": "Get Started",
             "pages": [
-              "pricing"
+              "integrations/nia-mcp"
             ]
           },
           {
-            "group": "Integrations",
+            "group": "Pricing",
             "pages": [
-              "integrations/nia-mcp"
+              "pricing"
             ]
           }
         ]
