@@ -176,7 +176,7 @@ Get context from both source code AND documentation in one unified search
             "mcpServers": {
               "nia": {
                 "command": "pipx",
-                "args": ["run", "nia-mcp-server"],
+                "args": ["run", "--no-cache", "nia-mcp-server"],
                 "env": {
                   "NIA_API_KEY": "YOUR_API_KEY",
                   "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -221,7 +221,7 @@ Get context from both source code AND documentation in one unified search
             "mcpServers": {
               "mcp-server-nia": {
                 "command": "pipx",
-                "args": ["run", "nia-mcp-server"],
+                "args": ["run", "--no-cache", "nia-mcp-server"],
                 "env": {
                   "NIA_API_KEY": "YOUR_API_KEY",
                   "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -265,7 +265,7 @@ Get context from both source code AND documentation in one unified search
             "mcpServers": {
               "mcp-server-nia": {
                 "command": "pipx",
-                "args": ["run", "nia-mcp-server"],
+                "args": ["run", "--no-cache", "nia-mcp-server"],
                 "env": {
                   "NIA_API_KEY": "YOUR_API_KEY",
                   "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -308,7 +308,7 @@ Get context from both source code AND documentation in one unified search
               "servers": {
                 "nia": {
                   "command": "pipx",
-                  "args": ["run", "nia-mcp-server"],
+                  "args": ["run", "--no-cache", "nia-mcp-server"],
                   "env": {
                     "NIA_API_KEY": "YOUR_API_KEY",
                     "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -355,7 +355,7 @@ Get context from both source code AND documentation in one unified search
               {
                 "name": "nia",
                 "command": "pipx",
-                "args": ["run", "nia-mcp-server"],
+                "args": ["run", "--no-cache", "nia-mcp-server"],
                 "env": {
                   "NIA_API_KEY": "YOUR_API_KEY",
                   "NIA_API_URL": "https://apigcp.trynia.ai/"
@@ -391,7 +391,7 @@ Get context from both source code AND documentation in one unified search
       <Step title="Add NIA Configuration">
         <CodeGroup>
           ```bash Option A: Using pipx (Recommended)
-          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- pipx run nia-mcp-server
+          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- pipx run --no-cache nia-mcp-server
           ```
           
           ```bash Option B: Using uvx
