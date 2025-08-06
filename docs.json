@@ -17,7 +17,8 @@
             "group": "Get Started",
             "pages": [
               "integrations/nia-mcp",
-              "quick-setup-cursor"
+              "quick-setup-cursor",
+              "troubleshooting"
             ]
           },
           {

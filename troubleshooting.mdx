@@ -1,0 +1,176 @@
+---
+title: 'Troubleshooting'
+description: 'Common issues and solutions for Nia MCP Server'
+---
+
+## Common Issues
+
+<AccordionGroup>
+  <Accordion title="MCP configuration file doesn't exist">
+    **Problem:** The mcp.json file doesn't exist in the expected location.
+    
+    **Solution:** You can create the file manually. The mcp.json file should be located at:
+    - **macOS (Cursor)**: `~/.cursor/mcp.json`
+    - **macOS (Windsurf)**: `~/.windsurf/mcp.json`
+    - **macOS (Claude Desktop)**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+    - **Windows (Cursor)**: `%APPDATA%\Cursor\mcp.json`
+    - **Windows (Windsurf)**: `%APPDATA%\Windsurf\mcp.json`
+    - **Windows (Claude Desktop)**: `%APPDATA%\Claude\claude_desktop_config.json`
+    - **Linux (Cursor)**: `~/.config/cursor/mcp.json`
+    - **Linux (Windsurf)**: `~/.config/windsurf/mcp.json`
+    
+    Create the directory if it doesn't exist, then create the mcp.json file with the configuration from the [installation guide](/integrations/nia-mcp#configuration-for-your-coding-assistant).
+    
+    Example:
+    ```bash
+    # For Cursor on macOS
+    mkdir -p ~/.cursor
+    touch ~/.cursor/mcp.json
+    ```
+    
+    Then add the configuration:
+    ```json
+    {
+      "mcpServers": {
+        "nia": {
+          "command": "pipx",
+          "args": ["run", "--no-cache", "nia-mcp-server"],
+          "env": {
+            "NIA_API_KEY": "YOUR_API_KEY",
+            "NIA_API_URL": "https://apigcp.trynia.ai/"
+          }
+        }
+      }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Tools not showing in MCP client">
+    **Problem:** After installation, the Nia tools don't appear in your MCP client (Cursor, Claude Desktop, etc.).
+    
+    **Solution:** This usually happens when the MCP server isn't installed globally. Make sure you've installed using `pipx` for global installation:
+    
+    ```bash
+    # Install pipx first if you haven't
+    pip install pipx
+    
+    # Install nia-mcp-server globally
+    pipx install nia-mcp-server
+    ```
+    
+    Why `pipx` is recommended:
+    - `pipx` installs packages globally in isolated environments
+    - Tools are available system-wide
+    - No conflicts with other Python packages
+    - Automatic PATH management
+    
+    After installing with `pipx`:
+    1. Update your MCP configuration to use `pipx run`
+    2. Restart your MCP client completely
+    3. Check if tools appear in the MCP tools section
+    
+    If you previously installed with `pip`, uninstall first:
+    ```bash
+    pip uninstall nia-mcp-server
+    pipx install nia-mcp-server
+    ```
+  </Accordion>
+
+  <Accordion title='"No API key provided" error'>
+    **Problem:** Getting an error that no API key was provided.
+    
+    **Solution:** 
+    1. Ensure you've replaced `YOUR_API_KEY` with your actual API key from [app.trynia.ai](http://app.trynia.ai/)
+    2. Check that the environment variable is correctly set in your MCP configuration
+    3. Verify there are no typos in the environment variable name `NIA_API_KEY`
+    4. Make sure there are no extra spaces or hidden characters in your API key
+    
+    Example of correct configuration:
+    ```json
+    {
+      "mcpServers": {
+        "nia": {
+          "command": "pipx",
+          "args": ["run", "--no-cache", "nia-mcp-server"],
+          "env": {
+            "NIA_API_KEY": "sk-proj-abc123xyz789",  // Replace with your actual key
+            "NIA_API_URL": "https://apigcp.trynia.ai/"
+          }
+        }
+      }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title='"Command not found: pipx" error'>
+    **Problem:** Getting "command not found" when trying to use pipx.
+    
+    **Solution:** Install pipx first:
+    
+    ```bash
+    # On macOS with Homebrew
+    brew install pipx
+    pipx ensurepath
+    
+    # On Windows
+    pip install pipx
+    pipx ensurepath
+    
+    # On Linux
+    pip install pipx
+    pipx ensurepath
+    ```
+    
+    After installation, you may need to:
+    1. Restart your terminal
+    2. Add pipx to your PATH if not done automatically
+    3. Verify installation with `pipx --version`
+  </Accordion>
+
+  <Accordion title="Rate limit exceeded">
+    **Problem:** Getting rate limit errors when using Nia tools.
+    
+    **Solution:**
+    - You've used your allocated requests for the current period
+    - Check your usage at [app.trynia.ai](http://app.trynia.ai/)
+    - Consider upgrading your plan for more requests
+    - Free tier includes 3 indexing jobs and limited searches
+  </Accordion>
+
+  <Accordion title="Indexing never completes">
+    **Problem:** Repository or documentation indexing seems stuck.
+    
+    **Solution:**
+    1. Use the status checking tools to monitor progress:
+       - `check_repository_status` for repositories
+       - `check_documentation_status` for documentation
+    
+    2. Large repositories/sites may take several minutes to index
+    
+    3. Check for:
+       - Valid repository URL (must be public or you have access)
+       - Stable internet connection
+       - API key has remaining credits
+    
+    4. Try re-indexing if the process fails:
+       - Delete the failed index first
+       - Attempt indexing again with correct parameters
+  </Accordion>
+</AccordionGroup>
+
+## Getting Help
+
+If you're still experiencing issues:
+
+1. **Check the main documentation**: Review the [installation guide](/integrations/nia-mcp) for detailed setup instructions
+2. **Community support**: Join our Discord community for help from other users
+3. **Direct support**: Contact us through [app.trynia.ai](http://app.trynia.ai/)
+4. **Email support**: The most effective way to get help is to email arlan@nozomio.com
+
+<Note>
+**Pro tip:** When seeking help, include:
+- Your MCP client (Cursor, Claude Desktop, etc.) and version
+- Your operating system
+- The exact error message you're seeing
+- Your configuration (with API key redacted)
+</Note>
