@@ -7,7 +7,9 @@ info:
     The API provides capabilities for:
     - Repository indexing and management
     - Documentation/website indexing and management
+    - Local filesystem indexing and management
     - AI-powered unified search across code and documentation
+    - Web search and deep research capabilities
     - Real-time status checking for indexing operations
     - Streaming responses for interactive applications
   
@@ -36,7 +38,7 @@ components:
       properties:
         repository:
           type: string
-          description: Repository identifier in owner/repo format
+          description: Repository identifier in owner/repo format or full GitHub URL (supports folder paths like owner/repo/tree/branch/folder)
           example: "microsoft/vscode"
         branch:
           type: string
@@ -74,7 +76,7 @@ components:
             properties:
               repository:
                 type: string
-                description: Repository identifier in owner/repo format
+                description: Repository identifier in owner/repo format or owner/repo/tree/branch/folder for folder-indexed repos
           description: List of repositories to query
         data_sources:
           type: array
@@ -100,13 +102,6 @@ components:
           type: boolean
           default: true
           description: Whether to include full source texts in the response (when false, only file paths are returned)
-        use_graph_rag:
-          type: boolean
-          description: Whether to use GraphRAG for enhanced code structure understanding
-        graph_query_mode:
-          type: string
-          enum: [auto, global, local, drift]
-          description: GraphRAG query mode for code navigation
 
     RepositoryStatus:
       type: object
@@ -123,30 +118,352 @@ components:
           description: Branch being indexed
         status:
           type: string
-          enum: [indexing, completed, error]
+          enum: [indexing, completed, indexed, error]
           description: Current indexing status
         progress:
           type: object
           description: Detailed progress information
           properties:
+            percentage:
+              type: number
+              description: Progress percentage (0-100)
             stage:
               type: string
+              description: Current stage of indexing
             message:
               type: string
-            progress:
-              type: number
+              description: Progress message
         error:
           type: string
           description: Error message if status is 'error'
 
-    Error:
+    RepositoryListItem:
+      type: object
+      properties:
+        repository_id:
+          type: string
+          description: Unique identifier for the repository
+        id:
+          type: string
+          description: Internal project ID for graph visualization
+        repository:
+          type: string
+          description: Repository identifier in owner/repo format
+        branch:
+          type: string
+          description: Indexed branch
+        status:
+          type: string
+          enum: [indexing, indexed, completed, error]
+        display_name:
+          type: string
+          description: Custom display name for the repository
+        progress:
+          type: object
+          properties:
+            percentage:
+              type: number
+            stage:
+              type: string
+            message:
+              type: string
+        error:
+          type: string
+          description: Error message if status is 'error'
+
+    HierarchyResponse:
       type: object
       required:
-        - detail
+        - repository_id
+        - hierarchy_text
+        - stats
       properties:
-        detail:
+        repository_id:
           type: string
-          description: Error message
+          description: The repository ID
+        hierarchy_text:
+          type: string
+          description: Text representation of the file hierarchy
+        stats:
+          type: object
+          description: Statistics about the hierarchy
+          properties:
+            total_files:
+              type: integer
+            total_directories:
+              type: integer
+            total_classes:
+              type: integer
+            total_methods:
+              type: integer
+        generated_at:
+          type: string
+          format: date-time
+          description: When the hierarchy was generated
+        options:
+          type: object
+          properties:
+            include_classes:
+              type: boolean
+            include_methods:
+              type: boolean
+        hierarchy_tree:
+          type: object
+          description: Tree structure of the hierarchy (optional, when X-Include-Tree header is true)
+
+    RenameRequest:
+      type: object
+      required:
+        - new_name
+      properties:
+        new_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: New display name for the resource
+
+    LocalFilesystemRequest:
+      type: object
+      required:
+        - directory_path
+      properties:
+        directory_path:
+          type: string
+          description: Absolute path to the directory to index
+          example: "/Users/username/projects/myproject"
+        inclusion_patterns:
+          type: array
+          items:
+            type: string
+          description: Patterns to include (e.g., 'ext:.py', 'dir:src')
+          example: ["ext:.py", "ext:.js", "dir:src"]
+        exclusion_patterns:
+          type: array
+          items:
+            type: string
+          description: Patterns to exclude (e.g., 'ext:.log', 'dir:node_modules')
+          example: ["dir:node_modules", "ext:.log", "dir:.git"]
+        max_file_size_mb:
+          type: integer
+          default: 50
+          description: Maximum file size in MB to process
+
+    LocalFilesystemScanResponse:
+      type: object
+      properties:
+        directory_path:
+          type: string
+        total_files:
+          type: integer
+        total_size_mb:
+          type: number
+        file_types:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of files by extension
+        files:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              size:
+                type: integer
+              extension:
+                type: string
+          description: Sample of files (limited to first 100)
+        truncated:
+          type: boolean
+          description: Whether the file list was truncated
+
+    LocalFilesystemStatusResponse:
+      type: object
+      properties:
+        source_id:
+          type: string
+        directory_path:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed, error]
+        progress:
+          type: number
+          description: Progress percentage
+        message:
+          type: string
+        page_count:
+          type: integer
+          description: Number of files indexed
+        chunk_count:
+          type: integer
+          description: Number of chunks created
+        error:
+          type: string
+
+    WebSearchRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: Search query
+          example: "best practices for React hooks"
+        num_results:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 5
+          description: Number of results to return
+        category:
+          type: string
+          enum: [github, company, research, news, tweet, pdf, blog]
+          description: Filter by content category
+        days_back:
+          type: integer
+          description: Only show results from last N days
+        find_similar_to:
+          type: string
+          format: uri
+          description: URL to find similar content to
+
+    WebSearchResponse:
+      type: object
+      properties:
+        github_repos:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+              owner_repo:
+                type: string
+              title:
+                type: string
+              summary:
+                type: string
+              highlights:
+                type: array
+                items:
+                  type: string
+              published_date:
+                type: string
+        documentation:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+              title:
+                type: string
+              summary:
+                type: string
+              highlights:
+                type: array
+                items:
+                  type: string
+        other_content:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+              title:
+                type: string
+              summary:
+                type: string
+        total_results:
+          type: integer
+
+    DeepResearchRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: Research question for deep analysis
+          example: "Compare the top 3 state management solutions for React with pros and cons"
+        output_format:
+          type: string
+          description: Optional structure hint for the output (e.g., 'comparison table', 'pros and cons list')
+
+    DeepResearchResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          description: Structured research data based on the query
+        citations:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+              title:
+                type: string
+              snippet:
+                type: string
+          description: Sources cited in the research
+        status:
+          type: string
+          enum: [completed, failed]
+
+    SourceContentRequest:
+      type: object
+      required:
+        - source_type
+        - source_identifier
+      properties:
+        source_type:
+          type: string
+          enum: [repository, documentation]
+          description: Type of source to retrieve
+        source_identifier:
+          type: string
+          description: |
+            Identifier for the source:
+            - For repositories: 'owner/repo:path/to/file' (e.g., 'facebook/react:src/React.js')
+            - For documentation: The source URL
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Optional metadata from search results to help locate the source
+
+    SourceContentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        content:
+          type: string
+          description: Full content of the source file or document
+        metadata:
+          type: object
+          properties:
+            repository:
+              type: string
+            file_path:
+              type: string
+            branch:
+              type: string
+            language:
+              type: string
+            url:
+              type: string
+            title:
+              type: string
+            source_type:
+              type: string
+        error:
+          type: string
+          description: Error message if retrieval failed
 
     DataSourceRequest:
       type: object
@@ -164,6 +481,12 @@ components:
             type: string
           description: URL patterns to include in crawling (supports wildcards)
           example: ["https://docs.example.com/api/*", "https://docs.example.com/guides/*"]
+        exclude_patterns:
+          type: array
+          items:
+            type: string
+          description: URL patterns to exclude from crawling
+          example: ["/blog/*", "/changelog/*"]
         project_id:
           type: string
           description: Optional project ID to associate with
@@ -180,6 +503,39 @@ components:
           type: boolean
           default: true
           description: Extract only main content (removes nav, ads, etc.)
+        limit:
+          type: integer
+          default: 10000
+          description: Maximum number of pages to crawl
+        max_depth:
+          type: integer
+          default: 20
+          description: Maximum crawl depth
+        crawl_entire_domain:
+          type: boolean
+          default: true
+          description: Whether to crawl the entire domain
+        wait_for:
+          type: integer
+          default: 2000
+          description: Time to wait for page to load in milliseconds
+        include_screenshot:
+          type: boolean
+          default: true
+          description: Include full page screenshot
+        check_llms_txt:
+          type: boolean
+          default: true
+          description: Check for llms.txt file for curated documentation URLs
+        llms_txt_strategy:
+          type: string
+          enum: [prefer, only, ignore]
+          default: prefer
+          description: |
+            How to use llms.txt if found:
+            - prefer: Start with llms.txt URLs, then crawl additional pages if under limit
+            - only: Only index URLs listed in llms.txt
+            - ignore: Skip llms.txt check (traditional behavior)
 
     DataSourceResponse:
       type: object
@@ -190,9 +546,15 @@ components:
         url:
           type: string
           description: The indexed URL
+        file_name:
+          type: string
+          description: File name for text sources
+        directory_path:
+          type: string
+          description: Directory path for local filesystem sources
         status:
           type: string
-          enum: [pending, processing, completed, error]
+          enum: [pending, processing, completed, failed, error]
           description: Current indexing status
         created_at:
           type: string
@@ -204,16 +566,38 @@ components:
           type: integer
           default: 0
           description: Number of pages indexed
+        chunk_count:
+          type: integer
+          default: 0
+          description: Number of chunks/embeddings created
         project_id:
           type: string
           description: Associated project ID if any
         source_type:
           type: string
-          enum: [web, text]
+          enum: [web, text, local_filesystem]
           default: web
         is_active:
           type: boolean
           default: true
+        display_name:
+          type: string
+          description: Custom display name for the data source
+        error:
+          type: string
+          description: Error message if status is 'error' or 'failed'
+        error_code:
+          type: string
+          description: Error code for programmatic error handling
+
+    Error:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message
 
   responses:
     UnauthorizedError:
@@ -267,32 +651,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    repository_id:
-                      type: string
-                      description: Unique identifier for the repository
-                    repository:
-                      type: string
-                      description: Repository identifier in owner/repo format
-                    branch:
-                      type: string
-                      description: Indexed branch
-                    status:
-                      type: string
-                      enum: [indexing, indexed, error]
-                    progress:
-                      type: object
-                      properties:
-                        percentage:
-                          type: number
-                        stage:
-                          type: string
-                        message:
-                          type: string
-                    error:
-                      type: string
-                      description: Error message if status is 'error'
+                  $ref: '#/components/schemas/RepositoryListItem'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '429':
@@ -301,10 +660,18 @@ paths:
       summary: Index a new repository
       description: |
         Start indexing a GitHub repository. The repository must be public or the request must include
-        a GitHub token with appropriate access rights.
+        a GitHub token with appropriate access rights. Supports indexing specific folders within a repository
+        by providing a path like "owner/repo/tree/branch/folder".
       operationId: indexRepository
       tags:
         - Repositories
+      parameters:
+        - name: X-GitHub-Token
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Optional GitHub token for private repository access
       requestBody:
         required: true
         content:
@@ -408,6 +775,132 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
+  /repositories/{repository_id}/hierarchy:
+    get:
+      summary: Get repository file hierarchy
+      description: |
+        Get the file hierarchy for an indexed repository. This endpoint returns a text representation
+        of the repository's file structure, optionally including class and method names.
+      operationId: getRepositoryHierarchy
+      tags:
+        - Repositories
+      parameters:
+        - name: repository_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the repository
+        - name: include_classes
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+          description: Include class names in hierarchy
+        - name: include_methods
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: Include method names in hierarchy
+        - name: X-Include-Tree
+          in: header
+          required: false
+          schema:
+            type: string
+            enum: ["true", "false"]
+          description: Include the full tree structure in response (can be large)
+      responses:
+        '200':
+          description: Hierarchy retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HierarchyResponse'
+        '400':
+          description: Repository not fully indexed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to repository
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Repository not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /repositories/{repository_id}/rename:
+    patch:
+      summary: Rename a repository
+      description: Update the display name of an indexed repository
+      operationId: renameRepository
+      tags:
+        - Repositories
+      parameters:
+        - name: repository_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the repository to rename
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenameRequest'
+      responses:
+        '200':
+          description: Repository renamed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  repository_id:
+                    type: string
+                  display_name:
+                    type: string
+                  message:
+                    type: string
+        '400':
+          description: Invalid request (e.g., empty name)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to repository
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Repository not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
   /query:
     post:
       summary: Query indexed repositories and documentation
@@ -416,7 +909,7 @@ paths:
         Supports three search modes:
         - 'unified': Search across both repositories and documentation (default)
         - 'repositories': Search only code repositories
-        - 'sources': Search only documentation sources
+        - 'sources': Search only documentation sources (returns vector search results without LLM processing)
         Supports both streaming and non-streaming responses.
       operationId: query
       tags:
@@ -468,6 +961,247 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
+  /local-filesystem:
+    post:
+      summary: Index a local filesystem directory
+      description: |
+        Start indexing a local filesystem directory. The directory must exist and be accessible.
+        Path traversal sequences are not allowed for security reasons.
+      operationId: indexLocalFilesystem
+      tags:
+        - Local Filesystem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocalFilesystemRequest'
+      responses:
+        '200':
+          description: Local filesystem indexing started successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      source_id:
+                        type: string
+                      status:
+                        type: string
+                      status_url:
+                        type: string
+        '400':
+          description: Invalid directory path or security violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /local-filesystem/scan:
+    post:
+      summary: Scan a local filesystem directory
+      description: |
+        Scan a local filesystem directory to preview what files would be indexed without actually indexing them.
+        Returns file counts, types, and sizes.
+      operationId: scanLocalFilesystem
+      tags:
+        - Local Filesystem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocalFilesystemRequest'
+      responses:
+        '200':
+          description: Directory scanned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalFilesystemScanResponse'
+        '400':
+          description: Invalid directory path or security violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /local-filesystem/{source_id}:
+    get:
+      summary: Get local filesystem indexing status
+      description: Check the current status of local filesystem indexing
+      operationId: getLocalFilesystemStatus
+      tags:
+        - Local Filesystem
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The source ID returned from the index endpoint
+      responses:
+        '200':
+          description: Status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalFilesystemStatusResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to data source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /web-search:
+    post:
+      summary: AI-powered web search
+      description: |
+        Perform an AI-powered web search to find relevant GitHub repositories, documentation, and other content.
+        Supports filtering by category and time range, as well as finding similar content to a given URL.
+      operationId: webSearch
+      tags:
+        - Search & Research
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebSearchRequest'
+      responses:
+        '200':
+          description: Search completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebSearchResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '503':
+          description: Web search service temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /deep-research:
+    post:
+      summary: Deep research agent (Pro only)
+      description: |
+        Perform deep, multi-step research on a topic using advanced AI research capabilities.
+        This endpoint is only available for Pro subscription users. The research agent will
+        analyze multiple sources, synthesize information, and provide comprehensive answers
+        with citations.
+      operationId: deepResearch
+      tags:
+        - Search & Research
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeepResearchRequest'
+      responses:
+        '200':
+          description: Research completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeepResearchResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Pro subscription required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '503':
+          description: Research service temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '504':
+          description: Research task timed out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /sources/content:
+    post:
+      summary: Get full source content
+      description: |
+        Retrieve the full content of a specific source file or document identified during search.
+        This endpoint allows fetching complete content when the truncated search results are insufficient.
+      operationId: getSourceContent
+      tags:
+        - Sources
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceContentRequest'
+      responses:
+        '200':
+          description: Source content retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceContentResponse'
+        '400':
+          description: Invalid source type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
   /data-sources:
     get:
       summary: List all data sources
@@ -492,7 +1226,7 @@ paths:
       summary: Index a new data source
       description: |
         Start indexing a documentation website or any web content.
-        Supports advanced crawling options like URL patterns and content filtering.
+        Supports advanced crawling options like URL patterns, content filtering, and llms.txt support.
       operationId: createDataSource
       tags:
         - Data Sources
@@ -593,10 +1327,75 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
+  /data-sources/{source_id}/rename:
+    patch:
+      summary: Rename a data source
+      description: Update the display name of an indexed data source
+      operationId: renameDataSource
+      tags:
+        - Data Sources
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the data source to rename
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenameRequest'
+      responses:
+        '200':
+          description: Data source renamed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  source_id:
+                    type: string
+                  display_name:
+                    type: string
+                  message:
+                    type: string
+        '400':
+          description: Invalid request (e.g., empty name)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to data source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
 tags:
   - name: Repositories
     description: Repository indexing and status operations
   - name: Query
     description: AI-powered code and documentation querying operations
   - name: Data Sources
-    description: Documentation and web content indexing operations ]
+    description: Documentation and web content indexing operations
+  - name: Local Filesystem
+    description: Local filesystem indexing operations
+  - name: Search & Research
+    description: Web search and deep research operations
+  - name: Sources
+    description: Source content retrieval operations
