@@ -296,23 +296,26 @@ Get context from both source code AND documentation in one unified search
   
   <Tab title="VS Code">
     <Steps>
-      <Step title="Open VS Code Settings">
-        Open your VS Code settings and locate the MCP configuration section, or create a `.vscode/settings.json` file in your workspace
+      <Step title="Open MCP Configuration">
+        Open your VS Code MCP configuration file. You can either:
+        - Run the **MCP: Open User Configuration** command from the Command Palette (opens `mcp.json` in your user profile)
+        - Use **MCP: Add Server** command and select **Global** to add to your profile
+        - Or manually edit the file at:
+          - **macOS/Linux**: `~/.config/Code/User/mcp.json`
+          - **Windows**: `%APPDATA%\Code\User\mcp.json`
       </Step>
       
       <Step title="Add NIA Configuration">
         <CodeGroup>
           ```json Option A: Using pipx (Recommended)
           {
-            "mcp": {
-              "servers": {
-                "nia": {
-                  "command": "pipx",
-                  "args": ["run", "--no-cache", "nia-mcp-server"],
-                  "env": {
-                    "NIA_API_KEY": "YOUR_API_KEY",
-                    "NIA_API_URL": "https://apigcp.trynia.ai/"
-                  }
+            "servers": {
+              "nia": {
+                "command": "pipx",
+                "args": ["run", "--no-cache", "nia-mcp-server"],
+                "env": {
+                  "NIA_API_KEY": "YOUR_API_KEY",
+                  "NIA_API_URL": "https://apigcp.trynia.ai/"
                 }
               }
             }
@@ -321,21 +324,23 @@ Get context from both source code AND documentation in one unified search
           
           ```json Option B: Using uvx
           {
-            "mcp": {
-              "servers": {
-                "nia": {
-                  "command": "uvx",
-                  "args": ["nia-mcp-server"],
-                  "env": {
-                    "NIA_API_KEY": "YOUR_API_KEY",
-                    "NIA_API_URL": "https://apigcp.trynia.ai/"
-                  }
+            "servers": {
+              "nia": {
+                "command": "uvx",
+                "args": ["nia-mcp-server"],
+                "env": {
+                  "NIA_API_KEY": "YOUR_API_KEY",
+                  "NIA_API_URL": "https://apigcp.trynia.ai/"
                 }
               }
             }
           }
           ```
         </CodeGroup>
+        
+        <Note>
+          When using multiple VS Code profiles, this allows you to switch between different MCP server configurations based on your active profile.
+        </Note>
       </Step>
     </Steps>
   </Tab>
