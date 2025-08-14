@@ -396,13 +396,29 @@ Get context from both source code AND documentation in one unified search
       <Step title="Add NIA Configuration">
         <CodeGroup>
           ```bash Option A: Using pipx (Recommended)
+          # For current project only (default)
           claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- pipx run --no-cache nia-mcp-server
+          
+          # For global installation (all projects)
+          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ --scope user -- pipx run --no-cache nia-mcp-server
           ```
           
           ```bash Option B: Using uvx
+          # For current project only (default)
           claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- uvx nia-mcp-server
+          
+          # For global installation (all projects)
+          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ --scope user -- uvx nia-mcp-server
           ```
         </CodeGroup>
+        
+        <Note>
+          **Scope Options:**
+          - **Default (no --scope flag)**: Installs for current project only
+          - **--scope user**: Installs globally for all projects on your machine
+          
+          Use `--scope user` if you want Nia available across all your projects. This is ideal for personal development where you frequently use Nia across different codebases.
+        </Note>
       </Step>
     </Steps>
   </Tab>
