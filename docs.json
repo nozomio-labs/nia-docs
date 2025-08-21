@@ -3,9 +3,20 @@
   "theme": "mint",
   "name": "Nia AI Documentation",
   "colors": {
-    "primary": "#0050f3",
-    "light": "#0050f3",
-    "dark": "#0050f3"
+    "primary": "#387CCD",
+    "light": "#387CCD",
+    "dark": "#387CCD"
+  },
+  "background": {
+    "color": {
+      "dark": "#18181B"
+    },
+    "decoration": "gradient"
+  },
+  "fonts": {
+    "family": "Alliance",
+    "source": "https://mintlify-assets.b-cdn.net/fonts/7faaa559c4eeae89-s.p.woff2",
+    "format": "woff2"
   },
   "favicon": "/favicon.svg",
   "navigation": {
