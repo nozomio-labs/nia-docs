@@ -7,8 +7,8 @@ info:
     The API provides capabilities for:
     - Repository indexing and management
     - Documentation/website indexing and management
-    - Local filesystem indexing and management
     - AI-powered unified search across code and documentation
+    - Package source code search across npm, PyPI, crates.io, and Go modules (powered by Chroma)
     - Web search and deep research capabilities
     - Real-time status checking for indexing operations
     - Streaming responses for interactive applications
@@ -222,86 +222,6 @@ components:
           maxLength: 100
           description: New display name for the resource
 
-    LocalFilesystemRequest:
-      type: object
-      required:
-        - directory_path
-      properties:
-        directory_path:
-          type: string
-          description: Absolute path to the directory to index
-          example: "/Users/username/projects/myproject"
-        inclusion_patterns:
-          type: array
-          items:
-            type: string
-          description: Patterns to include (e.g., 'ext:.py', 'dir:src')
-          example: ["ext:.py", "ext:.js", "dir:src"]
-        exclusion_patterns:
-          type: array
-          items:
-            type: string
-          description: Patterns to exclude (e.g., 'ext:.log', 'dir:node_modules')
-          example: ["dir:node_modules", "ext:.log", "dir:.git"]
-        max_file_size_mb:
-          type: integer
-          default: 50
-          description: Maximum file size in MB to process
-
-    LocalFilesystemScanResponse:
-      type: object
-      properties:
-        directory_path:
-          type: string
-        total_files:
-          type: integer
-        total_size_mb:
-          type: number
-        file_types:
-          type: object
-          additionalProperties:
-            type: integer
-          description: Count of files by extension
-        files:
-          type: array
-          items:
-            type: object
-            properties:
-              path:
-                type: string
-              size:
-                type: integer
-              extension:
-                type: string
-          description: Sample of files (limited to first 100)
-        truncated:
-          type: boolean
-          description: Whether the file list was truncated
-
-    LocalFilesystemStatusResponse:
-      type: object
-      properties:
-        source_id:
-          type: string
-        directory_path:
-          type: string
-        status:
-          type: string
-          enum: [pending, processing, completed, failed, error]
-        progress:
-          type: number
-          description: Progress percentage
-        message:
-          type: string
-        page_count:
-          type: integer
-          description: Number of files indexed
-        chunk_count:
-          type: integer
-          description: Number of chunks created
-        error:
-          type: string
-
     WebSearchRequest:
       type: object
       required:
@@ -464,6 +384,150 @@ components:
         error:
           type: string
           description: Error message if retrieval failed
+
+    PackageSearchGrepRequest:
+      type: object
+      required:
+        - registry
+        - package_name
+        - pattern
+      properties:
+        registry:
+          type: string
+          enum: [crates_io, golang_proxy, npm, py_pi]
+          description: Package registry to search
+          example: "npm"
+        package_name:
+          type: string
+          description: Name of the package to search
+          example: "react"
+        pattern:
+          type: string
+          description: Regex pattern to search for in the package source code
+          example: "useState|useEffect"
+        version:
+          type: string
+          description: Specific version to search (optional, defaults to latest)
+          example: "18.2.0"
+        language:
+          type: string
+          description: Language filter for search results
+          example: "TypeScript"
+        filename_sha256:
+          type: string
+          description: SHA256 hash of specific file to search in
+        a:
+          type: integer
+          description: Number of lines after each match to include
+        b:
+          type: integer
+          description: Number of lines before each match to include
+        c:
+          type: integer
+          description: Number of lines before and after each match to include
+        head_limit:
+          type: integer
+          description: Maximum number of results to return
+          example: 10
+        output_mode:
+          type: string
+          enum: [content, files_with_matches, count]
+          default: content
+          description: Format of the output results
+
+    PackageSearchHybridRequest:
+      type: object
+      required:
+        - registry
+        - package_name
+        - semantic_queries
+      properties:
+        registry:
+          type: string
+          enum: [crates_io, golang_proxy, npm, py_pi]
+          description: Package registry to search
+          example: "npm"
+        package_name:
+          type: string
+          description: Name of the package to search
+          example: "react"
+        semantic_queries:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 5
+          description: 1-5 semantic queries about the codebase
+          example: ["How does React handle state updates?", "What are the main hooks available?"]
+        version:
+          type: string
+          description: Specific version to search (optional, defaults to latest)
+          example: "18.2.0"
+        filename_sha256:
+          type: string
+          description: SHA256 hash of specific file to search in
+        pattern:
+          type: string
+          description: Optional regex pattern for pre-filtering results
+        language:
+          type: string
+          description: Language filter for search results
+          example: "TypeScript"
+
+    PackageSearchReadFileRequest:
+      type: object
+      required:
+        - registry
+        - package_name
+        - filename_sha256
+        - start_line
+        - end_line
+      properties:
+        registry:
+          type: string
+          enum: [crates_io, golang_proxy, npm, py_pi]
+          description: Package registry containing the file
+          example: "npm"
+        package_name:
+          type: string
+          description: Name of the package containing the file
+          example: "react"
+        filename_sha256:
+          type: string
+          description: SHA256 hash of the file to read (obtained from grep/hybrid search)
+          example: "a1b2c3d4e5f6..."
+        start_line:
+          type: integer
+          minimum: 1
+          description: Starting line number (1-based, inclusive)
+          example: 1
+        end_line:
+          type: integer
+          minimum: 1
+          description: Ending line number (1-based, inclusive)
+          example: 100
+        version:
+          type: string
+          description: Specific version of the package (optional, defaults to latest)
+          example: "18.2.0"
+
+    PackageSearchResponse:
+      type: object
+      description: Raw response from Chroma Package Search API
+      properties:
+        version_used:
+          type: string
+          description: Version of the package that was searched
+          example: "18.2.0"
+        results:
+          type: array
+          description: Search results from the package
+          items:
+            type: object
+            description: Search result item (format varies by search type)
+        truncation_message:
+          type: string
+          description: Message indicating if results were truncated
 
     DataSourceRequest:
       type: object
@@ -961,122 +1025,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
-  /local-filesystem:
-    post:
-      summary: Index a local filesystem directory
-      description: |
-        Start indexing a local filesystem directory. The directory must exist and be accessible.
-        Path traversal sequences are not allowed for security reasons.
-      operationId: indexLocalFilesystem
-      tags:
-        - Local Filesystem
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LocalFilesystemRequest'
-      responses:
-        '200':
-          description: Local filesystem indexing started successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  data:
-                    type: object
-                    properties:
-                      source_id:
-                        type: string
-                      status:
-                        type: string
-                      status_url:
-                        type: string
-        '400':
-          description: Invalid directory path or security violation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '429':
-          $ref: '#/components/responses/RateLimitError'
-
-  /local-filesystem/scan:
-    post:
-      summary: Scan a local filesystem directory
-      description: |
-        Scan a local filesystem directory to preview what files would be indexed without actually indexing them.
-        Returns file counts, types, and sizes.
-      operationId: scanLocalFilesystem
-      tags:
-        - Local Filesystem
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LocalFilesystemRequest'
-      responses:
-        '200':
-          description: Directory scanned successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LocalFilesystemScanResponse'
-        '400':
-          description: Invalid directory path or security violation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '429':
-          $ref: '#/components/responses/RateLimitError'
-
-  /local-filesystem/{source_id}:
-    get:
-      summary: Get local filesystem indexing status
-      description: Check the current status of local filesystem indexing
-      operationId: getLocalFilesystemStatus
-      tags:
-        - Local Filesystem
-      parameters:
-        - name: source_id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The source ID returned from the index endpoint
-      responses:
-        '200':
-          description: Status retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LocalFilesystemStatusResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          description: Access denied to data source
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Data source not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '429':
-          $ref: '#/components/responses/RateLimitError'
-
   /web-search:
     post:
       summary: AI-powered web search
@@ -1386,6 +1334,146 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
+  /package-search/grep:
+    post:
+      summary: Search package source code with regex
+      description: |
+        Execute a grep-style regex search over the source code of a public package.
+        This endpoint is useful for deterministically finding specific code patterns in packages
+        before implementing solutions that use external dependencies. Supports multiple package
+        registries including npm, PyPI, crates.io, and Go modules.
+      operationId: packageSearchGrep
+      tags:
+        - Package Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageSearchGrepRequest'
+      responses:
+        '200':
+          description: Package search completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageSearchResponse'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Chroma service error or package not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /package-search/hybrid:
+    post:
+      summary: Search package source code with AI/semantic queries
+      description: |
+        Execute a hybrid semantic search over package source code using AI understanding
+        and optional regex patterns. This allows for natural language queries about how
+        packages implement specific features, combined with optional pre-filtering.
+      operationId: packageSearchHybrid
+      tags:
+        - Package Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageSearchHybridRequest'
+      responses:
+        '200':
+          description: Package search completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageSearchResponse'
+        '400':
+          description: Invalid request parameters (e.g., too many semantic queries)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Chroma service error or package not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /package-search/read-file:
+    post:
+      summary: Read specific lines from a package file
+      description: |
+        Read exact lines from a source file within a public package. This is useful for
+        fetching complete file content when you already have the file SHA256 hash
+        (typically obtained from grep or hybrid search results). Maximum 200 lines per request.
+      operationId: packageSearchReadFile
+      tags:
+        - Package Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageSearchReadFileRequest'
+      responses:
+        '200':
+          description: File content retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version_used:
+                    type: string
+                    description: Version of the package
+                  file_path:
+                    type: string
+                    description: Path of the file within the package
+                  start_line:
+                    type: integer
+                    description: Starting line number
+                  end_line:
+                    type: integer
+                    description: Ending line number
+                  content:
+                    type: string
+                    description: File content for the specified line range
+                  total_lines:
+                    type: integer
+                    description: Total number of lines in the file
+        '400':
+          description: Invalid request parameters (e.g., invalid line range)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Chroma service error or file not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 tags:
   - name: Repositories
     description: Repository indexing and status operations
@@ -1393,9 +1481,9 @@ tags:
     description: AI-powered code and documentation querying operations
   - name: Data Sources
     description: Documentation and web content indexing operations
-  - name: Local Filesystem
-    description: Local filesystem indexing operations
   - name: Search & Research
     description: Web search and deep research operations
   - name: Sources
     description: Source content retrieval operations
+  - name: Package Search
+    description: Chroma-powered package source code search across npm, PyPI, crates.io, and Go modules
