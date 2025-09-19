@@ -81,14 +81,32 @@ components:
         data_sources:
           type: array
           items:
-            type: object
-            required:
-              - source_id
-            properties:
-              source_id:
-                type: string
-                description: Data source identifier
-          description: List of documentation/web sources to query
+            oneOf:
+              - type: string
+                description: |
+                  Flexible data source identifier (recommended). Can be:
+                  - UUID (e.g., "550e8400-e29b-41d4-a716-446655440000")
+                  - Display name (e.g., "Vercel AI SDK - Core")
+                  - URL (e.g., "https://docs.trynia.ai/")
+              - type: object
+                required:
+                  - source_id
+                properties:
+                  source_id:
+                    type: string
+                    description: Data source UUID identifier (legacy format)
+              - type: object
+                required:
+                  - identifier
+                properties:
+                  identifier:
+                    type: string
+                    description: Flexible data source identifier
+          description: |
+            List of documentation/web sources to query. Supports flexible identifiers:
+            - String format (recommended): ["Vercel AI SDK - Core", "https://docs.trynia.ai/"]
+            - Legacy object format: [{"source_id": "uuid"}]
+            - New object format: [{"identifier": "display-name-or-url"}]
         search_mode:
           type: string
           enum: [unified, repositories, sources]
@@ -216,6 +234,25 @@ components:
       required:
         - new_name
       properties:
+        new_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: New display name for the resource
+
+    RenameRequestWithIdentifier:
+      type: object
+      required:
+        - identifier
+        - new_name
+      properties:
+        identifier:
+          type: string
+          description: |
+            Flexible data source identifier. Can be:
+            - UUID (e.g., "550e8400-e29b-41d4-a716-446655440000")
+            - Display name (e.g., "Vercel AI SDK - Core")
+            - URL (e.g., "https://docs.trynia.ai/")
         new_name:
           type: string
           minLength: 1
@@ -1209,7 +1246,11 @@ paths:
           required: true
           schema:
             type: string
-          description: The ID of the data source
+          description: |
+            Flexible data source identifier. Can be:
+            - UUID (e.g., "550e8400-e29b-41d4-a716-446655440000")
+            - Display name (e.g., "Vercel AI SDK - Core")
+            - URL (e.g., "https://docs.trynia.ai/")
       responses:
         '200':
           description: Data source details retrieved successfully
@@ -1245,7 +1286,11 @@ paths:
           required: true
           schema:
             type: string
-          description: The ID of the data source to delete
+          description: |
+            Flexible data source identifier. Can be:
+            - UUID (e.g., "550e8400-e29b-41d4-a716-446655440000")
+            - Display name (e.g., "Vercel AI SDK - Core")
+            - URL (e.g., "https://docs.trynia.ai/")
       responses:
         '200':
           description: Data source deleted successfully
@@ -1277,9 +1322,9 @@ paths:
 
   /data-sources/{source_id}/rename:
     patch:
-      summary: Rename a data source
-      description: Update the display name of an indexed data source
-      operationId: renameDataSource
+      summary: Rename a data source (Legacy)
+      description: Update the display name of an indexed data source using UUID identifier only
+      operationId: renameDataSourceLegacy
       tags:
         - Data Sources
       parameters:
@@ -1288,7 +1333,7 @@ paths:
           required: true
           schema:
             type: string
-          description: The ID of the data source to rename
+          description: UUID identifier of the data source to rename
       requestBody:
         required: true
         content:
@@ -1317,6 +1362,109 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to data source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /data-sources/rename:
+    patch:
+      summary: Rename a data source (Flexible)
+      description: Update the display name of an indexed data source using flexible identifier (recommended)
+      operationId: renameDataSource
+      tags:
+        - Data Sources
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenameRequestWithIdentifier'
+      responses:
+        '200':
+          description: Data source renamed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  source_id:
+                    type: string
+                  display_name:
+                    type: string
+                  message:
+                    type: string
+        '400':
+          description: Invalid request (e.g., empty name, identifier not found)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to data source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /local-filesystem/{source_id}:
+    get:
+      summary: Get local filesystem indexing status
+      description: Check the status of local filesystem indexing operation (UUID only)
+      operationId: getLocalFilesystemStatus
+      tags:
+        - Data Sources
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: UUID identifier of the local filesystem data source
+      responses:
+        '200':
+          description: Local filesystem status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  source_id:
+                    type: string
+                  directory_path:
+                    type: string
+                  status:
+                    type: string
+                    enum: [pending, processing, completed, failed, error]
+                  progress:
+                    type: number
+                    description: Progress percentage (0-100)
+                  message:
+                    type: string
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':

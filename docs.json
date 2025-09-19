@@ -31,6 +31,24 @@
               "quick-setup-cursor",
               "troubleshooting"
             ]
+          },
+          {
+            "group": "Example Workflows",
+            "pages": [
+              "example-workflows/overview"
+            ]
+          },
+          {
+            "group": "Privacy",
+            "pages": [
+              "privacy"
+            ]
+          },
+          {
+            "group": "Enterprise",
+            "pages": [
+              "enterprise"
+            ]
           }
         ]
       },
