@@ -1,0 +1,35 @@
+---
+title: "Tips & Tricks"
+description: "Tips on how to use Nia and some tricks"
+---
+
+Here are some tips on how to use Nia effectively and some tricks to get better results.
+
+## 1. When using Nia search
+
+Ask your agent to use Nia as many times as you want and also leverage the `read_source_content` tool because each search tool outputs links where it found information from. Then the `read_source_content` tool can pick up those links and check the whole webpage or GitHub file to get the entire content if needed.
+
+## 2. Use package search when you need information about any package
+
+Enable your AI agents to search the source code of your package dependencies.
+
+<CardGroup cols={3}>
+  <Card title="Grep Search" icon="magnifying-glass">
+    Execute grep across the source code of a public package
+  </Card>
+  <Card title="Hybrid Search" icon="brain">
+    Search package source using regex or semantic understanding
+  </Card>
+  <Card title="File Reading" icon="file-code">
+    Read exact lines from a source file
+  </Card>
+</CardGroup>
+
+**Example queries:**
+- In numpy, what environment variables or compile-time flags switch kernels, and how do you plug in a custom inner loop?
+- How do I stream responses with AI SDK? Use package search.
+- Search PostHog and tell me how do they handle analytics and usage monitoring.
+
+## 3. When you start a new chat with an agent
+
+Ask it to list docs/repos first so it can output everything you have indexed, otherwise it won't have enough context about what it has.

@@ -35,7 +35,8 @@
           {
             "group": "Example Workflows",
             "pages": [
-              "example-workflows/overview"
+              "example-workflows/overview",
+              "example-workflows/tips"
             ]
           },
           {
