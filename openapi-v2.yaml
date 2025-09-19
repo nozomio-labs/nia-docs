@@ -650,9 +650,6 @@ components:
         file_name:
           type: string
           description: File name for text sources
-        directory_path:
-          type: string
-          description: Directory path for local filesystem sources
         status:
           type: string
           enum: [pending, processing, completed, failed, error]
@@ -676,7 +673,7 @@ components:
           description: Associated project ID if any
         source_type:
           type: string
-          enum: [web, text, local_filesystem]
+          enum: [web, text]
           default: web
         is_active:
           type: boolean
@@ -1414,57 +1411,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          description: Access denied to data source
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Data source not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '429':
-          $ref: '#/components/responses/RateLimitError'
-
-  /local-filesystem/{source_id}:
-    get:
-      summary: Get local filesystem indexing status
-      description: Check the status of local filesystem indexing operation (UUID only)
-      operationId: getLocalFilesystemStatus
-      tags:
-        - Data Sources
-      parameters:
-        - name: source_id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: UUID identifier of the local filesystem data source
-      responses:
-        '200':
-          description: Local filesystem status retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  source_id:
-                    type: string
-                  directory_path:
-                    type: string
-                  status:
-                    type: string
-                    enum: [pending, processing, completed, failed, error]
-                  progress:
-                    type: number
-                    description: Progress percentage (0-100)
-                  message:
-                    type: string
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
