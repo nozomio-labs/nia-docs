@@ -69,6 +69,11 @@
           "anchor": "Community",
           "href": "https://discord.gg/BBSwUMrrfn",
           "icon": "discord"
+        },
+        {
+          "anchor": "GitHub",
+          "href": "https://github.com/nozomio-labs/nia",
+          "icon": "github"
         }
       ]
     }

@@ -3,18 +3,14 @@ title: 'Quick Setup for Cursor'
 description: 'Get Nia MCP running in Cursor in under 2 minutes'
 ---
 
-<Note>
-  **Lightning-fast setup** - Get Nia's AI-powered codebase understanding in Cursor with just 3 simple steps!
-</Note>
-
-## 🚀 Setup in 3 Steps
+## Setup in 3 Steps
 
 <Steps>
   <Step title="Get Your API Key">
     Visit [app.trynia.ai](https://app.trynia.ai) and sign up to get your free API key.
     
     <Info>
-      You'll get 5 free requests to start - no credit card required!
+      You'll get 3 free index jobs to start - no credit card required!
     </Info>
   </Step>
   
@@ -26,12 +22,12 @@ description: 'Get Nia MCP running in Cursor in under 2 minutes'
     ```
     
     <Note>
-      Don't have pipx? Install it first with `pip install pipx`
+      Don't have pipx? Install it first with `pip install pipx` or uv!
     </Note>
   </Step>
   
   <Step title="Run Setup Command">
-    In your project directory (or globally), run the setup command with your API key:
+    Open your global terminal, run the setup command with your API key:
     
     ```bash
     pipx run --no-cache nia-mcp-server setup YOUR_API_KEY
@@ -40,7 +36,7 @@ description: 'Get Nia MCP running in Cursor in under 2 minutes'
     Replace `YOUR_API_KEY` with the key you got from step 1.
     
     <Tip>
-      This command will automatically configure Nia MCP for Cursor and create all necessary configuration files.
+      This command will automatically configure Nia MCP in cursor's mcp.json file.
     </Tip>
   </Step>
 </Steps>
