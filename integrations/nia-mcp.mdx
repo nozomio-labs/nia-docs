@@ -317,6 +317,22 @@ description: 'Context augmentation for agents.'
       </Step>
     </Steps>
   </Tab>
+
+  <Tab title="Codex">
+    <Steps>
+      <Step title="Add NIA Configuration">
+        <CodeGroup>
+          ```bash Option A: Using pipx (Recommended)
+          codex mcp add nia --env NIA_API_KEY=YOUR_API_KEY --env NIA_API_URL=https://apigcp.trynia.ai/ -- pipx run --no-cache nia-mcp-server
+          ```
+
+          ```bash Option B: Using uvx
+          codex mcp add nia --env NIA_API_KEY=YOUR_API_KEY --env NIA_API_URL=https://apigcp.trynia.ai/ -- uvx nia-mcp-server
+          ```
+        </CodeGroup>
+      </Step>
+    </Steps>
+  </Tab>
 </Tabs>
 
 ## 🚀 Try It Out!

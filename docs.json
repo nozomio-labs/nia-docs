@@ -29,6 +29,7 @@
             "pages": [
               "integrations/nia-mcp",
               "quick-setup-cursor",
+              "context-sharing",
               "troubleshooting"
             ]
           },
