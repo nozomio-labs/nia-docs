@@ -1,5 +1,5 @@
 ````mdx
-# Nia AI Documentation
+# Nia AI Documentation 
 
 Welcome to the Nia AI documentation repository! This repository contains the official documentation for Nia AI, powered by [Mintlify](https://mintlify.com/).
 
