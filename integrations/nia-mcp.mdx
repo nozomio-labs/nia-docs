@@ -1,56 +1,108 @@
 ---
-title: 'Nia Context MCP'
-description: 'Context augmentation for agents.'
+title: 'Installation'
+description: 'Install Nia MCP and configure it for your coding agent.'
 ---
 
-## 📦 Installation
+<Steps>
+  <Step title="Complete Onboarding">
+    Visit [app.trynia.ai](https://app.trynia.ai) and complete the onboarding process. Your API key will be automatically created.
+
+    <Info>
+      You'll get 3 free index jobs to start - no credit card required!
+    </Info>
+  </Step>
+
+  <Step title="Run Automated Setup">
+    Open your terminal and run the setup script with your API key and coding agent:
+
+    ```bash
+    curl -fsSL http://app.trynia.ai/api/setup-script | bash -s -- YOUR_API_KEY your-coding-agent
+    ```
+
+    Replace:
+    - `YOUR_API_KEY` with your API key from step 1
+    - `your-coding-agent` with one of: `cursor`, `claude-code`, `vscode`, `windsurf`, `continue`, `cline`, `codex`
+
+    **Examples:**
+    ```bash
+    # For Cursor
+    curl -fsSL http://app.trynia.ai/api/setup-script | bash -s -- nia_abc123 cursor
+
+    # For Claude Code
+    curl -fsSL http://app.trynia.ai/api/setup-script | bash -s -- nia_abc123 claude-code
+
+    # For VS Code
+    curl -fsSL http://app.trynia.ai/api/setup-script | bash -s -- nia_abc123 vscode
+    ```
+
+    <Tip>
+      This script will automatically install dependencies and configure Nia MCP for your coding agent.
+    </Tip>
+  </Step>
+
+  <Step title="Restart Your Coding Agent">
+    Restart your coding assistant to load the new MCP server
+  </Step>
+</Steps>
+
+## That's It!
+
+You're ready to start using Nia MCP! Check out the [Tools & Features](/tools-features) page to explore all available capabilities.
+
+<Note>
+  **Prefer manual setup?** See the [Manual Setup](#manual-setup) section below for detailed configuration instructions.
+</Note>
+
+## Manual Setup
+
+If you prefer to manually configure Nia MCP or if the automated setup didn't work for your setup, follow these detailed instructions:
 
 <Steps>
   <Step title="Prerequisites">
-    - Python 3.8+ 
+    - Python 3.8+
     - `pipx` (recommended) or `uvx` or `pip`
     - Your Nia API key from [app.trynia.ai](http://app.trynia.ai/)
   </Step>
-  
+
   <Step title="Install the Package">
     <CodeGroup>
       ```bash Option A: Using pipx (Recommended)
       # Install globally for use across all projects
       pipx install nia-mcp-server
       ```
-      
+
       ```bash Option B: Using uvx
       # uvx will automatically handle the installation when you run it
       # No need to pre-install if you have uvx
       ```
-      
+
       ```bash Option C: Using pip (If needed)
       pip install nia-mcp-server
       ```
     </CodeGroup>
   </Step>
-  
+
   <Step title="Configure Your MCP Client">
     Choose your coding agent below for specific configuration steps
   </Step>
-  
+
   <Step title="Replace Your API Key">
     Get your API key from [app.trynia.ai](http://app.trynia.ai/) and replace `YOUR_API_KEY` in the configuration
   </Step>
-  
+
   <Step title="Restart Your Client">
     Restart your coding assistant to load the new MCP server
   </Step>
 </Steps>
 
-## ⚙️ Configuration for Your Coding Assistant
+### Configuration by Coding Agent
 
 <Tabs>
   <Tab title="Cursor">
     <div style={{ marginBottom: '20px' }}>
       <a href="cursor://anysphere.cursor-deeplink/mcp/install?name=nia&config=eyJjb21tYW5kIjoidXZ4IG5pYS1tY3Atc2VydmVyIiwiZW52Ijp7Ik5JQV9BUElfS0VZIjoiWU9VUl9BUElfS0VZIiwiTklBX0FQSV9VUkwiOiJodHRwczovL2FwaWdjcC50cnluaWEuYWkvIn19">
-        <img 
-          src="https://cursor.com/deeplink/mcp-install-dark.png" 
+        <img
+          src="https://cursor.com/deeplink/mcp-install-dark.png"
           alt="Add Nia MCP server to Cursor"
           style={{ maxWidth: '200px', height: 'auto' }}
         />
@@ -63,7 +115,7 @@ description: 'Context augmentation for agents.'
         - **Windows**: `%APPDATA%\Cursor\mcp.json`
         - **Linux**: `~/.config/cursor/mcp.json`
       </Step>
-      
+
       <Step title="Add NIA Configuration">
         <CodeGroup>
           ```json Option A: Using pipx (Recommended)
@@ -80,7 +132,7 @@ description: 'Context augmentation for agents.'
             }
           }
           ```
-          
+
           ```json Option B: Using uvx
           {
             "mcpServers": {
@@ -99,7 +151,7 @@ description: 'Context augmentation for agents.'
       </Step>
     </Steps>
   </Tab>
-  
+
   <Tab title="Windsurf">
     <Steps>
       <Step title="Open MCP Configuration">
@@ -108,7 +160,7 @@ description: 'Context augmentation for agents.'
         - **Windows**: `%APPDATA%\Windsurf\mcp.json`
         - **Linux**: `~/.config/windsurf/mcp.json`
       </Step>
-      
+
       <Step title="Add NIA Configuration">
         <CodeGroup>
           ```json Option A: Using pipx (Recommended)
@@ -125,7 +177,7 @@ description: 'Context augmentation for agents.'
             }
           }
           ```
-          
+
           ```json Option B: Using uvx
           {
             "mcpServers": {
@@ -144,7 +196,7 @@ description: 'Context augmentation for agents.'
       </Step>
     </Steps>
   </Tab>
-  
+
   <Tab title="Claude Desktop">
     <Steps>
       <Step title="Open Configuration File">
@@ -152,7 +204,7 @@ description: 'Context augmentation for agents.'
         - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
         - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
       </Step>
-      
+
       <Step title="Add NIA Configuration">
         <CodeGroup>
           ```json Option A: Using pipx (Recommended)
@@ -169,7 +221,7 @@ description: 'Context augmentation for agents.'
             }
           }
           ```
-          
+
           ```json Option B: Using uvx
           {
             "mcpServers": {
@@ -188,7 +240,7 @@ description: 'Context augmentation for agents.'
       </Step>
     </Steps>
   </Tab>
-  
+
   <Tab title="VS Code">
     <Steps>
       <Step title="Open MCP Configuration">
@@ -199,7 +251,7 @@ description: 'Context augmentation for agents.'
           - **macOS/Linux**: `~/.config/Code/User/mcp.json`
           - **Windows**: `%APPDATA%\Code\User\mcp.json`
       </Step>
-      
+
       <Step title="Add NIA Configuration">
         <CodeGroup>
           ```json Option A: Using pipx (Recommended)
@@ -216,7 +268,7 @@ description: 'Context augmentation for agents.'
             }
           }
           ```
-          
+
           ```json Option B: Using uvx
           {
             "servers": {
@@ -232,20 +284,20 @@ description: 'Context augmentation for agents.'
           }
           ```
         </CodeGroup>
-        
+
         <Note>
           When using multiple VS Code profiles, this allows you to switch between different MCP server configurations based on your active profile.
         </Note>
       </Step>
     </Steps>
   </Tab>
-  
+
   <Tab title="Continue.dev">
     <Steps>
       <Step title="Open Continue Configuration">
         Edit your `~/.continue/config.json` file
       </Step>
-      
+
       <Step title="Add NIA Configuration">
         <CodeGroup>
           ```json Option A: Using pipx (Recommended)
@@ -264,7 +316,7 @@ description: 'Context augmentation for agents.'
             ]
           }
           ```
-          
+
           ```json Option B: Using uvx
           {
             "models": [...],
@@ -285,7 +337,7 @@ description: 'Context augmentation for agents.'
       </Step>
     </Steps>
   </Tab>
-  
+
   <Tab title="Claude Code">
     <Steps>
       <Step title="Add NIA Configuration">
@@ -293,25 +345,25 @@ description: 'Context augmentation for agents.'
           ```bash Option A: Using pipx (Recommended)
           # For current project only (default)
           claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- pipx run --no-cache nia-mcp-server
-          
+
           # For global installation (all projects)
           claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ --scope user -- pipx run --no-cache nia-mcp-server
           ```
-          
+
           ```bash Option B: Using uvx
           # For current project only (default)
           claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- uvx nia-mcp-server
-          
+
           # For global installation (all projects)
           claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ --scope user -- uvx nia-mcp-server
           ```
         </CodeGroup>
-        
+
         <Note>
           **Scope Options:**
           - **Default (no --scope flag)**: Installs for current project only
           - **--scope user**: Installs globally for all projects on your machine
-          
+
           Use `--scope user` if you want Nia available across all your projects. This is ideal for personal development where you frequently use Nia across different codebases.
         </Note>
       </Step>
@@ -333,235 +385,51 @@ description: 'Context augmentation for agents.'
       </Step>
     </Steps>
   </Tab>
+
+  <Tab title="Cline">
+    <Steps>
+      <Step title="Open MCP Configuration">
+        Open your Cline MCP configuration file according to your IDE:
+        - **VS Code**: Use the MCP configuration steps similar to Continue.dev
+        - Check Cline's documentation for the specific configuration file location
+      </Step>
+
+      <Step title="Add NIA Configuration">
+        <CodeGroup>
+          ```json Option A: Using pipx (Recommended)
+          {
+            "mcpServers": {
+              "nia": {
+                "command": "pipx",
+                "args": ["run", "--no-cache", "nia-mcp-server"],
+                "env": {
+                  "NIA_API_KEY": "YOUR_API_KEY",
+                  "NIA_API_URL": "https://apigcp.trynia.ai/"
+                }
+              }
+            }
+          }
+          ```
+
+          ```json Option B: Using uvx
+          {
+            "mcpServers": {
+              "nia": {
+                "command": "uvx",
+                "args": ["nia-mcp-server"],
+                "env": {
+                  "NIA_API_KEY": "YOUR_API_KEY",
+                  "NIA_API_URL": "https://apigcp.trynia.ai/"
+                }
+              }
+            }
+          }
+          ```
+        </CodeGroup>
+      </Step>
+    </Steps>
+  </Tab>
 </Tabs>
-
-## 🚀 Try It Out!
-
-After restarting your coding agent, you're good to go:
-
-<Steps>
-  <Step title="Search Package Source Code (No indexing required!)">
-    Ask your coding agent: *"Use package search to find how error handling is implemented in the `requests` Python library"* or *"Search the numpy package for array manipulation examples"*
-  </Step>
-
-  <Step title="Index Documentation or a Repository">
-    Try indexing public documentation or a repository:
-    - *"Index https://docs.trynia.ai/"*
-    - *"Index https://github.com/browser-use/browser-use"*
-    - *"Use nia deep research to compare the best GraphRAG frameworks and then index the one with least latency."*
-  </Step>
-
-  <Step title="Monitor Progress & Explore">
-    Check your indexed resources:
-    - *"List my resources"* or *"Check the status of my indexing jobs"*
-    - Visit [app.trynia.ai](https://app.trynia.ai) to see all your indexed content
-  </Step>
-</Steps>
-
-## 🛠️ Available Tools
-
-<CardGroup cols={2}>
-  <Card title="Package Search (No indexing!)" icon="package">
-    - **`nia_package_search_grep`** - Regex-based code search in 3,000+ packages
-    - **`nia_package_search_hybrid`** - AI-powered semantic package search
-    - **`nia_package_search_read_file`** - Read specific file sections
-    - **Supports:** PyPI, NPM, Crates.io, Go modules
-  </Card>
-
-  <Card title="Repository Management" icon="github">
-    - **`index_repository`** - Index GitHub repositories for intelligent search
-    - **`search_codebase`** - Search code with natural language queries
-    - **`visualize_codebase`** - Open interactive graph visualization
-  </Card>
-
-  <Card title="Documentation Management" icon="book">
-    - **`index_documentation`** - Index websites and documentation
-    - **`search_documentation`** - Search docs with natural language
-  </Card>
-
-  <Card title="Unified Resource Management" icon="database">
-    - **`list_resources`** - List all indexed repositories and documentation
-    - **`check_resource_status`** - Monitor indexing progress
-    - **`rename_resource`** - Rename resources for better organization
-    - **`delete_resource`** - Remove indexed resources
-  </Card>
-
-  <Card title="Web Search & Research" icon="magnifying-glass">
-    - **`nia_web_search`** - AI-powered search for repos, docs, and content
-    - **`nia_deep_research_agent`** - Deep multi-step research and analysis
-  </Card>
-
-  <Card title="Project & Development Tools" icon="gear">
-    - **`initialize_project`** - Set up NIA-enabled projects with IDE configs
-    - **`read_source_content`** - Read full content of specific sources
-    - **`nia_bug_report`** - Submit feedback directly to the development team
-  </Card>
-</CardGroup>
-
-## 📋 Complete Tool Reference
-
-<AccordionGroup>
-  <Accordion title="🔍 Package Search Tools (Instant Access to 3,000+ Packages)">
-    ### `nia_package_search_grep`
-    Regex-based deterministic code search across packages from PyPI, NPM, Crates.io, and Go modules.
-
-    **Parameters**:
-    - `registry` (str): One of "py_pi", "npm", "crates_io", "golang_proxy"
-    - `package_name` (str): Package name (for Go: "org/repo" format)
-    - `pattern` (str): Regex pattern to search for
-    - `version` (str, optional): Specific package version
-    - `language` (str, optional): Filter by programming language
-    - `output_mode` (str): "content" (default), "files_with_matches", "count"
-
-    **Best for**: Finding specific code patterns, function definitions, API usage examples.
-
-    ### `nia_package_search_hybrid`
-    AI-powered semantic search combined with optional regex filtering.
-
-    **Parameters**:
-    - `registry` (str): Package registry
-    - `package_name` (str): Package name
-    - `semantic_queries` (List[str]): 1-5 natural language questions
-    - `pattern` (str, optional): Regex pre-filter
-    - `version` (str, optional): Specific version
-
-    **Best for**: Understanding implementation patterns, finding usage examples, exploring architecture.
-
-    ### `nia_package_search_read_file`
-    Read exact lines from a package source file using its SHA256 hash.
-
-    **Parameters**:
-    - `registry` (str): Package registry
-    - `package_name` (str): Package name
-    - `filename_sha256` (str): File hash from search results
-    - `start_line` (int): Starting line (1-based)
-    - `end_line` (int): Ending line (max 200 lines)
-
-    **Best for**: Getting complete context around code snippets found in searches.
-  </Accordion>
-
-  <Accordion title="📦 Repository Management Tools">
-    ### `index_repository`
-    Index a GitHub repository for AI-powered code search and analysis.
-
-    **Parameters**:
-    - `repo_url` (str): GitHub repository URL
-    - `branch` (str, optional): Specific branch to index
-
-    **Usage**: Monitor progress with `check_resource_status`.
-
-    ### `search_codebase`
-    Search indexed repositories using natural language queries.
-
-    **Parameters**:
-    - `query` (str): Natural language search question
-    - `repositories` (List[str]): List of repositories to search (owner/repo format)
-    - `include_sources` (bool, default=True): Include source code snippets
-
-    **Returns**: AI-analyzed results with code snippets and explanations.
-
-    ### `visualize_codebase`
-    Open an interactive graph visualization of repository structure.
-
-    **Parameters**:
-    - `repository` (str): Repository in owner/repo format
-
-    **Features**: Interactive force-directed graph, click-to-chat with code elements, relationship visualization.
-  </Accordion>
-
-  <Accordion title="📚 Documentation Management Tools">
-    ### `index_documentation`
-    Index websites, documentation, or API references for intelligent search.
-
-    **Parameters**:
-    - `url` (str): URL of documentation site
-    - `url_patterns` (List[str], optional): Include patterns (e.g., ["/docs/*"])
-    - `exclude_patterns` (List[str], optional): Exclude patterns (e.g., ["/blog/*"])
-    - `only_main_content` (bool, default=True): Extract main content only
-
-    ### `search_documentation`
-    Search indexed documentation with natural language queries.
-
-    **Parameters**:
-    - `query` (str): Natural language question
-    - `sources` (List[str]): List of documentation source UUIDs/names/URLs
-    - `include_sources` (bool, default=True): Include source references
-  </Accordion>
-
-  <Accordion title="🗂️ Unified Resource Management">
-    ### `list_resources`
-    List all indexed repositories and documentation with their status.
-
-    **Parameters**:
-    - `resource_type` (str, optional): Filter by "repository", "documentation", or None for all
-
-    ### `check_resource_status`
-    Check indexing progress and status of any resource.
-
-    **Parameters**:
-    - `resource_type` (str): "repository" or "documentation"
-    - `identifier` (str): Repository name or documentation UUID
-
-    ### `rename_resource` & `delete_resource`
-    Manage your indexed resources with rename and delete operations.
-
-    **Parameters**:
-    - `resource_type` (str): "repository" or "documentation"
-    - `identifier` (str): Resource identifier
-    - `new_name` (str): New display name (for rename only)
-  </Accordion>
-
-  <Accordion title="🌐 Web Search & Research Tools">
-    ### `nia_web_search`
-    AI-powered search for discovering repositories, documentation, and content.
-
-    **Use Cases**: Finding specific repos/docs, trending technologies, similar content
-
-    **Parameters**:
-    - `query` (str): Natural language search query
-    - `num_results` (int, default=5): Number of results (max: 10)
-    - `category` (str, optional): Filter by type ("github", "company", etc.)
-    - `days_back` (int, optional): Recent content only
-
-    ### `nia_deep_research_agent`
-    Comprehensive multi-step research and analysis.
-
-    **Use Cases**: Comparative analysis, pros/cons evaluation, technology selection
-
-    **Parameters**:
-    - `query` (str): Research question
-    - `output_format` (str, optional): Structure hint (e.g., "comparison table")
-
-    **Tool Selection Guide**:
-    - Use `nia_web_search` for: Simple discovery, finding specific items
-    - Use `nia_deep_research_agent` for: Complex analysis, comparisons, evaluations
-  </Accordion>
-
-  <Accordion title="🛠️ Development Tools">
-    ### `initialize_project`
-    Set up NIA-enabled projects with IDE-specific configurations.
-
-    **Parameters**:
-    - `project_root` (str): Absolute path to project directory
-    - `profiles` (List[str], optional): IDE profiles ["cursor", "vscode", "claude", etc.]
-
-    ### `read_source_content`
-    Read full content of specific sources found in search results.
-
-    **Parameters**:
-    - `source_type` (str): "repository" or "documentation"
-    - `source_identifier` (str): Source path or URL
-    - `metadata` (dict, optional): Additional context from search results
-
-    ### `nia_bug_report`
-    Submit feedback, bug reports, or feature requests directly to the development team.
-
-    **Parameters**:
-    - `description` (str): Detailed description (10-5000 chars)
-    - `bug_type` (str): "bug", "feature-request", "improvement", "other"
-    - `additional_context` (str, optional): Extra details
-  </Accordion>
-</AccordionGroup>
 
 ---
 

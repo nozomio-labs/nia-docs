@@ -1,21 +1,25 @@
 openapi: 3.1.0
 info:
   title: Nia AI API
-  version: '2.0.0'
+  version: '2.1.0'
   description: |
     Nia AI API allows developers to index and query code repositories and documentation using advanced AI understanding.
     The API provides capabilities for:
-    - Repository indexing and management
+    - Repository indexing and management (including direct GitHub tree access)
     - Documentation/website indexing and management
-    - AI-powered unified search across code and documentation
+    - AI-powered search across code and documentation
+    - Advanced regex pattern search over indexed repositories
     - Package source code search across npm, PyPI, crates.io, and Go modules (powered by Chroma)
     - Web search and deep research capabilities
+    - Cross-agent conversation context sharing with semantic search
     - Real-time status checking for indexing operations
     - Streaming responses for interactive applications
   
 servers:
   - url: https://apigcp.trynia.ai/v2
     description: Production API
+  - url: http://localhost:8000/v2
+    description: Local development
 
 security:
   - ApiKeyAuth: []
@@ -107,9 +111,9 @@ components:
             - New object format: [{"identifier": "display-name-or-url"}]
         search_mode:
           type: string
-          enum: [unified, repositories, sources]
-          default: unified
-          description: "Search mode: 'unified' searches both repos and docs, 'repositories' searches only code, 'sources' searches only documentation"
+          enum: [repositories, sources]
+          default: repositories
+          description: "Search mode: 'repositories' searches only code, 'sources' searches only documentation"
         stream:
           type: boolean
           default: false
@@ -186,46 +190,6 @@ components:
         error:
           type: string
           description: Error message if status is 'error'
-
-    HierarchyResponse:
-      type: object
-      required:
-        - repository_id
-        - hierarchy_text
-        - stats
-      properties:
-        repository_id:
-          type: string
-          description: The repository ID
-        hierarchy_text:
-          type: string
-          description: Text representation of the file hierarchy
-        stats:
-          type: object
-          description: Statistics about the hierarchy
-          properties:
-            total_files:
-              type: integer
-            total_directories:
-              type: integer
-            total_classes:
-              type: integer
-            total_methods:
-              type: integer
-        generated_at:
-          type: string
-          format: date-time
-          description: When the hierarchy was generated
-        options:
-          type: object
-          properties:
-            include_classes:
-              type: boolean
-            include_methods:
-              type: boolean
-        hierarchy_tree:
-          type: object
-          description: Tree structure of the hierarchy (optional, when X-Include-Tree header is true)
 
     RenameRequest:
       type: object
@@ -686,6 +650,342 @@ components:
           type: string
           description: Error code for programmatic error handling
 
+    GitHubTreeRequest:
+      type: object
+      required:
+        - repository_id
+      properties:
+        repository_id:
+          type: string
+          description: Repository identifier (owner/repo format)
+        branch:
+          type: string
+          description: Branch name (optional, defaults to repository's default branch)
+        include_paths:
+          type: array
+          items:
+            type: string
+          description: Only show files in these paths (e.g., ["src/", "lib/"])
+        exclude_paths:
+          type: array
+          items:
+            type: string
+          description: Hide files in these paths (e.g., ["node_modules/", "dist/"])
+        file_extensions:
+          type: array
+          items:
+            type: string
+          description: Only show these file types (e.g., [".py", ".js", ".ts"])
+        exclude_extensions:
+          type: array
+          items:
+            type: string
+          description: Hide these file types (e.g., [".md", ".lock", ".json"])
+        show_full_paths:
+          type: boolean
+          default: false
+          description: Show full paths instead of tree structure
+
+    GitHubTreeResponse:
+      type: object
+      properties:
+        repository:
+          type: string
+          description: Repository identifier
+        branch:
+          type: string
+          description: Branch name
+        tree:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              type:
+                type: string
+                enum: [file, tree]
+              sha:
+                type: string
+        stats:
+          type: object
+          properties:
+            total_files:
+              type: integer
+            total_directories:
+              type: integer
+        formatted_tree:
+          type: string
+          description: Text representation of the tree structure
+
+    RegexSearchRequest:
+      type: object
+      required:
+        - repositories
+        - query
+      properties:
+        repositories:
+          type: array
+          items:
+            type: string
+          description: List of repositories to search (owner/repo format)
+          example: ["facebook/react", "vercel/next.js"]
+        query:
+          type: string
+          description: Natural language query or regex pattern
+          example: "function handleSubmit"
+        pattern:
+          type: string
+          description: Optional explicit regex pattern (overrides automatic extraction from query)
+          example: "async\\s+function\\s+\\w+"
+        file_extensions:
+          type: array
+          items:
+            type: string
+          description: File extensions to filter (e.g., [".js", ".tsx", ".py"])
+        languages:
+          type: array
+          items:
+            type: string
+          description: Programming languages to filter (e.g., ["python", "javascript", "typescript"])
+        max_results:
+          type: integer
+          default: 50
+          minimum: 1
+          maximum: 200
+          description: Maximum number of results to return
+        include_context:
+          type: boolean
+          default: true
+          description: Include surrounding context lines
+        context_lines:
+          type: integer
+          default: 3
+          minimum: 0
+          maximum: 10
+          description: Number of context lines before/after match
+
+    RegexSearchResponse:
+      type: object
+      properties:
+        query:
+          type: string
+          description: The search query used
+        pattern_used:
+          type: string
+          description: The regex pattern that was executed
+        total_matches:
+          type: integer
+          description: Total number of matches found
+        repositories_searched:
+          type: array
+          items:
+            type: string
+          description: Repositories that were searched
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              repository:
+                type: string
+              file_path:
+                type: string
+              line_number:
+                type: integer
+              matched_line:
+                type: string
+              context_before:
+                type: array
+                items:
+                  type: string
+              context_after:
+                type: array
+                items:
+                  type: string
+              language:
+                type: string
+        truncated:
+          type: boolean
+          description: Whether results were truncated due to max_results limit
+
+    NiaReferences:
+      type: object
+      description: References to NIA resources used during the conversation
+      properties:
+        indexed_repositories:
+          type: array
+          items:
+            type: string
+          description: List of repository identifiers that were indexed
+        indexed_documentation:
+          type: array
+          items:
+            type: string
+          description: List of documentation source identifiers
+        queried_repositories:
+          type: array
+          items:
+            type: string
+          description: Repositories that were queried
+        queried_documentation:
+          type: array
+          items:
+            type: string
+          description: Documentation sources that were queried
+        web_searches:
+          type: array
+          items:
+            type: string
+          description: Web search queries performed
+        deep_research_queries:
+          type: array
+          items:
+            type: string
+          description: Deep research queries performed
+
+    EditedFile:
+      type: object
+      required:
+        - file_path
+      properties:
+        file_path:
+          type: string
+          description: Path to the edited file
+        operation:
+          type: string
+          enum: [created, modified, deleted]
+          description: Type of operation performed on the file
+        lines_added:
+          type: integer
+          description: Number of lines added (for created/modified operations)
+        lines_removed:
+          type: integer
+          description: Number of lines removed (for modified/deleted operations)
+        language:
+          type: string
+          description: Programming language of the file
+
+    ContextShareRequest:
+      type: object
+      required:
+        - title
+        - summary
+        - content
+        - agent_source
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Descriptive title for the context
+        summary:
+          type: string
+          minLength: 10
+          maxLength: 1000
+          description: Brief summary of the conversation
+        content:
+          type: string
+          minLength: 50
+          description: Full conversation context
+        agent_source:
+          type: string
+          description: Which agent is creating this context (e.g., "cursor", "claude-code")
+        tags:
+          type: array
+          items:
+            type: string
+          description: Searchable tags for categorization
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Optional metadata like file paths, repositories discussed, etc.
+        nia_references:
+          $ref: '#/components/schemas/NiaReferences'
+        edited_files:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditedFile'
+          description: List of files that were modified during conversation
+        workspace_override:
+          type: string
+          description: Optional custom workspace name (overrides auto-detection)
+
+    ContextShareResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the context
+        user_id:
+          type: string
+          description: User who created the context
+        organization_id:
+          type: string
+          description: Organization ID if context belongs to an organization
+        title:
+          type: string
+          description: Context title
+        summary:
+          type: string
+          description: Context summary
+        content:
+          type: string
+          description: Full context content
+        tags:
+          type: array
+          items:
+            type: string
+        agent_source:
+          type: string
+          description: Source agent (e.g., "cursor", "claude-code")
+        created_at:
+          type: string
+          format: date-time
+          description: When the context was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the context was last updated
+        metadata:
+          type: object
+          additionalProperties: true
+        nia_references:
+          $ref: '#/components/schemas/NiaReferences'
+        edited_files:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditedFile'
+
+    ContextShareUpdateRequest:
+      type: object
+      description: Request to update an existing context (all fields optional)
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        summary:
+          type: string
+          minLength: 10
+          maxLength: 1000
+        content:
+          type: string
+          minLength: 50
+        tags:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        nia_references:
+          $ref: '#/components/schemas/NiaReferences'
+        edited_files:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditedFile'
+
     Error:
       type: object
       required:
@@ -871,73 +1171,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
-  /repositories/{repository_id}/hierarchy:
-    get:
-      summary: Get repository file hierarchy
-      description: |
-        Get the file hierarchy for an indexed repository. This endpoint returns a text representation
-        of the repository's file structure, optionally including class and method names.
-      operationId: getRepositoryHierarchy
-      tags:
-        - Repositories
-      parameters:
-        - name: repository_id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The ID of the repository
-        - name: include_classes
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: true
-          description: Include class names in hierarchy
-        - name: include_methods
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: false
-          description: Include method names in hierarchy
-        - name: X-Include-Tree
-          in: header
-          required: false
-          schema:
-            type: string
-            enum: ["true", "false"]
-          description: Include the full tree structure in response (can be large)
-      responses:
-        '200':
-          description: Hierarchy retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HierarchyResponse'
-        '400':
-          description: Repository not fully indexed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          description: Access denied to repository
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Repository not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '429':
-          $ref: '#/components/responses/RateLimitError'
-
   /repositories/{repository_id}/rename:
     patch:
       summary: Rename a repository
@@ -997,14 +1230,107 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
+  /repositories/{repository_id}/github-tree:
+    get:
+      summary: Get GitHub tree structure
+      description: |
+        Get the file and folder structure directly from GitHub API (no indexing required).
+        This endpoint provides a fast way to explore repository structure with flexible filtering
+        options for paths and file extensions.
+      operationId: getGitHubTree
+      tags:
+        - Repositories
+      parameters:
+        - name: repository_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Repository identifier in owner/repo format
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Branch name (defaults to repository's default branch)
+        - name: include_paths
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: Only show files in these paths (e.g., "src/,lib/")
+          style: form
+          explode: false
+        - name: exclude_paths
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: Hide files in these paths (e.g., "node_modules/,dist/")
+          style: form
+          explode: false
+        - name: file_extensions
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: Only show these file types (e.g., ".py,.js,.ts")
+          style: form
+          explode: false
+        - name: exclude_extensions
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: Hide these file types (e.g., ".md,.lock,.json")
+          style: form
+          explode: false
+        - name: show_full_paths
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: Show full paths instead of tree structure
+      responses:
+        '200':
+          description: GitHub tree retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitHubTreeResponse'
+        '400':
+          description: Invalid repository identifier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Repository not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
   /query:
     post:
       summary: Query indexed repositories and documentation
       description: |
-        Send a query to get AI-powered insights about indexed repositories and/or documentation sources.
-        Supports three search modes:
-        - 'unified': Search across both repositories and documentation (default)
-        - 'repositories': Search only code repositories
+        Send a query to get AI-powered insights about indexed repositories or documentation sources.
+        Supports two search modes:
+        - 'repositories': Search only code repositories (default)
         - 'sources': Search only documentation sources (returns vector search results without LLM processing)
         Supports both streaming and non-streaming responses.
       operationId: query
@@ -1059,9 +1385,9 @@ paths:
 
   /web-search:
     post:
-      summary: AI-powered web search
+      summary: Web search
       description: |
-        Perform an AI-powered web search to find relevant GitHub repositories, documentation, and other content.
+        Perform a web search to find relevant content.
         Supports filtering by category and time range, as well as finding similar content to a given URL.
       operationId: webSearch
       tags:
@@ -1145,7 +1471,7 @@ paths:
         This endpoint allows fetching complete content when the truncated search results are insufficient.
       operationId: getSourceContent
       tags:
-        - Sources
+        - Search & Research
       requestBody:
         required: true
         content:
@@ -1469,7 +1795,7 @@ paths:
 
   /package-search/hybrid:
     post:
-      summary: Search package source code with AI/semantic queries
+      summary: Search package source code with semantic queries
       description: |
         Execute a hybrid semantic search over package source code using AI understanding
         and optional regex patterns. This allows for natural language queries about how
@@ -1566,6 +1892,493 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /regex-search:
+    post:
+      summary: Regex pattern search over indexed repositories
+      description: |
+        Perform regex pattern search over indexed repository source code.
+        This endpoint allows deterministic code finding using regex patterns with optional
+        filtering by file extensions, programming languages, and context lines.
+        Supports natural language queries that are automatically converted to regex patterns,
+        or explicit regex patterns for advanced use cases.
+      operationId: regexSearch
+      tags:
+        - Query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegexSearchRequest'
+      responses:
+        '200':
+          description: Regex search completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegexSearchResponse'
+        '400':
+          description: Invalid request parameters (e.g., invalid regex pattern)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: One or more repositories not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Search execution error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /contexts:
+    post:
+      summary: Save conversation context
+      description: |
+        Save a new conversation context for cross-agent sharing.
+        Contexts are stored in MongoDB and indexed in Turbopuffer vector store for semantic search.
+        Supports organization-level contexts for team collaboration.
+      operationId: saveContext
+      tags:
+        - Context Sharing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContextShareRequest'
+      responses:
+        '200':
+          description: Context saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextShareResponse'
+        '400':
+          description: Invalid request (e.g., content too short)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Failed to save context
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      summary: List conversation contexts
+      description: |
+        List user's conversation contexts with pagination and filtering.
+        Supports filtering by tags, agent source, and organization.
+        Returns contexts sorted by creation date (newest first).
+      operationId: listContexts
+      tags:
+        - Context Sharing
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Number of contexts to return
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of contexts to skip (for pagination)
+        - name: tags
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Comma-separated tags to filter by
+        - name: agent_source
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by agent source (e.g., "cursor", "claude-code")
+      responses:
+        '200':
+          description: Contexts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contexts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContextShareResponse'
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        description: Total number of contexts matching filters
+                      limit:
+                        type: integer
+                      offset:
+                        type: integer
+                      has_more:
+                        type: boolean
+                        description: Whether there are more contexts to fetch
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Failed to list contexts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /contexts/search:
+    get:
+      summary: Text search contexts
+      description: |
+        Search conversation contexts by content, title, summary, or tags using MongoDB text search.
+        This is a simpler, faster alternative to semantic search for exact matches.
+      operationId: searchContexts
+      tags:
+        - Context Sharing
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+          description: Search query
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Maximum number of results
+        - name: tags
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Comma-separated tags to filter by
+        - name: agent_source
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by agent source
+      responses:
+        '200':
+          description: Search completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contexts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContextShareResponse'
+                  search_query:
+                    type: string
+                  total_results:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Search failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /contexts/semantic-search:
+    get:
+      summary: Semantic search contexts
+      description: |
+        Semantic search conversation contexts using vector embeddings and hybrid (vector + BM25) search.
+        Uses Turbopuffer vector store for fast similarity search across context content.
+        Returns results ranked by relevance with optional match highlights and workspace filtering.
+      operationId: semanticSearchContexts
+      tags:
+        - Context Sharing
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+          description: Search query
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Maximum number of results
+        - name: include_highlights
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+          description: Include match highlights in results
+        - name: workspace_filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by specific workspace name
+      responses:
+        '200':
+          description: Semantic search completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/ContextShareResponse'
+                        - type: object
+                          properties:
+                            relevance_score:
+                              type: number
+                              description: Relevance score from vector search (0-1)
+                            match_metadata:
+                              type: object
+                              properties:
+                                search_type:
+                                  type: string
+                                  enum: [hybrid]
+                                vector_score:
+                                  type: number
+                                rank:
+                                  type: integer
+                            match_highlights:
+                              type: array
+                              items:
+                                type: string
+                              description: Highlighted matches from content
+                            files_edited:
+                              type: array
+                              items:
+                                type: string
+                              description: Paths of edited files (up to 5)
+                            workspace_name:
+                              type: string
+                              description: Workspace/project name
+                  search_query:
+                    type: string
+                  search_metadata:
+                    type: object
+                    properties:
+                      search_type:
+                        type: string
+                      total_results:
+                        type: integer
+                      vector_matches:
+                        type: integer
+                      mongodb_matches:
+                        type: integer
+                  suggestions:
+                    type: object
+                    properties:
+                      related_tags:
+                        type: array
+                        items:
+                          type: string
+                      workspaces:
+                        type: array
+                        items:
+                          type: string
+                      tips:
+                        type: array
+                        items:
+                          type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '503':
+          description: Vector store not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Semantic search error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /contexts/{context_id}:
+    get:
+      summary: Get conversation context
+      description: |
+        Retrieve a specific conversation context by ID.
+        Returns full context details including content, metadata, NIA references, and edited files.
+      operationId: getContext
+      tags:
+        - Context Sharing
+      parameters:
+        - name: context_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique context identifier
+      responses:
+        '200':
+          description: Context retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextShareResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Context not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Failed to retrieve context
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Update conversation context
+      description: |
+        Update an existing conversation context.
+        All fields are optional - only provided fields will be updated.
+        The context is re-indexed in the vector store if content fields are updated.
+      operationId: updateContext
+      tags:
+        - Context Sharing
+      parameters:
+        - name: context_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique context identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContextShareUpdateRequest'
+      responses:
+        '200':
+          description: Context updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextShareResponse'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Context not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Failed to update context
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete conversation context
+      description: |
+        Delete a conversation context (soft delete).
+        The context is marked as inactive but not permanently deleted from the database.
+      operationId: deleteContext
+      tags:
+        - Context Sharing
+      parameters:
+        - name: context_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique context identifier
+      responses:
+        '200':
+          description: Context deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Context not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Failed to delete context
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 tags:
   - name: Repositories
     description: Repository indexing and status operations
@@ -1575,7 +2388,7 @@ tags:
     description: Documentation and web content indexing operations
   - name: Search & Research
     description: Web search and deep research operations
-  - name: Sources
-    description: Source content retrieval operations
   - name: Package Search
     description: Chroma-powered package source code search across npm, PyPI, crates.io, and Go modules
+  - name: Context Sharing
+    description: Cross-agent conversation context sharing with vector search capabilities

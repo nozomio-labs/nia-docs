@@ -1,13 +1,7 @@
 ---
-title: 'Context Sharing'
-description: 'Move between coding agents without losing your work.'
+title: 'Agent Context Sharing'
+description: 'Finish planning in one agent, pick up execution in another, without losing the thread.'
 ---
-
-## Cross-Agent Context Sharing
-
-Finish planning in one agent, pick up execution in another, without losing the thread.
-
-### Core Capabilities
 
 Save entire conversation histories - code snippets, plans, decisions, referenced sources, and edited files. Re-open them in another chat or coding agent.
 
@@ -24,33 +18,37 @@ Nia preserves what you searched and every query you made.
 
 This makes it easy to move between different agents. Plan with Cursor and continue execution in Claude Code. All your context comes with you.
 
-### MCP Tools
+### Unified Context Tool
+
+The `context` tool provides all context management operations through different actions:
 
 <CardGroup cols={2}>
-  <Card title="save_context" icon="floppy-disk">
-    Save conversation with title, summary, content, and tags
+  <Card title="Action: save" icon="floppy-disk">
+    Save conversation with title, summary, content, tags, and edited files
   </Card>
 
-  <Card title="list_contexts" icon="list">
-    List all your saved contexts
+  <Card title="Action: list" icon="list">
+    List saved contexts with filtering (workspace, directory, file overlap)
   </Card>
 
-  <Card title="retrieve_context" icon="arrow-down">
+  <Card title="Action: retrieve" icon="arrow-down">
     Pull full context by ID
   </Card>
 
-  <Card title="search_contexts" icon="magnifying-glass">
-    Search by keyword, tag, or source
+  <Card title="Action: search" icon="magnifying-glass">
+    Search by keyword across title, summary, content, and tags
   </Card>
 
-  <Card title="update_context" icon="pencil">
-    Edit titles and tags
+  <Card title="Action: update" icon="pencil">
+    Update title, summary, content, tags, or metadata
   </Card>
 
-  <Card title="delete_context" icon="trash">
-    Clean up when done
+  <Card title="Action: delete" icon="trash">
+    Remove contexts when done
   </Card>
 </CardGroup>
+
+All operations use the same `context` tool with different `action` parameters.
 
 ### How It Works
 

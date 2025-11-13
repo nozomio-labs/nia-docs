@@ -1,0 +1,357 @@
+---
+title: 'Tools & Features'
+description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
+---
+
+<Steps>
+  <Step title="Search Package Source Code (No indexing required!)">
+    Ask your coding agent: *"Use package search to find how error handling is implemented in the `requests` Python library"* or *"Search the numpy package for array manipulation examples"*
+  </Step>
+
+  <Step title="Index Documentation or a Repository">
+    Try indexing public documentation or a repository:
+    - *"Index https://docs.trynia.ai/"*
+    - *"Index https://github.com/browser-use/browser-use"*
+    - *"Use nia deep research to compare the best GraphRAG frameworks and then index the one with least latency."*
+  </Step>
+
+  <Step title="Monitor Progress & Explore">
+    Check your indexed resources using `manage_resource`:
+    - *"List my resources"* or *"Check the status of my indexing jobs"*
+    - Visit [app.trynia.ai](https://app.trynia.ai) to see all your indexed content
+  </Step>
+</Steps>
+
+## Available Tools
+
+<CardGroup cols={2}>
+  <Card title="Package Search (No indexing!)" icon="box">
+    - **`nia_package_search_grep`** - Regex-based code search in 3,000+ packages
+    - **`nia_package_search_hybrid`** - AI-powered semantic package search
+    - **`nia_package_search_read_file`** - Read specific file sections
+    - **Supports:** PyPI, NPM, Crates.io, Go modules
+  </Card>
+
+  <Card title="Universal Indexing" icon="database">
+    - **`index`** - Universal indexing tool (auto-detects repos or docs from URL)
+    - **`get_github_file_tree`** - Get GitHub file structure without indexing
+  </Card>
+
+  <Card title="Repository Search" icon="github">
+    - **`search_codebase`** - AI-powered natural language code search
+    - **`regex_search`** - Regex pattern search over indexed repositories
+  </Card>
+
+  <Card title="Documentation Search" icon="book">
+    - **`search_documentation`** - Search indexed docs with natural language
+  </Card>
+
+  <Card title="Resource Management" icon="folder">
+    - **`manage_resource`** - Unified tool for all resource operations (list, status, rename, delete)
+  </Card>
+
+  <Card title="Web Search & Research" icon="magnifying-glass">
+    - **`nia_web_search`** - AI-powered search for repos, docs, and content
+    - **`nia_deep_research_agent`** - Deep multi-step research and analysis
+  </Card>
+
+  <Card title="Context Management" icon="comments">
+    - **`context`** - Unified context management (save, list, retrieve, search, update, delete)
+  </Card>
+
+  <Card title="Development Tools" icon="gear">
+    - **`read_source_content`** - Read full content of specific sources
+    - **`nia_bug_report`** - Submit feedback directly to the development team
+  </Card>
+</CardGroup>
+
+## Complete Tool Reference
+
+<AccordionGroup>
+  <Accordion title="Package Search Tools (Instant Access to 3,000+ Packages)">
+    ### `nia_package_search_grep`
+    Regex-based deterministic code search across packages from PyPI, NPM, Crates.io, and Go modules.
+
+    **Parameters**:
+    - `registry` (str): One of "py_pi", "npm", "crates_io", "golang_proxy"
+    - `package_name` (str): Package name (for Go: "org/repo" format)
+    - `pattern` (str): Regex pattern to search for
+    - `version` (str, optional): Specific package version
+    - `language` (str, optional): Filter by programming language
+    - `output_mode` (str): "content" (default), "files_with_matches", "count"
+
+    **Best for**: Finding specific code patterns, function definitions, API usage examples.
+
+    ### `nia_package_search_hybrid`
+    AI-powered semantic search combined with optional regex filtering.
+
+    **Parameters**:
+    - `registry` (str): Package registry
+    - `package_name` (str): Package name
+    - `semantic_queries` (List[str]): 1-5 natural language questions
+    - `pattern` (str, optional): Regex pre-filter
+    - `version` (str, optional): Specific version
+
+    **Best for**: Understanding implementation patterns, finding usage examples, exploring architecture.
+
+    ### `nia_package_search_read_file`
+    Read exact lines from a package source file using its SHA256 hash.
+
+    **Parameters**:
+    - `registry` (str): Package registry
+    - `package_name` (str): Package name
+    - `filename_sha256` (str): File hash from search results
+    - `start_line` (int): Starting line (1-based)
+    - `end_line` (int): Ending line (max 200 lines)
+
+    **Best for**: Getting complete context around code snippets found in searches.
+  </Accordion>
+
+  <Accordion title="Universal Indexing Tools">
+    ### `index`
+    Universal indexing tool that intelligently detects and indexes GitHub repositories or documentation.
+
+    **Auto-Detection**:
+    - GitHub URLs (containing "github.com") → Repository indexing
+    - All other URLs → Documentation indexing
+
+    **Parameters**:
+    - `url` (str, required): GitHub repository URL or documentation site URL
+    - `resource_type` (str, optional): Override auto-detection - "repository" or "documentation"
+
+    **Repository-specific**:
+    - `branch` (str, optional): Branch to index (defaults to main branch)
+
+    **Documentation-specific**:
+    - `url_patterns` (List[str], optional): URL patterns to include in crawling
+    - `exclude_patterns` (List[str], optional): URL patterns to exclude from crawling
+    - `only_main_content` (bool, default=True): Extract main content only
+    - `check_llms_txt` (bool, default=True): Check for /llms.txt file
+    - `llms_txt_strategy` (str, default="prefer"): Strategy for handling llms.txt
+
+    **Usage**: Monitor progress with `manage_resource` action "status"
+
+    **Examples**:
+    ```
+    # Index a repository (auto-detected)
+    index("https://github.com/owner/repo", branch="main")
+
+    # Index documentation (auto-detected)
+    index("https://docs.example.com", url_patterns=["*/api/*"])
+    ```
+
+    ### `get_github_file_tree`
+    Get file and folder structure directly from GitHub API without indexing.
+
+    **Parameters**:
+    - `repository` (str, required): Repository identifier (owner/repo format)
+    - `branch` (str, optional): Branch name (defaults to repository's default branch)
+    - `include_paths` (List[str], optional): Only show files in these paths
+    - `exclude_paths` (List[str], optional): Hide files in these paths
+    - `file_extensions` (List[str], optional): Only show these file types
+    - `exclude_extensions` (List[str], optional): Hide these file types
+    - `show_full_paths` (bool, default=False): Show full paths instead of tree structure
+
+    **Best for**: Quick repository exploration without indexing overhead.
+  </Accordion>
+
+  <Accordion title="Repository Search Tools">
+    ### `search_codebase`
+    Search indexed repositories using natural language queries.
+
+    **Parameters**:
+    - `query` (str, required): Natural language search question
+    - `repositories` (List[str], optional): List of repositories to search (owner/repo format)
+    - `include_sources` (bool, default=True): Include source code snippets
+
+    **Returns**: AI-analyzed results with code snippets and explanations.
+
+    ### `regex_search`
+    Perform regex pattern search over indexed repository source code.
+
+    **Parameters**:
+    - `repositories` (List[str], required): List of repositories to search (owner/repo format)
+    - `query` (str, required): Natural language query or regex pattern
+    - `pattern` (str, optional): Explicit regex pattern (overrides automatic extraction)
+    - `file_extensions` (List[str], optional): Filter by file extensions (e.g., [".js", ".tsx"])
+    - `languages` (List[str], optional): Filter by programming languages
+    - `max_results` (int, default=50): Maximum number of results
+    - `include_context` (bool, default=True): Include surrounding context lines
+    - `context_lines` (int, default=3): Number of context lines before/after match
+
+    **Best for**: Finding exact code patterns, function definitions, specific syntax.
+  </Accordion>
+
+  <Accordion title="Documentation Search Tools">
+    ### `search_documentation`
+    Search indexed documentation with natural language queries.
+
+    **Parameters**:
+    - `query` (str, required): Comprehensive natural language question (not just keywords)
+    - `sources` (List[str], optional): List of documentation identifiers (UUIDs preferred, also supports display names or URLs)
+    - `include_sources` (bool, default=True): Include source references
+
+    **Important**: UUIDs are the preferred identifier format for best performance.
+  </Accordion>
+
+  <Accordion title="Resource Management">
+    ### `manage_resource`
+    Unified resource management tool for repositories and documentation.
+
+    **Actions**:
+
+    #### Action: "list"
+    List all indexed repositories and documentation with their status.
+
+    **Parameters**:
+    - `action` (str, required): "list"
+    - `resource_type` (str, optional): Filter by "repository", "documentation", or None for all
+
+    #### Action: "status"
+    Check indexing progress and status of any resource.
+
+    **Parameters**:
+    - `action` (str, required): "status"
+    - `resource_type` (str, required): "repository" or "documentation"
+    - `identifier` (str, required): Repository name (owner/repo) or documentation UUID/URL
+
+    #### Action: "rename"
+    Rename a resource for better organization.
+
+    **Parameters**:
+    - `action` (str, required): "rename"
+    - `resource_type` (str, required): "repository" or "documentation"
+    - `identifier` (str, required): Resource identifier (owner/repo or UUID/URL)
+    - `new_name` (str, required): New display name (1-100 characters)
+
+    #### Action: "delete"
+    Remove an indexed resource.
+
+    **Parameters**:
+    - `action` (str, required): "delete"
+    - `resource_type` (str, required): "repository" or "documentation"
+    - `identifier` (str, required): Resource identifier (owner/repo or UUID/URL)
+
+    **Identifier Formats**:
+    - For repositories: owner/repo format (e.g., "facebook/react")
+    - For documentation: UUID preferred, also supports display name or URL
+  </Accordion>
+
+  <Accordion title="Web Search & Research Tools">
+    ### `nia_web_search`
+    AI-powered search for discovering repositories, documentation, and content.
+
+    **Use Cases**: Finding specific repos/docs, trending technologies, similar content
+
+    **Parameters**:
+    - `query` (str): Natural language search query
+    - `num_results` (int, default=5): Number of results (max: 10)
+    - `category` (str, optional): Filter by type ("github", "company", etc.)
+    - `days_back` (int, optional): Recent content only
+
+    ### `nia_deep_research_agent`
+    Comprehensive multi-step research and analysis.
+
+    **Use Cases**: Comparative analysis, pros/cons evaluation, technology selection
+
+    **Parameters**:
+    - `query` (str): Research question
+    - `output_format` (str, optional): Structure hint (e.g., "comparison table")
+
+    **Tool Selection Guide**:
+    - Use `nia_web_search` for: Simple discovery, finding specific items
+    - Use `nia_deep_research_agent` for: Complex analysis, comparisons, evaluations
+  </Accordion>
+
+  <Accordion title="Context Management">
+    ### `context`
+    Unified context management tool for saving, retrieving, and managing conversation contexts across agents.
+
+    **Actions**:
+
+    #### Action: "save"
+    Save conversation context for later retrieval.
+
+    **Parameters**:
+    - `action` (str, required): "save"
+    - `title` (str, required): Descriptive title
+    - `summary` (str, required): Brief summary (10-1000 chars)
+    - `content` (str, required): Full conversation context (minimum 50 chars)
+    - `agent_source` (str, required): Which agent created this (e.g., "cursor", "claude-code")
+    - `tags` (List[str], optional): Searchable tags
+    - `metadata` (dict, optional): File paths, repositories discussed, etc.
+    - `nia_references` (dict, optional): Structured data about NIA resources used
+    - `edited_files` (List[dict], optional): Files modified during conversation
+    - `workspace_override` (str, optional): Custom workspace name
+
+    #### Action: "list"
+    List saved contexts with optional filtering.
+
+    **Parameters**:
+    - `action` (str, required): "list"
+    - `limit` (int, default=20): Number of contexts to return (1-100)
+    - `offset` (int, default=0): Number of contexts to skip (pagination)
+    - `scope` (str, optional): "auto" (smart relevance), "all", "workspace", "directory"
+    - `workspace` (str, optional): Filter by workspace/project name
+    - `directory` (str, optional): Filter by directory path
+    - `file_overlap` (List[str], optional): Find contexts with overlapping files
+
+    #### Action: "retrieve"
+    Get full context by ID.
+
+    **Parameters**:
+    - `action` (str, required): "retrieve"
+    - `context_id` (str, required): Unique context ID
+
+    #### Action: "search"
+    Search contexts by keyword.
+
+    **Parameters**:
+    - `action` (str, required): "search"
+    - `query` (str, required): Search query (matches title, summary, content, tags)
+    - `limit` (int, default=20): Maximum results (1-100)
+
+    #### Action: "update"
+    Update existing context.
+
+    **Parameters**:
+    - `action` (str, required): "update"
+    - `context_id` (str, required): Context ID to update
+    - `title` (str, optional): Updated title
+    - `summary` (str, optional): Updated summary
+    - `content` (str, optional): Updated content
+    - `tags` (List[str], optional): Updated tags
+    - `metadata` (dict, optional): Updated metadata
+
+    #### Action: "delete"
+    Delete a context.
+
+    **Parameters**:
+    - `action` (str, required): "delete"
+    - `context_id` (str, required): Context ID to delete
+  </Accordion>
+
+  <Accordion title="Development Tools">
+    ### `read_source_content`
+    Read full content of specific sources found in search results.
+
+    **Parameters**:
+    - `source_type` (str, required): "repository" or "documentation"
+    - `source_identifier` (str, required): Source path or URL
+    - `metadata` (dict, optional): Additional context from search results
+
+    ### `nia_bug_report`
+    Submit feedback, bug reports, or feature requests directly to the development team.
+
+    **Parameters**:
+    - `description` (str, required): Detailed description (10-5000 chars)
+    - `bug_type` (str, default="bug"): "bug", "feature-request", "improvement", "other"
+    - `additional_context` (str, optional): Extra details
+  </Accordion>
+</AccordionGroup>
+
+---
+
+<Warning>
+**Need Help?** Join our community or reach out through [app.trynia.ai](http://app.trynia.ai/) for support and updates.
+</Warning>

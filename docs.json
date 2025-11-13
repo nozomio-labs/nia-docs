@@ -25,11 +25,16 @@
         "tab": "Guides",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Overview",
             "pages": [
               "integrations/nia-mcp",
-              "quick-setup-cursor",
-              "context-sharing",
+              {
+                "group": "Tools & Features",
+                "pages": [
+                  "tools-features",
+                  "context-sharing"
+                ]
+              },
               "troubleshooting"
             ]
           },
@@ -38,6 +43,12 @@
             "pages": [
               "example-workflows/overview",
               "example-workflows/tips"
+            ]
+          },
+          {
+            "group": "Pricing",
+            "pages": [
+              "pricing"
             ]
           },
           {
@@ -62,11 +73,6 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://docs.trynia.ai/introduction",
-          "icon": "book-open-cover"
-        },
-        {
           "anchor": "Community",
           "href": "https://discord.gg/BBSwUMrrfn",
           "icon": "discord"
@@ -80,14 +86,14 @@
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/light.png",
+    "dark": "/logo/dark.png"
   },
   "navbar": {
     "links": [
       {
         "label": "Support",
-        "href": "mailto:arlan@hanlantech.net"
+        "href": "mailto:arlan@nozomio.com"
       }
     ],
     "primary": {
