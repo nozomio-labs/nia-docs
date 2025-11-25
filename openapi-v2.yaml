@@ -2503,18 +2503,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /oracle-limited:
+  /oracle/jobs:
     post:
-      summary: Oracle research with limited toolset (benchmarking)
+      summary: Create Oracle research job (Pro only)
       description: |
-        Execute Oracle research using a LIMITED toolset (list_repos, list_docs, repo_search, doc_search).
+        Create a new Oracle research job that runs asynchronously via Hatchet workflow.
         
-        **This endpoint is specifically designed for benchmarking** to test the core capabilities
-        of repository and documentation search without additional tools like web search,
-        regex search, or file reading.
+        This is the recommended way to run Oracle research as it:
+        - Queues jobs for reliable execution
+        - Supports concurrency limits per user
+        - Enables reconnection to running jobs
+        - Provides job status tracking and history
         
-        For full Oracle capabilities, use `/oracle` or `/oracle/stream` instead.
-      operationId: oracleLimitedResearch
+        After creating a job, subscribe to `/oracle/jobs/{job_id}/stream` for real-time progress.
+      operationId: createOracleJob
       tags:
         - Oracle Research
       requestBody:
@@ -2525,27 +2527,321 @@ paths:
               $ref: '#/components/schemas/OracleResearchRequest'
       responses:
         '200':
-          description: Research completed successfully
+          description: Job created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OracleResearchResponse'
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    description: Unique job identifier (Hatchet workflow run ID)
+                  session_id:
+                    type: string
+                    description: Research session identifier
+                  status:
+                    type: string
+                    enum: [queued, running]
+                    description: Initial job status
+                  message:
+                    type: string
+                    description: Status message
+                  stream_url:
+                    type: string
+                    description: URL to subscribe for real-time updates
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Pro subscription required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Failed to create job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      summary: List Oracle research jobs
+      description: List Oracle research jobs for the authenticated user with optional status filtering
+      operationId: listOracleJobs
+      tags:
+        - Oracle Research
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [queued, running, completed, failed, cancelled]
+          description: Filter jobs by status
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Number of jobs to return
+        - name: skip
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of jobs to skip (for pagination)
+      responses:
+        '200':
+          description: Jobs list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        job_id:
+                          type: string
+                        session_id:
+                          type: string
+                        query:
+                          type: string
+                        status:
+                          type: string
+                          enum: [queued, running, completed, failed, cancelled]
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        iterations:
+                          type: integer
+                        duration_ms:
+                          type: integer
+                  total:
+                    type: integer
+                  has_more:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /oracle/jobs/{job_id}:
+    get:
+      summary: Get Oracle job status and result
+      description: |
+        Retrieve the current status and result of an Oracle research job.
+        
+        For completed jobs, includes the full research report and citations.
+        For running jobs, shows progress information.
+      operationId: getOracleJob
+      tags:
+        - Oracle Research
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Job identifier (Hatchet workflow run ID)
+      responses:
+        '200':
+          description: Job details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                  session_id:
+                    type: string
+                  query:
+                    type: string
+                  status:
+                    type: string
+                    enum: [queued, running, completed, failed, cancelled]
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  completed_at:
+                    type: string
+                    format: date-time
+                  final_report:
+                    type: string
+                    description: Research report (only for completed jobs)
+                  citations:
+                    type: array
+                    items:
+                      type: object
+                    description: Source citations (only for completed jobs)
+                  tool_calls:
+                    type: array
+                    items:
+                      type: object
+                    description: Tool execution log (only for completed jobs)
+                  iterations:
+                    type: integer
+                  duration_ms:
+                    type: integer
+                  error:
+                    type: string
+                    description: Error message (only for failed jobs)
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to this job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+    delete:
+      summary: Cancel Oracle research job
+      description: |
+        Cancel a running or queued Oracle research job.
+        
+        Cancellation is best-effort - the job may complete before cancellation takes effect.
+        Jobs that are already completed, failed, or cancelled cannot be cancelled again.
+      operationId: cancelOracleJob
+      tags:
+        - Oracle Research
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Job identifier to cancel
+      responses:
+        '200':
+          description: Job cancelled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                  session_id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [cancelled]
+                  message:
+                    type: string
         '400':
-          description: Invalid request parameters
+          description: Job cannot be cancelled (already completed/failed/cancelled)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-        '429':
-          $ref: '#/components/responses/RateLimitError'
-        '500':
-          description: Research execution error
+        '403':
+          description: Access denied to this job
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Failed to cancel job in Hatchet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /oracle/jobs/{job_id}/stream:
+    get:
+      summary: Stream Oracle job events (SSE)
+      description: |
+        Subscribe to real-time progress updates for an Oracle research job via Server-Sent Events.
+        
+        This endpoint supports reconnection - you can subscribe to a running job at any time
+        to receive remaining events. For completed jobs, returns the final result immediately.
+        
+        **Event types:**
+        - `connected`: Connection established with session info
+        - `started`: Research job has started
+        - `iteration_start`: New research iteration beginning
+        - `tool_start`: Tool execution starting (includes action, args, reason)
+        - `tool_complete`: Tool finished (includes success status)
+        - `generating_report`: Final report synthesis starting
+        - `complete`: Research finished with full result
+        - `error`: Error occurred
+        - `workflow_event`: Hatchet workflow state change
+      operationId: streamOracleJob
+      tags:
+        - Oracle Research
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Job identifier to stream
+      responses:
+        '200':
+          description: SSE stream of job events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  Stream of Server-Sent Events with JSON payloads:
+                  
+                  ```
+                  data: {"type": "connected", "job_id": "...", "session_id": "...", "timestamp": "..."}
+                  
+                  data: {"type": "tool_start", "action": "run_doc_search", "args": {...}, "reason": "...", "iteration": 1}
+                  
+                  data: {"type": "tool_complete", "action": "run_doc_search", "success": true, "result_summary": "...", "iteration": 1}
+                  
+                  data: {"type": "complete", "session_id": "...", "result": {...}}
+                  ```
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to this job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
 
   /contexts:
     post:
