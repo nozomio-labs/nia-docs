@@ -1768,6 +1768,306 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
+  /data-sources/{source_id}/tree:
+    get:
+      summary: Get documentation tree structure
+      description: |
+        Get the filesystem-like tree structure of indexed documentation.
+        Shows all indexed pages organized as a virtual file tree, making it easy
+        to browse documentation structure without remembering URLs.
+      operationId: getDocumentationTree
+      tags:
+        - Data Sources
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: |
+            Flexible data source identifier. Can be:
+            - UUID (e.g., "550e8400-e29b-41d4-a716-446655440000")
+            - Display name (e.g., "Vercel AI SDK - Core")
+            - URL (e.g., "https://docs.trynia.ai/")
+      responses:
+        '200':
+          description: Tree structure retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  tree:
+                    type: object
+                    description: Nested tree structure of documentation pages
+                  tree_string:
+                    type: string
+                    description: Formatted text representation of the tree
+                  base_url:
+                    type: string
+                    description: Base URL of the documentation
+                  page_count:
+                    type: integer
+                    description: Total number of indexed pages
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to data source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /data-sources/{source_id}/ls:
+    get:
+      summary: List documentation directory contents
+      description: |
+        List contents of a virtual directory in the documentation.
+        Shows files (pages) and subdirectories at the specified path,
+        similar to the Unix 'ls' command.
+      operationId: listDocumentationDirectory
+      tags:
+        - Data Sources
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Flexible data source identifier (UUID, display name, or URL)
+        - name: path
+          in: query
+          required: false
+          schema:
+            type: string
+            default: "/"
+          description: Virtual path to list (default is root "/")
+      responses:
+        '200':
+          description: Directory contents retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  path:
+                    type: string
+                    description: The path that was listed
+                  directories:
+                    type: array
+                    items:
+                      type: string
+                    description: Subdirectories at this path
+                  files:
+                    type: array
+                    items:
+                      type: string
+                    description: Files (pages) at this path
+                  total:
+                    type: integer
+                    description: Total number of items
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to data source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /data-sources/{source_id}/read:
+    get:
+      summary: Read documentation page content
+      description: |
+        Read content of a documentation page by its virtual filesystem path.
+        More intuitive than remembering URLs - just use the path from doc_tree or doc_ls.
+      operationId: readDocumentationPage
+      tags:
+        - Data Sources
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Flexible data source identifier (UUID, display name, or URL)
+        - name: path
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Virtual path to the page (e.g., "/api/authentication.md")
+      responses:
+        '200':
+          description: Page content retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  path:
+                    type: string
+                    description: The virtual path requested
+                  url:
+                    type: string
+                    description: The actual URL of the page
+                  content:
+                    type: string
+                    description: Full content of the documentation page
+                  metadata:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                      source_id:
+                        type: string
+                      chunks_found:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to data source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data source or path not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /data-sources/{source_id}/grep:
+    post:
+      summary: Search documentation with regex
+      description: |
+        Search documentation content with a regex pattern.
+        Like the Unix 'grep' command, but for indexed documentation.
+        Searches through all pages and returns matches with context.
+      operationId: grepDocumentation
+      tags:
+        - Data Sources
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Flexible data source identifier (UUID, display name, or URL)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pattern
+              properties:
+                pattern:
+                  type: string
+                  description: Regex pattern to search for
+                  example: "authentication.*token"
+                path:
+                  type: string
+                  default: "/"
+                  description: Limit search to this path prefix
+                context_lines:
+                  type: integer
+                  default: 3
+                  minimum: 0
+                  maximum: 10
+                  description: Number of context lines around matches
+      responses:
+        '200':
+          description: Search completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  matches:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        path:
+                          type: string
+                          description: Virtual path of the matched file
+                        url:
+                          type: string
+                          description: Actual URL of the page
+                        line_number:
+                          type: integer
+                        line:
+                          type: string
+                          description: The matched line
+                        context:
+                          type: array
+                          items:
+                            type: string
+                          description: Context lines around the match
+                        context_start_line:
+                          type: integer
+                  pattern:
+                    type: string
+                    description: The pattern that was searched
+                  path_filter:
+                    type: string
+                    description: Path filter that was applied
+                  total_matches:
+                    type: integer
+                  files_searched:
+                    type: integer
+        '400':
+          description: Invalid regex pattern
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to data source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
   /data-sources/rename:
     patch:
       summary: Rename a data source (Flexible)
@@ -2008,16 +2308,212 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /oracle:
+    post:
+      summary: Oracle autonomous research agent (Pro only)
+      description: |
+        Execute comprehensive Oracle research using the full autonomous agent with extended thinking.
+        
+        The Oracle agent uses Claude's extended thinking capabilities to plan and execute multi-step
+        research autonomously. It has access to a diverse set of tools including:
+        - **Discovery**: list_repositories, list_documentation
+        - **Web Research**: run_web_search, web_fetch (server-side)
+        - **Code Search**: run_indexed_repo_search, run_regex_search, get_github_tree, read_source_content
+        - **Documentation**: run_doc_search, doc_tree, doc_ls, doc_read, doc_grep
+        
+        The agent will iteratively search and analyze your indexed repositories and documentation,
+        perform web searches for external context, and synthesize findings into a comprehensive report.
+        
+        **Note**: This is a long-running operation (typically 30-180 seconds). For real-time progress
+        updates, use the streaming endpoint `/oracle/stream` instead.
+      operationId: oracleResearch
+      tags:
+        - Oracle Research
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OracleResearchRequest'
+      responses:
+        '200':
+          description: Research completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OracleResearchResponse'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Pro subscription required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Research execution error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /oracle/stream:
+    post:
+      summary: Oracle research with real-time streaming (Pro only)
+      description: |
+        Execute Oracle research with Server-Sent Events (SSE) streaming for real-time progress updates.
+        
+        This endpoint streams research progress including:
+        - **iteration_start**: New research iteration beginning
+        - **tool_start**: Tool execution starting with action name and reason
+        - **tool_complete**: Tool finished with success/failure status
+        - **generating_report**: Final report synthesis starting
+        - **complete**: Research finished with full result
+        - **heartbeat**: Connection keep-alive (every 0.5s during idle)
+        - **error**: Error occurred during research
+        
+        The Oracle agent uses Claude's extended thinking and has access to all tools including
+        web search, code search, documentation search, and the new doc filesystem tools
+        (doc_tree, doc_ls, doc_read, doc_grep).
+      operationId: oracleResearchStream
+      tags:
+        - Oracle Research
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OracleResearchRequest'
+      responses:
+        '200':
+          description: SSE stream of research progress
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  Stream of Server-Sent Events with JSON payloads. Event types:
+                  - connected: Connection established
+                  - iteration_start: {type, iteration, max_iterations}
+                  - tool_start: {type, action, args, reason, iteration}
+                  - tool_complete: {type, action, success, result_summary, iteration}
+                  - generating_report: {type, message}
+                  - complete: {type, result: OracleResearchResponse}
+                  - error: {type, action, error, iteration}
+                  - heartbeat: {type, timestamp}
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Pro subscription required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /oracle/history:
+    get:
+      summary: List Oracle research history
+      description: List recent Oracle research sessions for the authenticated API key
+      operationId: listOracleHistory
+      tags:
+        - Oracle Research
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Number of sessions to return
+        - name: skip
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 500
+            default: 0
+          description: Number of sessions to skip (for pagination)
+      responses:
+        '200':
+          description: Session history retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        session_id:
+                          type: string
+                        query:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        iterations:
+                          type: integer
+                        duration_ms:
+                          type: integer
+                        status:
+                          type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /oracle/history/{session_id}:
+    get:
+      summary: Get Oracle research session details
+      description: Retrieve full details of a specific Oracle research session
+      operationId: getOracleSession
+      tags:
+        - Oracle Research
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Session ID to retrieve
+      responses:
+        '200':
+          description: Session details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OracleResearchResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /oracle-limited:
     post:
-      summary: Oracle research with limited toolset
+      summary: Oracle research with limited toolset (benchmarking)
       description: |
         Execute Oracle research using a LIMITED toolset (list_repos, list_docs, repo_search, doc_search).
         
-        This endpoint is specifically designed for benchmarking to test the core capabilities
+        **This endpoint is specifically designed for benchmarking** to test the core capabilities
         of repository and documentation search without additional tools like web search,
-        regex search, or file reading. The Oracle agent will iteratively search and analyze
-        your indexed repositories and documentation to answer complex research questions.
+        regex search, or file reading.
+        
+        For full Oracle capabilities, use `/oracle` or `/oracle/stream` instead.
       operationId: oracleLimitedResearch
       tags:
         - Oracle Research
@@ -2504,4 +3000,4 @@ tags:
   - name: Context Sharing
     description: Cross-agent conversation context sharing with vector search capabilities
   - name: Oracle Research
-    description: AI research agent with limited toolset for benchmarking repository and documentation search
+    description: Autonomous AI research agent with extended thinking, web search, code analysis, and documentation exploration capabilities
