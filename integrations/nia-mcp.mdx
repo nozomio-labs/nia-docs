@@ -12,508 +12,1023 @@ description: 'Install Nia MCP and configure it for your coding agent.'
     </Info>
   </Step>
 
-  <Step title="Run Automated Setup">
-    Open your terminal and run the setup script with your API key and coding agent:
-
-    ```bash
-    curl -fsSL http://app.trynia.ai/api/setup-script | bash -s -- YOUR_API_KEY your-coding-agent
-    ```
-
-    Replace:
-    - `YOUR_API_KEY` with your API key from step 1
-    - `your-coding-agent` with one of: `cursor`, `claude-code`, `vscode`, `windsurf`, `continue`, `cline`, `codex`, `trae`, `antigravity`
-
-    **Examples:**
-    ```bash
-    # For Cursor
-    curl -fsSL http://app.trynia.ai/api/setup-script | bash -s -- nia_abc123 cursor
-
-    # For Claude Code
-    curl -fsSL http://app.trynia.ai/api/setup-script | bash -s -- nia_abc123 claude-code
-
-    # For VS Code
-    curl -fsSL http://app.trynia.ai/api/setup-script | bash -s -- nia_abc123 vscode
-    ```
-
-    <Tip>
-      This script will automatically install dependencies and configure Nia MCP for your coding agent.
-    </Tip>
+  <Step title="Configure Your IDE">
+    Choose your coding agent below and follow the configuration instructions.
   </Step>
 
   <Step title="Restart Your Coding Agent">
-    Restart your coding assistant to load the new MCP server
+    Restart your coding assistant to load the new MCP server.
   </Step>
 </Steps>
 
-## That's It!
+---
 
-You're ready to start using Nia MCP! Check out the [Tools & Features](/tools-features) page to explore all available capabilities.
+## Client-Specific Installation
+
+Choose your coding agent below for detailed configuration instructions. Each section includes both **Remote Server (Recommended)** and **Local Server** options.
+
+<Info>
+  **Remote Server** is recommended - no dependencies, no local process, always up-to-date.
+</Info>
 
 <Note>
-  **Prefer manual setup?** See the [Manual Setup](#manual-setup) section below for detailed configuration instructions.
+  **Prerequisites for Local Server:**
+  - Python 3.8+
+  - `pipx` (recommended) or `uvx`
+  - Your Nia API key from [app.trynia.ai](https://app.trynia.ai/)
 </Note>
 
-## Manual Setup
+<Accordion title="Cursor">
+  Go to: **Settings → Cursor Settings → MCP → Add new global MCP server**
 
-If you prefer to manually configure Nia MCP or if the automated setup didn't work for your setup, follow these detailed instructions:
+  In Cursor 1.0 and later, manually edit `~/.cursor/mcp.json`:
+  - **macOS**: `~/.cursor/mcp.json`
+  - **Windows**: `%APPDATA%\Cursor\mcp.json`
+  - **Linux**: `~/.config/cursor/mcp.json`
 
-<Steps>
-  <Step title="Prerequisites">
-    - Python 3.8+
-    - `pipx` (recommended) or `uvx` or `pip`
-    - Your Nia API key from [app.trynia.ai](http://app.trynia.ai/)
-  </Step>
+  **Remote Server (Recommended):**
 
-  <Step title="Install the Package">
-    <CodeGroup>
-      ```bash Option A: Using pipx (Recommended)
-      # Install globally for use across all projects
-      pipx install nia-mcp-server
-      ```
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "url": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
 
-      ```bash Option B: Using uvx
-      # uvx will automatically handle the installation when you run it
-      # No need to pre-install if you have uvx
-      ```
+  **Local Server:**
 
-      ```bash Option C: Using pip (If needed)
-      pip install nia-mcp-server
-      ```
-    </CodeGroup>
-  </Step>
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
 
-  <Step title="Configure Your MCP Client">
-    Choose your coding agent below for specific configuration steps
-  </Step>
+<Accordion title="VS Code">
+  Open your VS Code MCP configuration:
+  - Run **MCP: Open User Configuration** from the Command Palette
+  - Or manually edit:
+    - **macOS/Linux**: `~/.config/Code/User/mcp.json`
+    - **Windows**: `%APPDATA%\Code\User\mcp.json`
 
-  <Step title="Replace Your API Key">
-    Get your API key from [app.trynia.ai](http://app.trynia.ai/) and replace `YOUR_API_KEY` in the configuration
-  </Step>
+  **Remote Server (Recommended):**
 
-  <Step title="Restart Your Client">
-    Restart your coding assistant to load the new MCP server
-  </Step>
-</Steps>
+  ```json
+  {
+    "servers": {
+      "nia": {
+        "type": "http",
+        "url": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
 
-### Configuration by Coding Agent
+  **Local Server:**
 
-<Tabs>
-  <Tab title="Cursor">
-    <div style={{ marginBottom: '20px' }}>
-      <a href="cursor://anysphere.cursor-deeplink/mcp/install?name=nia&config=eyJjb21tYW5kIjoidXZ4IG5pYS1tY3Atc2VydmVyIiwiZW52Ijp7Ik5JQV9BUElfS0VZIjoiWU9VUl9BUElfS0VZIiwiTklBX0FQSV9VUkwiOiJodHRwczovL2FwaWdjcC50cnluaWEuYWkvIn19">
-        <img
-          src="https://cursor.com/deeplink/mcp-install-dark.png"
-          alt="Add Nia MCP server to Cursor"
-          style={{ maxWidth: '200px', height: 'auto' }}
-        />
-      </a>
-    </div>
-    <Steps>
-      <Step title="Open MCP Configuration">
-        Open your Cursor MCP configuration file:
-        - **macOS**: `~/.cursor/mcp.json`
-        - **Windows**: `%APPDATA%\Cursor\mcp.json`
-        - **Linux**: `~/.config/cursor/mcp.json`
-      </Step>
+  ```json
+  {
+    "servers": {
+      "nia": {
+        "type": "stdio",
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
 
-      <Step title="Add NIA Configuration">
-        <CodeGroup>
-          ```json Option A: Using pipx (Recommended)
-          {
-            "mcpServers": {
-              "nia": {
-                "command": "pipx",
-                "args": ["run", "--no-cache", "nia-mcp-server"],
-                "env": {
-                  "NIA_API_KEY": "YOUR_API_KEY",
-                  "NIA_API_URL": "https://apigcp.trynia.ai/"
-                }
-              }
-            }
-          }
-          ```
+<Accordion title="Claude Code">
+  **Remote Server (Recommended):**
 
-          ```json Option B: Using uvx
-          {
-            "mcpServers": {
-              "nia": {
-                "command": "uvx",
-                "args": ["nia-mcp-server"],
-                "env": {
-                  "NIA_API_KEY": "YOUR_API_KEY",
-                  "NIA_API_URL": "https://apigcp.trynia.ai/"
-                }
-              }
-            }
-          }
-          ```
-        </CodeGroup>
-      </Step>
-    </Steps>
-  </Tab>
+  ```bash
+  claude mcp add --transport http nia https://apigcp.trynia.ai/mcp \
+    --header "Authorization: Bearer YOUR_API_KEY"
+  ```
 
-  <Tab title="Windsurf">
-    <Steps>
-      <Step title="Open MCP Configuration">
-        Open your Windsurf MCP configuration file:
-        - **macOS**: `~/.windsurf/mcp.json`
-        - **Windows**: `%APPDATA%\Windsurf\mcp.json`
-        - **Linux**: `~/.config/windsurf/mcp.json`
-      </Step>
+  **Local Server:**
 
-      <Step title="Add NIA Configuration">
-        <CodeGroup>
-          ```json Option A: Using pipx (Recommended)
-          {
-            "mcpServers": {
-              "mcp-server-nia": {
-                "command": "pipx",
-                "args": ["run", "--no-cache", "nia-mcp-server"],
-                "env": {
-                  "NIA_API_KEY": "YOUR_API_KEY",
-                  "NIA_API_URL": "https://apigcp.trynia.ai/"
-                }
-              }
-            }
-          }
-          ```
+  ```bash
+  # For current project only (default)
+  claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- pipx run --no-cache nia-mcp-server
 
-          ```json Option B: Using uvx
-          {
-            "mcpServers": {
-              "mcp-server-nia": {
-                "command": "uvx",
-                "args": ["nia-mcp-server"],
-                "env": {
-                  "NIA_API_KEY": "YOUR_API_KEY",
-                  "NIA_API_URL": "https://apigcp.trynia.ai/"
-                }
-              }
-            }
-          }
-          ```
-        </CodeGroup>
-      </Step>
-    </Steps>
-  </Tab>
+  # For global installation (all projects)
+  claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ --scope user -- pipx run --no-cache nia-mcp-server
+  ```
 
-  <Tab title="Claude Desktop">
-    <Steps>
-      <Step title="Open Configuration File">
-        Edit your Claude Desktop configuration:
-        - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-        - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-      </Step>
+  <Note>
+    Use `--scope user` if you want Nia available across all your projects.
+  </Note>
+</Accordion>
 
-      <Step title="Add NIA Configuration">
-        <CodeGroup>
-          ```json Option A: Using pipx (Recommended)
-          {
-            "mcpServers": {
-              "mcp-server-nia": {
-                "command": "pipx",
-                "args": ["run", "--no-cache", "nia-mcp-server"],
-                "env": {
-                  "NIA_API_KEY": "YOUR_API_KEY",
-                  "NIA_API_URL": "https://apigcp.trynia.ai/"
-                }
-              }
-            }
-          }
-          ```
+<Accordion title="Windsurf">
+  Open your Windsurf MCP configuration:
+  - **macOS**: `~/.windsurf/mcp.json`
+  - **Windows**: `%APPDATA%\Windsurf\mcp.json`
+  - **Linux**: `~/.config/windsurf/mcp.json`
 
-          ```json Option B: Using uvx
-          {
-            "mcpServers": {
-              "mcp-server-nia": {
-                "command": "uvx",
-                "args": ["nia-mcp-server"],
-                "env": {
-                  "NIA_API_KEY": "YOUR_API_KEY",
-                  "NIA_API_URL": "https://apigcp.trynia.ai/"
-                }
-              }
-            }
-          }
-          ```
-        </CodeGroup>
-      </Step>
-    </Steps>
-  </Tab>
+  **Remote Server (Recommended):**
 
-  <Tab title="VS Code">
-    <Steps>
-      <Step title="Open MCP Configuration">
-        Open your VS Code MCP configuration file. You can either:
-        - Run the **MCP: Open User Configuration** command from the Command Palette (opens `mcp.json` in your user profile)
-        - Use **MCP: Add Server** command and select **Global** to add to your profile
-        - Or manually edit the file at:
-          - **macOS/Linux**: `~/.config/Code/User/mcp.json`
-          - **Windows**: `%APPDATA%\Code\User\mcp.json`
-      </Step>
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "serverUrl": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
 
-      <Step title="Add NIA Configuration">
-        <CodeGroup>
-          ```json Option A: Using pipx (Recommended)
-          {
-            "servers": {
-              "nia": {
-                "command": "pipx",
-                "args": ["run", "--no-cache", "nia-mcp-server"],
-                "env": {
-                  "NIA_API_KEY": "YOUR_API_KEY",
-                  "NIA_API_URL": "https://apigcp.trynia.ai/"
-                }
-              }
-            }
-          }
-          ```
+  **Local Server:**
 
-          ```json Option B: Using uvx
-          {
-            "servers": {
-              "nia": {
-                "command": "uvx",
-                "args": ["nia-mcp-server"],
-                "env": {
-                  "NIA_API_KEY": "YOUR_API_KEY",
-                  "NIA_API_URL": "https://apigcp.trynia.ai/"
-                }
-              }
-            }
-          }
-          ```
-        </CodeGroup>
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
 
-        <Note>
-          When using multiple VS Code profiles, this allows you to switch between different MCP server configurations based on your active profile.
-        </Note>
-      </Step>
-    </Steps>
-  </Tab>
+<Accordion title="Cline">
+  **Remote Server (Recommended):**
 
-  <Tab title="Continue.dev">
-    <Steps>
-      <Step title="Open Continue Configuration">
-        Edit your `~/.continue/config.json` file
-      </Step>
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "url": "https://apigcp.trynia.ai/mcp",
+        "type": "streamableHttp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
 
-      <Step title="Add NIA Configuration">
-        <CodeGroup>
-          ```json Option A: Using pipx (Recommended)
-          {
-            "models": [...],
-            "mcpServers": [
-              {
-                "name": "nia",
-                "command": "pipx",
-                "args": ["run", "--no-cache", "nia-mcp-server"],
-                "env": {
-                  "NIA_API_KEY": "YOUR_API_KEY",
-                  "NIA_API_URL": "https://apigcp.trynia.ai/"
-                }
-              }
-            ]
-          }
-          ```
+  **Local Server:**
 
-          ```json Option B: Using uvx
-          {
-            "models": [...],
-            "mcpServers": [
-              {
-                "name": "nia",
-                "command": "uvx",
-                "args": ["nia-mcp-server"],
-                "env": {
-                  "NIA_API_KEY": "YOUR_API_KEY",
-                  "NIA_API_URL": "https://apigcp.trynia.ai/"
-                }
-              }
-            ]
-          }
-          ```
-        </CodeGroup>
-      </Step>
-    </Steps>
-  </Tab>
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
 
-  <Tab title="Claude Code">
-    <Steps>
-      <Step title="Add NIA Configuration">
-        <CodeGroup>
-          ```bash Option A: Using pipx (Recommended)
-          # For current project only (default)
-          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- pipx run --no-cache nia-mcp-server
+<Accordion title="Continue.dev">
+  Edit your `~/.continue/config.json` file.
 
-          # For global installation (all projects)
-          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ --scope user -- pipx run --no-cache nia-mcp-server
-          ```
+  **Remote Server (Recommended):**
 
-          ```bash Option B: Using uvx
-          # For current project only (default)
-          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- uvx nia-mcp-server
-
-          # For global installation (all projects)
-          claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ --scope user -- uvx nia-mcp-server
-          ```
-        </CodeGroup>
-
-        <Note>
-          **Scope Options:**
-          - **Default (no --scope flag)**: Installs for current project only
-          - **--scope user**: Installs globally for all projects on your machine
-
-          Use `--scope user` if you want Nia available across all your projects. This is ideal for personal development where you frequently use Nia across different codebases.
-        </Note>
-      </Step>
-    </Steps>
-  </Tab>
-
-  <Tab title="Codex">
-    <Steps>
-      <Step title="Add NIA Configuration">
-        <CodeGroup>
-          ```bash Option A: Using pipx (Recommended)
-          codex mcp add nia --env NIA_API_KEY=YOUR_API_KEY --env NIA_API_URL=https://apigcp.trynia.ai/ -- pipx run --no-cache nia-mcp-server
-          ```
-
-          ```bash Option B: Using uvx
-          codex mcp add nia --env NIA_API_KEY=YOUR_API_KEY --env NIA_API_URL=https://apigcp.trynia.ai/ -- uvx nia-mcp-server
-          ```
-        </CodeGroup>
-      </Step>
-
-      <Step title="Configure Timeouts (Important!)">
-        <Warning>
-          **Codex requires extended timeout settings for NIA to work properly.** Without these settings, tool outputs may get truncated or timeout prematurely.
-        </Warning>
-
-        Edit your `.codex/config.toml` file and add the following configuration:
-
-        ```toml
-        tool_output_token_limit = 25000  # Extended cap to prevent output truncation
-
-        [mcp_servers.nia]
-        command = "pipx"
-        args = ["run", "--no-cache", "nia-mcp-server"]
-        startup_timeout_sec = 30
-        tool_timeout_sec = 360  # 6 minutes - essential for NIA operations
-        ```
-
-        <Note>
-          **Why these settings matter:**
-          - `tool_output_token_limit = 25000`: Prevents NIA's comprehensive responses from being truncated
-          - `tool_timeout_sec = 360`: Gives NIA enough time to complete indexing and search operations (6 minutes is plenty)
-          - `startup_timeout_sec = 30`: Ensures NIA server has time to initialize properly
-        </Note>
-      </Step>
-    </Steps>
-  </Tab>
-
-  <Tab title="Cline">
-    <Steps>
-      <Step title="Open MCP Configuration">
-        Open your Cline MCP configuration file according to your IDE:
-        - **VS Code**: Use the MCP configuration steps similar to Continue.dev
-        - Check Cline's documentation for the specific configuration file location
-      </Step>
-
-      <Step title="Add NIA Configuration">
-        <CodeGroup>
-          ```json Option A: Using pipx (Recommended)
-          {
-            "mcpServers": {
-              "nia": {
-                "command": "pipx",
-                "args": ["run", "--no-cache", "nia-mcp-server"],
-                "env": {
-                  "NIA_API_KEY": "YOUR_API_KEY",
-                  "NIA_API_URL": "https://apigcp.trynia.ai/"
-                }
-              }
-            }
-          }
-          ```
-
-          ```json Option B: Using uvx
-          {
-            "mcpServers": {
-              "nia": {
-                "command": "uvx",
-                "args": ["nia-mcp-server"],
-                "env": {
-                  "NIA_API_KEY": "YOUR_API_KEY",
-                  "NIA_API_URL": "https://apigcp.trynia.ai/"
-                }
-              }
-            }
-          }
-          ```
-        </CodeGroup>
-      </Step>
-    </Steps>
-  </Tab>
-
-  <Tab title="Trae">
-    <Steps>
-      <Step title="Add NIA Configuration">
-        ```json
-        {
-          "mcpServers": {
-            "nia": {
-              "command": "pipx",
-              "args": ["run", "--no-cache", "nia-mcp-server"],
-              "env": {
-                "NIA_API_KEY": "YOUR_API_KEY",
-                "NIA_API_URL": "https://apigcp.trynia.ai/"
-              }
-            }
+  ```json
+  {
+    "experimental": {
+      "modelContextProtocolServer": {
+        "transport": {
+          "type": "http",
+          "url": "https://apigcp.trynia.ai/mcp",
+          "headers": {
+            "Authorization": "Bearer YOUR_API_KEY"
           }
         }
-        ```
-      </Step>
+      }
+    }
+  }
+  ```
 
-      <Step title="One-Command Setup">
-        Alternatively, use this one-command setup:
-        ```bash
-        curl -fsSL https://app.trynia.ai/api/setup-script | bash -s -- YOUR_API_KEY trae
-        ```
-      </Step>
-    </Steps>
-  </Tab>
+  **Local Server:**
 
-  <Tab title="Google Antigravity">
-    <Steps>
-      <Step title="Add NIA Configuration">
-        ```json
-        {
-          "mcpServers": {
-            "nia": {
-              "command": "pipx",
-              "args": ["run", "--no-cache", "nia-mcp-server"],
-              "env": {
-                "NIA_API_KEY": "YOUR_API_KEY",
-                "NIA_API_URL": "https://apigcp.trynia.ai/"
-              }
-            }
+  ```json
+  {
+    "models": [],
+    "mcpServers": [
+      {
+        "name": "nia",
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    ]
+  }
+  ```
+</Accordion>
+
+<Accordion title="Google Antigravity">
+  **Remote Server (Recommended):**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "serverUrl": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
+
+  **Local Server:**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Trae">
+  **Remote Server (Recommended):**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "url": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
+
+  **Local Server:**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Claude Desktop">
+  Edit your Claude Desktop configuration:
+  - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+  - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+  **Local Server:**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Gemini CLI">
+  Open `~/.gemini/settings.json` and add:
+
+  **Remote Server (Recommended):**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "httpUrl": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY",
+          "Accept": "application/json, text/event-stream"
+        }
+      }
+    }
+  }
+  ```
+
+  **Local Server:**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Zed">
+  Add to your Zed `settings.json`:
+
+  **Local Server:**
+
+  ```json
+  {
+    "context_servers": {
+      "nia": {
+        "source": "custom",
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="OpenAI Codex">
+  <Warning>
+    Codex requires extended timeout settings for NIA to work properly.
+  </Warning>
+
+  **Local Server:**
+
+  ```toml
+  tool_output_token_limit = 25000
+
+  [mcp_servers.nia]
+  command = "pipx"
+  args = ["run", "--no-cache", "nia-mcp-server"]
+  startup_timeout_sec = 30
+  tool_timeout_sec = 360
+
+  [mcp_servers.nia.env]
+  NIA_API_KEY = "YOUR_API_KEY"
+  NIA_API_URL = "https://apigcp.trynia.ai/"
+  ```
+
+  **Windows:** Use full paths if you encounter timeout errors.
+</Accordion>
+
+<Accordion title="Roo Code">
+  **Remote Server (Recommended):**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "type": "streamable-http",
+        "url": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
+
+  **Local Server:**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Kilo Code">
+  Via UI:
+  1. Open Kilo Code → Settings icon → MCP Servers
+  2. Click **Add Server** → Choose **HTTP Server (Streamable HTTP Transport)**
+  3. Enter URL: `https://apigcp.trynia.ai/mcp`
+  4. Add Header - Key: `Authorization`, Value: `Bearer YOUR_API_KEY`
+  5. Click **Save**
+
+  **Remote Server (Recommended):**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "type": "streamable-http",
+        "url": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        },
+        "disabled": false
+      }
+    }
+  }
+  ```
+
+  **Local Server:**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        },
+        "disabled": false
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="JetBrains AI Assistant">
+  1. Go to **Settings → Tools → AI Assistant → Model Context Protocol (MCP)**
+  2. Click **+ Add**
+  3. Select **As JSON** from the dropdown
+  4. Add configuration:
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+
+  5. Click **Apply**
+</Accordion>
+
+<Accordion title="Kiro">
+  1. Navigate to **Kiro → MCP Servers**
+  2. Click **+ Add**
+  3. Add configuration:
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        },
+        "disabled": false,
+        "autoApprove": []
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="LM Studio">
+  Go to **Program → Install → Edit mcp.json**:
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Visual Studio 2022">
+  **Remote Server (Recommended):**
+
+  ```json
+  {
+    "servers": {
+      "nia": {
+        "type": "http",
+        "url": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
+
+  **Local Server:**
+
+  ```json
+  {
+    "mcp": {
+      "servers": {
+        "nia": {
+          "type": "stdio",
+          "command": "pipx",
+          "args": ["run", "--no-cache", "nia-mcp-server"],
+          "env": {
+            "NIA_API_KEY": "YOUR_API_KEY",
+            "NIA_API_URL": "https://apigcp.trynia.ai/"
           }
         }
-        ```
-      </Step>
+      }
+    }
+  }
+  ```
+</Accordion>
 
-      <Step title="One-Command Setup">
-        Alternatively, use this one-command setup:
-        ```bash
-        curl -fsSL https://app.trynia.ai/api/setup-script | bash -s -- YOUR_API_KEY antigravity
-        ```
-      </Step>
-    </Steps>
-  </Tab>
-</Tabs>
+<Accordion title="BoltAI">
+  Open **Settings → Plugins**, then add:
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Qodo Gen">
+  1. Open the Qodo Gen chat panel
+  2. Click **Connect more tools**
+  3. Click **+ Add new MCP**
+
+  **Remote Server (Recommended):**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "url": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
+
+  **Local Server:**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Qwen Coder">
+  Open `~/.qwen/settings.json` and add:
+
+  **Remote Server (Recommended):**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "httpUrl": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY",
+          "Accept": "application/json, text/event-stream"
+        }
+      }
+    }
+  }
+  ```
+
+  **Local Server:**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Perplexity Desktop">
+  1. Navigate to **Perplexity → Settings → Connectors**
+  2. Click **Add Connector → Advanced**
+  3. Server Name: `Nia`
+  4. Add configuration:
+
+  ```json
+  {
+    "args": ["run", "--no-cache", "nia-mcp-server"],
+    "command": "pipx",
+    "env": {
+      "NIA_API_KEY": "YOUR_API_KEY",
+      "NIA_API_URL": "https://apigcp.trynia.ai/"
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Warp">
+  1. Navigate to **Settings → AI → Manage MCP servers**
+  2. Click **+ Add**
+  3. Add configuration:
+
+  ```json
+  {
+    "nia": {
+      "command": "pipx",
+      "args": ["run", "--no-cache", "nia-mcp-server"],
+      "env": {
+        "NIA_API_KEY": "YOUR_API_KEY",
+        "NIA_API_URL": "https://apigcp.trynia.ai/"
+      },
+      "working_directory": null,
+      "start_on_launch": true
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Copilot Coding Agent">
+  Add to: **Repository → Settings → Copilot → Coding agent → MCP configuration**
+
+  **Remote Server (Recommended):**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "type": "http",
+        "url": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
+
+  **Local Server:**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "type": "stdio",
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Copilot CLI">
+  Open `~/.copilot/mcp-config.json` and add:
+
+  **Remote Server (Recommended):**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "type": "http",
+        "url": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
+
+  **Local Server:**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "type": "local",
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Amazon Q Developer CLI">
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Opencode">
+  **Remote Server (Recommended):**
+
+  ```json
+  {
+    "mcp": {
+      "nia": {
+        "type": "remote",
+        "url": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        },
+        "enabled": true
+      }
+    }
+  }
+  ```
+
+  **Local Server:**
+
+  ```json
+  {
+    "mcp": {
+      "nia": {
+        "type": "local",
+        "command": ["pipx", "run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        },
+        "enabled": true
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Crush">
+  **Remote Server (Recommended):**
+
+  ```json
+  {
+    "$schema": "https://charm.land/crush.json",
+    "mcp": {
+      "nia": {
+        "type": "http",
+        "url": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
+
+  **Local Server:**
+
+  ```json
+  {
+    "$schema": "https://charm.land/crush.json",
+    "mcp": {
+      "nia": {
+        "type": "stdio",
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Amp">
+  **Remote Server Only:**
+
+  ```bash
+  amp mcp add nia --header "Authorization=Bearer YOUR_API_KEY" https://apigcp.trynia.ai/mcp
+  ```
+</Accordion>
+
+<Accordion title="Factory">
+  Factory's droid supports MCP servers through its CLI.
+
+  **Remote Server (Recommended):**
+
+  ```bash
+  droid mcp add nia https://apigcp.trynia.ai/mcp --type http --header "Authorization: Bearer YOUR_API_KEY"
+  ```
+
+  **Local Server:**
+
+  ```bash
+  droid mcp add nia "pipx run --no-cache nia-mcp-server" --env NIA_API_KEY=YOUR_API_KEY --env NIA_API_URL=https://apigcp.trynia.ai/
+  ```
+
+  Once configured, Nia tools will be available in your droid sessions. Type `/mcp` within droid to manage servers.
+</Accordion>
+
+<Accordion title="Augment Code">
+  Via UI:
+  1. Hamburger menu → Settings → Tools
+  2. Click **+ Add MCP**
+  3. Enter command: `pipx run --no-cache nia-mcp-server`
+  4. Name: `Nia`
+
+  **Manual Configuration:**
+
+  ```json
+  "augment.advanced": {
+    "mcpServers": [
+      {
+        "name": "nia",
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    ]
+  }
+  ```
+</Accordion>
+
+<Accordion title="Windows Configuration">
+  On Windows, configuration differs slightly. Use `cmd` with `/c`:
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "cmd",
+        "args": ["/c", "pipx", "run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        },
+        "disabled": false
+      }
+    }
+  }
+  ```
+</Accordion>
+
+---
+
+## Automated Setup Script
+
+Don't want to configure manually? Use our automated setup script.
+
+### Remote Setup (Recommended)
+
+```bash
+curl -fsSL https://app.trynia.ai/api/setup-script | bash -s -- YOUR_API_KEY IDE_NAME --remote
+```
+
+**Supported IDEs:**
+`cursor`, `vscode`, `windsurf`, `cline`, `antigravity`, `trae`, `continue`, `roo-code`, `kilo-code`, `gemini-cli`, `opencode`, `qodo-gen`, `qwen-coder`, `visual-studio`, `crush`, `copilot-agent`, `copilot-cli`, `claude-code`, `factory`, `amp`
+
+### Local Setup
+
+```bash
+curl -fsSL https://app.trynia.ai/api/setup-script | bash -s -- YOUR_API_KEY IDE_NAME
+```
+
+**Supported IDEs:**
+`cursor`, `vscode`, `windsurf`, `cline`, `antigravity`, `trae`, `continue`, `roo-code`, `kilo-code`, `gemini-cli`, `opencode`, `qodo-gen`, `qwen-coder`, `visual-studio`, `crush`, `copilot-agent`, `copilot-cli`, `claude-code`, `factory`, `codex`, `zed`, `augment`, `jetbrains`, `kiro`, `lm-studio`, `bolt-ai`, `perplexity`, `warp`, `amazon-q`, `claude-desktop`
+
+### Python CLI Alternative
+
+```bash
+# Remote
+pipx run nia-mcp-server setup YOUR_API_KEY --ide IDE_NAME --remote
+
+# Local
+pipx run nia-mcp-server setup YOUR_API_KEY --ide IDE_NAME
+```
+
+<Note>
+  **Not fully automated:** `zencoder` and `rovo-dev` require manual UI setup - the script prints the config for you to copy.
+</Note>
 
 ---
 
 <Warning>
-**Need Help?** Join our community or reach out through [app.trynia.ai](http://app.trynia.ai/) for support and updates.
-</Warning> 
+**Need Help?** Join our community or reach out through [app.trynia.ai](https://app.trynia.ai/) for support and updates.
+</Warning>
