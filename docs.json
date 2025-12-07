@@ -42,7 +42,8 @@
             "group": "Example Workflows",
             "pages": [
               "example-workflows/overview",
-              "example-workflows/tips"
+              "example-workflows/tips",
+              "example-workflows/best-practices"
             ]
           },
           {
