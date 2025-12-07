@@ -809,6 +809,155 @@ components:
           type: boolean
           description: Whether results were truncated due to max_results limit
 
+    CodeGrepRequest:
+      type: object
+      required:
+        - pattern
+      properties:
+        pattern:
+          type: string
+          description: Regex pattern to search for in repository code
+          example: "async function\\s+\\w+"
+        path:
+          type: string
+          default: ""
+          description: Limit search to files with this path prefix
+          example: "src/"
+        context_lines:
+          type: integer
+          minimum: 0
+          maximum: 10
+          description: Lines before AND after each match (shorthand for A/B). Overridden by A or B if specified.
+        A:
+          type: integer
+          minimum: 0
+          maximum: 20
+          description: Lines after each match (like grep -A). Overrides context_lines for after.
+        B:
+          type: integer
+          minimum: 0
+          maximum: 20
+          description: Lines before each match (like grep -B). Overrides context_lines for before.
+        case_sensitive:
+          type: boolean
+          default: false
+          description: Case-sensitive matching (default is case-insensitive)
+        whole_word:
+          type: boolean
+          default: false
+          description: Match whole words only
+        fixed_string:
+          type: boolean
+          default: false
+          description: Treat pattern as literal string, not regex
+        max_matches_per_file:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+          description: Maximum matches to return per file
+        max_total_matches:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+          description: Maximum total matches to return
+        output_mode:
+          type: string
+          enum: [content, files_with_matches, count]
+          default: content
+          description: |
+            Output format:
+            - content: Return matched lines with context (grouped by file)
+            - files_with_matches: Return only file paths that matched
+            - count: Return match counts per file
+        highlight:
+          type: boolean
+          default: false
+          description: Add >>markers<< around matched text in results
+        include_line_numbers:
+          type: boolean
+          default: true
+          description: Include line numbers in results
+        group_by_file:
+          type: boolean
+          default: true
+          description: Group matches by file in results
+
+    CodeGrepResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        matches:
+          oneOf:
+            - type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    line_number:
+                      type: integer
+                    line:
+                      type: string
+                    context:
+                      type: string
+              description: Matches grouped by file path (when group_by_file is true)
+            - type: array
+              items:
+                type: object
+                properties:
+                  path:
+                    type: string
+                  line_number:
+                    type: integer
+                  line:
+                    type: string
+                  context:
+                    type: string
+              description: Flat list of matches (when group_by_file is false)
+        files:
+          type: array
+          items:
+            type: string
+          description: List of file paths (when output_mode is 'files_with_matches')
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Match counts per file (when output_mode is 'count')
+        pattern:
+          type: string
+          description: The regex pattern that was searched
+        path_filter:
+          type: string
+          description: Path filter that was applied
+        total_matches:
+          type: integer
+          description: Total number of matches found
+        files_searched:
+          type: integer
+          description: Number of code chunks searched
+        files_with_matches:
+          type: integer
+          description: Number of files that contained matches
+        truncated:
+          type: boolean
+          description: Whether results were truncated due to limits
+        options:
+          type: object
+          description: Applied search options
+          properties:
+            case_sensitive:
+              type: boolean
+            lines_before:
+              type: integer
+            lines_after:
+              type: integer
+            output_mode:
+              type: string
+
     NiaReferences:
       type: object
       description: References to NIA resources used during the conversation
@@ -1392,6 +1541,70 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
+  /repositories/{repository_id}/grep:
+    post:
+      summary: Search repository code with regex
+      description: |
+        Search repository code with a regex pattern.
+        Like the Unix 'grep' command, but for indexed repository code.
+        Searches through all code chunks and returns matches with context.
+        
+        Uses TurboPuffer BM25 search for efficient keyword retrieval, then applies
+        regex pattern matching on the results. Supports asymmetric context lines
+        (A for after, B for before), case sensitivity, whole word matching, and
+        multiple output modes.
+      operationId: grepRepository
+      tags:
+        - Repositories
+      parameters:
+        - name: repository_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Repository identifier in owner/repo format
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CodeGrepRequest'
+      responses:
+        '200':
+          description: Search completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeGrepResponse'
+        '400':
+          description: Invalid regex pattern or request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to repository
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Repository not found or not indexed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Search execution error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /query:
     post:
       summary: Query indexed repositories and documentation
@@ -1901,6 +2114,7 @@ paths:
       description: |
         Read content of a documentation page by its virtual filesystem path.
         More intuitive than remembering URLs - just use the path from doc_tree or doc_ls.
+        Supports line range slicing and length truncation for efficient content retrieval.
       operationId: readDocumentationPage
       tags:
         - Data Sources
@@ -1917,6 +2131,28 @@ paths:
           schema:
             type: string
           description: Virtual path to the page (e.g., "/api/authentication.md")
+        - name: line_start
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          description: Start line number (1-based, inclusive). Use with line_end for slicing.
+        - name: line_end
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          description: End line number (1-based, inclusive). Use with line_start for slicing.
+        - name: max_length
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 100
+            maximum: 100000
+          description: Maximum number of characters to return (100-100000). Content will be truncated if exceeded.
       responses:
         '200':
           description: Page content retrieved successfully
@@ -1935,7 +2171,20 @@ paths:
                     description: The actual URL of the page
                   content:
                     type: string
-                    description: Full content of the documentation page
+                    description: Full or partial content of the documentation page
+                  total_lines:
+                    type: integer
+                    description: Total number of lines in the document
+                  returned_lines:
+                    type: array
+                    items:
+                      type: integer
+                    minItems: 2
+                    maxItems: 2
+                    description: "[start_line, end_line] range of returned content"
+                  truncated:
+                    type: boolean
+                    description: Whether content was truncated due to max_length limit
                   metadata:
                     type: object
                     properties:
@@ -1945,6 +2194,8 @@ paths:
                         type: string
                       chunks_found:
                         type: integer
+                      title:
+                        type: string
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
@@ -1969,6 +2220,9 @@ paths:
         Search documentation content with a regex pattern.
         Like the Unix 'grep' command, but for indexed documentation.
         Searches through all pages and returns matches with context.
+        
+        Supports asymmetric context lines (A for after, B for before),
+        case sensitivity, whole word matching, and multiple output modes.
       operationId: grepDocumentation
       tags:
         - Data Sources
@@ -1995,13 +2249,67 @@ paths:
                 path:
                   type: string
                   default: "/"
-                  description: Limit search to this path prefix
+                  description: Limit search to this virtual path prefix
                 context_lines:
                   type: integer
-                  default: 3
                   minimum: 0
                   maximum: 10
-                  description: Number of context lines around matches
+                  description: Lines before AND after each match (shorthand for A/B). Overridden by A or B if specified.
+                A:
+                  type: integer
+                  minimum: 0
+                  maximum: 20
+                  description: Lines after each match (like grep -A). Overrides context_lines for after.
+                B:
+                  type: integer
+                  minimum: 0
+                  maximum: 20
+                  description: Lines before each match (like grep -B). Overrides context_lines for before.
+                case_sensitive:
+                  type: boolean
+                  default: false
+                  description: Case-sensitive matching (default is case-insensitive)
+                whole_word:
+                  type: boolean
+                  default: false
+                  description: Match whole words only
+                fixed_string:
+                  type: boolean
+                  default: false
+                  description: Treat pattern as literal string, not regex
+                max_matches_per_file:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 10
+                  description: Maximum matches to return per file
+                max_total_matches:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000
+                  default: 100
+                  description: Maximum total matches to return
+                output_mode:
+                  type: string
+                  enum: [content, files_with_matches, count]
+                  default: content
+                  description: |
+                    Output format:
+                    - content: Return matched lines with context
+                    - files_with_matches: Return only file paths that matched
+                    - count: Return match counts per file
+                highlight:
+                  type: boolean
+                  default: false
+                  description: Add >>markers<< around matched text in results
+                include_line_numbers:
+                  type: boolean
+                  default: true
+                  description: Include line numbers in results
+                group_by_file:
+                  type: boolean
+                  default: true
+                  description: Group matches by file in results
       responses:
         '200':
           description: Search completed successfully
@@ -2014,6 +2322,7 @@ paths:
                     type: boolean
                   matches:
                     type: array
+                    description: Matches grouped by file (when output_mode is 'content')
                     items:
                       type: object
                       properties:
@@ -2023,18 +2332,33 @@ paths:
                         url:
                           type: string
                           description: Actual URL of the page
-                        line_number:
-                          type: integer
-                        line:
-                          type: string
-                          description: The matched line
-                        context:
+                        matches:
                           type: array
                           items:
-                            type: string
-                          description: Context lines around the match
-                        context_start_line:
-                          type: integer
+                            type: object
+                            properties:
+                              line_number:
+                                type: integer
+                              line:
+                                type: string
+                                description: The matched line
+                              context:
+                                type: array
+                                items:
+                                  type: string
+                                description: Context lines around the match
+                              context_start_line:
+                                type: integer
+                  files:
+                    type: array
+                    items:
+                      type: string
+                    description: List of file paths (when output_mode is 'files_with_matches')
+                  counts:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                    description: Match counts per file (when output_mode is 'count')
                   pattern:
                     type: string
                     description: The pattern that was searched
@@ -2045,6 +2369,26 @@ paths:
                     type: integer
                   files_searched:
                     type: integer
+                  files_with_matches:
+                    type: integer
+                    description: Number of files that contained matches
+                  truncated:
+                    type: boolean
+                    description: Whether results were truncated due to limits
+                  options:
+                    type: object
+                    description: Applied search options
+                    properties:
+                      case_sensitive:
+                        type: boolean
+                      whole_word:
+                        type: boolean
+                      lines_before:
+                        type: integer
+                      lines_after:
+                        type: integer
+                      output_mode:
+                        type: string
         '400':
           description: Invalid regex pattern
           content:
@@ -2260,54 +2604,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /regex-search:
-    post:
-      summary: Regex pattern search over indexed repositories
-      description: |
-        Perform regex pattern search over indexed repository source code.
-        This endpoint allows deterministic code finding using regex patterns with optional
-        filtering by file extensions, programming languages, and context lines.
-        Supports natural language queries that are automatically converted to regex patterns,
-        or explicit regex patterns for advanced use cases.
-      operationId: regexSearch
-      tags:
-        - Query
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RegexSearchRequest'
-      responses:
-        '200':
-          description: Regex search completed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RegexSearchResponse'
-        '400':
-          description: Invalid request parameters (e.g., invalid regex pattern)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
-          description: One or more repositories not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '429':
-          $ref: '#/components/responses/RateLimitError'
-        '500':
-          description: Search execution error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
   /oracle:
     post:
       summary: Oracle autonomous research agent (Pro only)
@@ -2318,7 +2614,7 @@ paths:
         research autonomously. It has access to a diverse set of tools including:
         - **Discovery**: list_repositories, list_documentation
         - **Web Research**: run_web_search, web_fetch (server-side)
-        - **Code Search**: run_indexed_repo_search, run_regex_search, get_github_tree, read_source_content
+        - **Code Search**: run_indexed_repo_search, code_grep, get_github_tree, read_source_content
         - **Documentation**: run_doc_search, doc_tree, doc_ls, doc_read, doc_grep
         
         The agent will iteratively search and analyze your indexed repositories and documentation,
