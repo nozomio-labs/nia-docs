@@ -334,6 +334,128 @@ components:
           type: string
           enum: [completed, failed]
 
+    UniversalSearchRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: Natural language search query
+          example: "How does authentication work in FastAPI?"
+        top_k:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+          description: Total number of results to return
+        include_repos:
+          type: boolean
+          default: true
+          description: Include repository sources in search
+        include_docs:
+          type: boolean
+          default: true
+          description: Include documentation sources in search
+        alpha:
+          type: number
+          minimum: 0.0
+          maximum: 1.0
+          default: 0.7
+          description: Weight for vector search (1-alpha for BM25). Higher values favor semantic similarity.
+        compress_output:
+          type: boolean
+          default: false
+          description: Use AI to compress results into a concise answer with citations
+
+    UniversalSearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              content:
+                type: string
+                description: Text content of the search result
+              score:
+                type: number
+                description: Relevance score (higher is better)
+              source:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum: [repository, documentation]
+                    description: Type of source
+                  url:
+                    type: string
+                    description: URL of the source
+                  namespace:
+                    type: string
+                    description: TurboPuffer namespace identifier
+                  file_path:
+                    type: string
+                    description: File path within the source (if applicable)
+                  display_name:
+                    type: string
+                    description: Human-readable name of the source
+        sources_searched:
+          type: integer
+          description: Number of source namespaces searched
+        query_time_ms:
+          type: integer
+          description: Total query time in milliseconds
+        errors:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Any errors encountered during search
+        answer:
+          type: string
+          nullable: true
+          description: AI-compressed answer (only when compress_output=true)
+
+    UsageSummaryResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: User identifier
+        organization_id:
+          type: string
+          nullable: true
+          description: Organization identifier (if applicable)
+        subscription_tier:
+          type: string
+          enum: [free, pro, enterprise]
+          description: Current subscription tier
+        billing_period_start:
+          type: string
+          format: date-time
+          description: Start of current billing period
+        billing_period_end:
+          type: string
+          format: date-time
+          description: End of current billing period
+        usage:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              used:
+                type: integer
+                description: Number of operations used this period
+              limit:
+                type: integer
+                description: Maximum allowed operations (0 if unlimited)
+              unlimited:
+                type: boolean
+                description: Whether this operation type is unlimited
+          description: Usage breakdown by operation type
+
     SourceContentRequest:
       type: object
       required:
@@ -1739,6 +1861,98 @@ paths:
                 $ref: '#/components/schemas/Error'
         '504':
           description: Research task timed out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /universal-search:
+    post:
+      summary: Universal search across all public sources
+      description: |
+        Search across ALL indexed public sources (repositories and documentation) in a single query.
+        
+        This endpoint performs a two-phase hybrid search:
+        1. **Discovery Phase**: Fast O(1) search across a universal index to identify relevant sources
+        2. **Deep Search Phase**: Targeted searches into the top matching source namespaces for comprehensive results
+        
+        Results are combined using Reciprocal Rank Fusion (RRF) for optimal ranking.
+        
+        Use this when you want to discover relevant content without knowing which specific sources to search.
+        
+        **Performance**: Typically returns results in 1-3 seconds for thousands of indexed sources.
+      operationId: universalSearch
+      tags:
+        - Search & Research
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UniversalSearchRequest'
+            examples:
+              basic:
+                summary: Basic universal search
+                value:
+                  query: "How to implement authentication in FastAPI?"
+                  top_k: 20
+              filtered:
+                summary: Search only documentation
+                value:
+                  query: "React hooks best practices"
+                  top_k: 10
+                  include_repos: false
+                  include_docs: true
+              compressed:
+                summary: Get AI-compressed answer
+                value:
+                  query: "What is the difference between useState and useReducer?"
+                  top_k: 20
+                  compress_output: true
+      responses:
+        '200':
+          description: Search completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UniversalSearchResponse'
+              examples:
+                success:
+                  summary: Successful search results
+                  value:
+                    results:
+                      - content: "FastAPI provides built-in support for OAuth2..."
+                        score: 0.95
+                        source:
+                          type: "documentation"
+                          url: "https://fastapi.tiangolo.com"
+                          namespace: "public-docs-abc123"
+                          file_path: "/security/oauth2"
+                      - content: "Example authentication implementation..."
+                        score: 0.89
+                        source:
+                          type: "repository"
+                          url: "https://github.com/fastapi/fastapi"
+                          namespace: "public-repo-def456"
+                          file_path: "examples/security/oauth2.py"
+                    sources_searched: 5
+                    query_time_ms: 1250
+                    errors: null
+                    answer: null
+                compressed:
+                  summary: AI-compressed answer
+                  value:
+                    results: []
+                    sources_searched: 5
+                    query_time_ms: 2500
+                    errors: null
+                    answer: "FastAPI supports OAuth2 authentication through its security utilities. Here's a basic example: [Source 1]..."
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Search failed
           content:
             application/json:
               schema:
@@ -3578,6 +3792,60 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /usage:
+    get:
+      summary: Get usage summary
+      description: |
+        Get the current user's usage summary for the current billing period.
+        
+        Returns usage counts and limits for all metered operations including:
+        - **queries**: Search, grep, doc_read, read_source_content operations
+        - **deep_research**: Deep research agent usage
+        - **web_search**: Web search operations
+        - **package_search**: Package source code search
+        - **oracle**: Oracle research agent usage
+        - **contexts**: Context sharing operations
+        - **indexing**: Repository and documentation indexing
+        
+        Free tier users have monthly limits on certain operations.
+        Pro users have unlimited usage for most operations.
+      operationId: getUsageSummary
+      tags:
+        - Usage
+      responses:
+        '200':
+          description: Usage summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageSummaryResponse'
+              example:
+                user_id: "user_abc123"
+                subscription_tier: "free"
+                billing_period_start: "2024-01-01T00:00:00Z"
+                billing_period_end: "2024-02-01T00:00:00Z"
+                usage:
+                  queries:
+                    used: 45
+                    limit: 100
+                    unlimited: false
+                  deep_research:
+                    used: 0
+                    limit: 0
+                    unlimited: false
+                  indexing:
+                    used: 2
+                    limit: 5
+                    unlimited: false
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          description: Failed to fetch usage summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 tags:
   - name: Repositories
     description: Repository indexing and status operations
@@ -3586,10 +3854,12 @@ tags:
   - name: Data Sources
     description: Documentation and web content indexing operations
   - name: Search & Research
-    description: Web search and deep research operations
+    description: Web search, deep research, and universal search operations
   - name: Package Search
     description: Chroma-powered package source code search across npm, PyPI, crates.io, and Go modules
   - name: Context Sharing
     description: Cross-agent conversation context sharing with vector search capabilities
   - name: Oracle Research
     description: Autonomous AI research agent with extended thinking, web search, code analysis, and documentation exploration capabilities
+  - name: Usage
+    description: API usage tracking and billing information
