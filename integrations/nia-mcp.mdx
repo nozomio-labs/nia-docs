@@ -387,6 +387,28 @@ Choose your coding agent below for detailed configuration instructions. Each sec
   ```
 </Accordion>
 
+<Accordion title="Mistral Vibe CLI">
+  Open `~/.vibe/config.toml` and add:
+
+  **Remote Server (Recommended):**
+
+  ```toml
+  [[mcp_servers]]
+  name = "nia"
+  transport = "streamable-http"
+  url = "https://apigcp.trynia.ai/mcp"
+
+  [mcp_servers.headers]
+  Authorization = "Bearer YOUR_API_KEY"
+  ```
+
+  <Note>
+    Mistral Vibe CLI uses TOML format for configuration. The configuration should be added to your existing config file at:
+    - **macOS/Linux**: `~/.vibe/config.toml`
+    - **Windows**: `%USERPROFILE%\.vibe\config.toml`
+  </Note>
+</Accordion>
+
 <Accordion title="Zed">
   Add to your Zed `settings.json`:
 
@@ -1002,7 +1024,7 @@ curl -fsSL https://app.trynia.ai/api/setup-script | bash -s -- YOUR_API_KEY IDE_
 ```
 
 **Supported IDEs:**
-`cursor`, `vscode`, `windsurf`, `cline`, `antigravity`, `trae`, `continue`, `roo-code`, `kilo-code`, `gemini-cli`, `opencode`, `qodo-gen`, `qwen-coder`, `visual-studio`, `crush`, `copilot-agent`, `copilot-cli`, `claude-code`, `factory`, `amp`
+`cursor`, `vscode`, `windsurf`, `cline`, `antigravity`, `trae`, `continue`, `roo-code`, `kilo-code`, `gemini-cli`, `vibe`, `opencode`, `qodo-gen`, `qwen-coder`, `visual-studio`, `crush`, `copilot-agent`, `copilot-cli`, `claude-code`, `factory`, `amp`
 
 ### Local Setup
 
