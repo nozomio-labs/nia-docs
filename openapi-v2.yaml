@@ -1282,13 +1282,51 @@ components:
           type: string
           description: Optional output format specification
           example: "markdown report with code examples"
+        model:
+          type: string
+          description: Optional model selection for Oracle (defaults to claude-opus-4-5-20251101)
+          enum:
+            - claude-opus-4-5-20251101
+            - claude-sonnet-4-5-20250929
+            - claude-sonnet-4-5-1m
+
+    OracleCitation:
+      type: object
+      description: A single grounded "citation" entry recorded by Oracle during tool use.
+      properties:
+        source_id:
+          type: integer
+          description: Monotonic integer id (1-based) assigned during the run
+        tool:
+          type: string
+          description: Tool/action name that produced this citation
+        args:
+          type: object
+          additionalProperties: true
+          description: Tool arguments used
+        summary:
+          type: string
+          description: Short summary of the tool result (truncated)
+
+    OracleToolCall:
+      type: object
+      description: A single tool call logged by Oracle during the run.
+      properties:
+        action:
+          type: string
+          description: Tool/action name
+        args:
+          type: object
+          additionalProperties: true
+          description: Tool arguments used
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO timestamp when the tool was executed
 
     OracleResearchResponse:
       type: object
       properties:
-        success:
-          type: boolean
-          description: Whether the research was successful
         query:
           type: string
           description: The research query that was executed
@@ -1298,22 +1336,12 @@ components:
         citations:
           type: array
           items:
-            type: object
-            properties:
-              source:
-                type: string
-              content:
-                type: string
-          description: List of sources cited in the research
+            $ref: '#/components/schemas/OracleCitation'
+          description: Tool-result citations recorded during the run
         tool_calls:
           type: array
           items:
-            type: object
-            properties:
-              tool:
-                type: string
-              args:
-                type: object
+            $ref: '#/components/schemas/OracleToolCall'
           description: List of tool calls made during research
         iterations:
           type: integer
@@ -1324,6 +1352,124 @@ components:
         session_id:
           type: string
           description: Unique session identifier for this research
+        created_at:
+          type: string
+          format: date-time
+          description: When this research session was created
+
+    OracleSessionSummary:
+      type: object
+      description: Summary of a persisted Oracle research session.
+      properties:
+        session_id:
+          type: string
+        title:
+          type: string
+          nullable: true
+        query:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        iterations:
+          type: integer
+          nullable: true
+        duration_ms:
+          type: integer
+          nullable: true
+        status:
+          type: string
+        model:
+          type: string
+          nullable: true
+
+    OracleSessionDetails:
+      allOf:
+        - $ref: '#/components/schemas/OracleSessionSummary'
+        - type: object
+          properties:
+            final_report:
+              type: string
+            citations:
+              type: array
+              items:
+                $ref: '#/components/schemas/OracleCitation'
+            tool_calls:
+              type: array
+              items:
+                $ref: '#/components/schemas/OracleToolCall'
+            research_notes:
+              type: array
+              items:
+                type: string
+            prioritized_repositories:
+              type: array
+              items:
+                type: string
+            prioritized_data_sources:
+              type: array
+              items:
+                type: string
+            discovered_repositories:
+              type: array
+              items:
+                type: string
+            discovered_data_sources:
+              type: array
+              items:
+                type: string
+            output_format:
+              type: string
+              nullable: true
+            metadata:
+              type: object
+              additionalProperties: true
+
+    OracleSessionChatRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          description: User's follow-up question
+
+    OracleChatMessage:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        is_original:
+          type: boolean
+        message_id:
+          type: string
+          nullable: true
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/OracleCitation'
+          nullable: true
+
+    OracleSessionMessagesResponse:
+      type: object
+      properties:
+        session_id:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/OracleChatMessage'
+        total:
+          type: integer
 
     Error:
       type: object
@@ -2965,21 +3111,7 @@ paths:
                   sessions:
                     type: array
                     items:
-                      type: object
-                      properties:
-                        session_id:
-                          type: string
-                        query:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        iterations:
-                          type: integer
-                        duration_ms:
-                          type: integer
-                        status:
-                          type: string
+                      $ref: '#/components/schemas/OracleSessionSummary'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
@@ -3003,7 +3135,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OracleResearchResponse'
+                $ref: '#/components/schemas/OracleSessionDetails'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '404':
@@ -3012,6 +3144,98 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /oracle/sessions/{session_id}/messages:
+    get:
+      summary: Get Oracle session chat messages
+      description: |
+        Get chat messages for an Oracle research session, including the original query/report and follow-up messages.
+      operationId: getOracleSessionMessages
+      tags:
+        - Oracle Research
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Session ID to retrieve messages for
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+          description: Maximum number of stored messages to include
+      responses:
+        '200':
+          description: Messages retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OracleSessionMessagesResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /oracle/sessions/{session_id}/chat/stream:
+    post:
+      summary: Stream a follow-up chat answer for an Oracle session (SSE)
+      description: |
+        Stream a follow-up chat response for a completed Oracle research session.
+        This is a lightweight tool-using follow-up mode (not a full Oracle research run).
+      operationId: streamOracleSessionChat
+      tags:
+        - Oracle Research
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Session ID to chat with
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OracleSessionChatRequest'
+      responses:
+        '200':
+          description: SSE stream of follow-up chat events and content chunks
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  Stream of Server-Sent Events with JSON payloads. Typical event types:
+                  - tool_start / tool_complete (OracleAgent events)
+                  - content: {type, content} (answer chunks)
+                  - done: {type, session_id}
+                  - error: {type, error}
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Pro subscription required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
 
   /oracle/jobs:
     post:
@@ -3056,9 +3280,10 @@ paths:
                   message:
                     type: string
                     description: Status message
-                  stream_url:
+                  created_at:
                     type: string
-                    description: URL to subscribe for real-time updates
+                    format: date-time
+                    description: When the job was created
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
@@ -3136,10 +3361,14 @@ paths:
                           type: integer
                         duration_ms:
                           type: integer
+                        error:
+                          type: string
                   total:
                     type: integer
-                  has_more:
-                    type: boolean
+                  limit:
+                    type: integer
+                  skip:
+                    type: integer
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '429':
