@@ -1005,6 +1005,14 @@ components:
           type: boolean
           default: true
           description: Group matches by file in results
+        exhaustive:
+          type: boolean
+          default: true
+          description: |
+            Search ALL chunks for complete results (default: true).
+            When true, iterates through all indexed chunks to find every match (like real grep).
+            When false, uses BM25 keyword search to find top candidates first (faster but may miss matches).
+            Automatically enabled when pattern has no extractable keywords.
 
     CodeGrepResponse:
       type: object
@@ -1817,10 +1825,12 @@ paths:
         Like the Unix 'grep' command, but for indexed repository code.
         Searches through all code chunks and returns matches with context.
         
-        Uses TurboPuffer BM25 search for efficient keyword retrieval, then applies
-        regex pattern matching on the results. Supports asymmetric context lines
-        (A for after, B for before), case sensitivity, whole word matching, and
-        multiple output modes.
+        By default (exhaustive=true), iterates through ALL indexed chunks to find every match,
+        providing true grep-like behavior. For faster but potentially incomplete results,
+        set exhaustive=false to use BM25 keyword search first.
+        
+        Supports asymmetric context lines (A for after, B for before), case sensitivity,
+        whole word matching, and multiple output modes.
       operationId: grepRepository
       tags:
         - Repositories
@@ -2581,6 +2591,10 @@ paths:
         Like the Unix 'grep' command, but for indexed documentation.
         Searches through all pages and returns matches with context.
         
+        By default (exhaustive=true), iterates through ALL indexed chunks to find every match,
+        providing true grep-like behavior. For faster but potentially incomplete results,
+        set exhaustive=false to use BM25 keyword search first.
+        
         Supports asymmetric context lines (A for after, B for before),
         case sensitivity, whole word matching, and multiple output modes.
       operationId: grepDocumentation
@@ -2670,6 +2684,13 @@ paths:
                   type: boolean
                   default: true
                   description: Group matches by file in results
+                exhaustive:
+                  type: boolean
+                  default: true
+                  description: |
+                    Search ALL chunks for complete results (default: true).
+                    When true, iterates through all indexed chunks to find every match (like real grep).
+                    When false, uses BM25 keyword search to find top candidates first (faster but may miss matches).
       responses:
         '200':
           description: Search completed successfully
