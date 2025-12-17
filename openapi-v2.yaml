@@ -3,11 +3,12 @@ info:
   title: Nia AI API
   version: '2.1.0'
   description: |
-    Nia AI API allows developers to index and query code repositories and documentation using advanced AI understanding.
+    Nia AI API allows developers to index and query code repositories, documentation, and research papers using advanced AI understanding.
     The API provides capabilities for:
     - Repository indexing and management (including direct GitHub tree access)
     - Documentation/website indexing and management
-    - AI-powered search across code and documentation
+    - Research paper indexing (arXiv support with automatic metadata extraction)
+    - AI-powered search across code, documentation, and research papers
     - Advanced regex pattern search over indexed repositories
     - Package source code search across npm, PyPI, crates.io, and Go modules (powered by Chroma)
     - Web search and deep research capabilities
@@ -757,7 +758,7 @@ components:
           description: Associated project ID if any
         source_type:
           type: string
-          enum: [web, text]
+          enum: [web, documentation, research_paper, text]
           default: web
         is_active:
           type: boolean
@@ -765,12 +766,104 @@ components:
         display_name:
           type: string
           description: Custom display name for the data source
+        arxiv_id:
+          type: string
+          nullable: true
+          description: arXiv identifier when source_type is research_paper
+        paper_source:
+          type: string
+          nullable: true
+          description: Research paper source provider (e.g. arxiv)
+        metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: |
+            Optional lightweight metadata. For research_paper sources this may include title/authors/etc.
+            For other source types this may be omitted.
         error:
           type: string
           description: Error message if status is 'error' or 'failed'
         error_code:
           type: string
           description: Error code for programmatic error handling
+
+    ResearchPaperRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          description: |
+            arXiv URL or raw ID. Supports multiple formats:
+            - Full URL: https://arxiv.org/abs/2312.00752
+            - PDF URL: https://arxiv.org/pdf/2312.00752.pdf
+            - Raw new-format ID: 2312.00752
+            - Raw old-format ID: hep-th/9901001
+            - With version: 2312.00752v1
+          example: "2312.00752"
+
+    ResearchPaperResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the data source
+        arxiv_id:
+          type: string
+          description: The arXiv identifier (e.g., "2312.00752")
+        title:
+          type: string
+          description: Paper title extracted from arXiv
+        authors:
+          type: array
+          items:
+            type: string
+          description: List of paper authors
+        abstract:
+          type: string
+          description: Paper abstract
+        categories:
+          type: array
+          items:
+            type: string
+          description: arXiv categories (e.g., ["cs.CL", "cs.AI"])
+        primary_category:
+          type: string
+          description: Primary arXiv category
+        status:
+          type: string
+          enum: [pending, processing, completed, failed, error]
+          description: Current indexing status (aligned with DataSourceResponse)
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        chunk_count:
+          type: integer
+          default: 0
+          description: Number of text chunks created from the paper
+        doi:
+          type: string
+          nullable: true
+          description: DOI if available
+        published_date:
+          type: string
+          nullable: true
+          description: Publication date from arXiv
+        pdf_url:
+          type: string
+          description: Direct URL to the PDF
+        abs_url:
+          type: string
+          description: URL to the arXiv abstract page
+        error:
+          type: string
+          nullable: true
+          description: Error message if status is 'failed'
 
     GitHubTreeRequest:
       type: object
@@ -1532,6 +1625,35 @@ paths:
       operationId: listRepositories
       tags:
         - Repositories
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional substring filter (matches repository/display_name)
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional status filter (e.g. completed|indexing|failed)
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5000
+          description: Max repositories to return (default: all)
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of repositories to skip
       responses:
         '200':
           description: List of repositories retrieved successfully
@@ -2166,6 +2288,42 @@ paths:
       operationId: listDataSources
       tags:
         - Data Sources
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional substring filter (matches display_name/url/file_name)
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional status filter (e.g. completed|indexing|failed)
+        - name: source_type
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional source type filter (e.g. web|documentation|research_paper|text)
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+          description: Max data sources to return (db-level pagination)
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of data sources to skip (db-level pagination)
       responses:
         '200':
           description: List of data sources retrieved successfully
@@ -2844,6 +3002,116 @@ paths:
                 $ref: '#/components/schemas/Error'
         '429':
           $ref: '#/components/responses/RateLimitError'
+
+  /research-papers:
+    post:
+      summary: Index a research paper
+      description: |
+        Index a research paper from arXiv. The paper's PDF is extracted using Firecrawl,
+        enriched with metadata from the arXiv API (title, authors, abstract, categories),
+        and indexed into the vector store for semantic search.
+
+        Supports multiple input formats:
+        - Full arXiv URL: https://arxiv.org/abs/2312.00752
+        - PDF URL: https://arxiv.org/pdf/2312.00752.pdf
+        - Raw new-format ID: 2312.00752
+        - Raw old-format ID: hep-th/9901001
+        - With version: 2312.00752v1
+
+        Papers are globally deduplicated - if another user has already indexed a paper,
+        you'll get instant access to the existing index.
+      operationId: indexResearchPaper
+      tags:
+        - Research Papers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResearchPaperRequest'
+            examples:
+              arxiv_id:
+                summary: Using raw arXiv ID
+                value:
+                  url: "2312.00752"
+              arxiv_url:
+                summary: Using full arXiv URL
+                value:
+                  url: "https://arxiv.org/abs/2312.00752"
+              arxiv_id_versioned:
+                summary: Using versioned arXiv ID
+                value:
+                  url: "2312.00752v1"
+              old_format:
+                summary: Using old arXiv format
+                value:
+                  url: "hep-th/9901001"
+      responses:
+        '200':
+          description: Research paper indexing started or completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchPaperResponse'
+              examples:
+                processing:
+                  summary: Paper indexing started
+                  value:
+                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    arxiv_id: "2312.00752"
+                    title: "Attention Is All You Need"
+                    authors: ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar"]
+                    abstract: "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks..."
+                    categories: ["cs.CL", "cs.LG"]
+                    primary_category: "cs.CL"
+                    status: "processing"
+                    created_at: "2024-01-15T10:30:00Z"
+                    updated_at: "2024-01-15T10:30:00Z"
+                    chunk_count: 0
+                    pdf_url: "https://arxiv.org/pdf/2312.00752.pdf"
+                    abs_url: "https://arxiv.org/abs/2312.00752"
+                completed:
+                  summary: Paper already indexed (instant access)
+                  value:
+                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    arxiv_id: "2312.00752"
+                    title: "Attention Is All You Need"
+                    authors: ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar"]
+                    abstract: "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks..."
+                    categories: ["cs.CL", "cs.LG"]
+                    primary_category: "cs.CL"
+                    status: "completed"
+                    created_at: "2024-01-15T10:30:00Z"
+                    updated_at: "2024-01-15T10:35:00Z"
+                    chunk_count: 150
+                    pdf_url: "https://arxiv.org/pdf/2312.00752.pdf"
+                    abs_url: "https://arxiv.org/abs/2312.00752"
+        '400':
+          description: Invalid arXiv URL or ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Invalid arXiv URL or ID: invalid-id. Expected formats: https://arxiv.org/abs/2312.00752, 2312.00752, or hep-th/9901001"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Paper not found on arXiv
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Paper not found on arXiv: 9999.99999. Please verify the ID is correct."
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Internal server error during indexing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /package-search/grep:
     post:
@@ -4103,6 +4371,8 @@ tags:
     description: AI-powered code and documentation querying operations
   - name: Data Sources
     description: Documentation and web content indexing operations
+  - name: Research Papers
+    description: Research paper indexing from arXiv with automatic metadata extraction
   - name: Search & Research
     description: Web search, deep research, and universal search operations
   - name: Package Search
