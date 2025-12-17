@@ -8,10 +8,11 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     Ask your coding agent: *"Use package search to find how error handling is implemented in the `requests` Python library"* or *"Search the numpy package for array manipulation examples"*
   </Step>
 
-  <Step title="Index Documentation or a Repository">
-    Try indexing public documentation or a repository:
+  <Step title="Index Documentation, Repositories, or Research Papers">
+    Try indexing public documentation, a repository, or research papers:
     - *"Index https://docs.trynia.ai/"*
     - *"Index https://github.com/browser-use/browser-use"*
+    - *"Index https://arxiv.org/abs/2401.12345"* (arXiv papers)
     - *"Use nia deep research to compare the best GraphRAG frameworks and then index the one with least latency."*
   </Step>
 
@@ -33,8 +34,9 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
   </Card>
 
   <Card title="Universal Indexing" icon="database">
-    - **`index`** - Universal indexing tool (auto-detects repos or docs from URL)
+    - **`index`** - Universal indexing tool (auto-detects repos, docs, or research papers from URL)
     - **`get_github_file_tree`** - Get GitHub file structure without indexing
+    - **Supports:** GitHub repos, documentation sites, arXiv papers
   </Card>
 
   <Card title="Repository Search" icon="github">
@@ -109,10 +111,11 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
   <Accordion title="Universal Indexing Tools">
     ### `index`
-    Universal indexing tool that intelligently detects and indexes GitHub repositories or documentation.
+    Universal indexing tool that intelligently detects and indexes GitHub repositories, documentation, or research papers.
 
     **Auto-Detection**:
     - GitHub URLs (containing "github.com") → Repository indexing
+    - arXiv URLs (containing "arxiv.org") → Research paper indexing
     - All other URLs → Documentation indexing
 
     **Parameters**:
@@ -138,6 +141,9 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
     # Index documentation (auto-detected)
     index("https://docs.example.com", url_patterns=["*/api/*"])
+
+    # Index a research paper from arXiv
+    index("https://arxiv.org/abs/2401.12345")
     ```
 
     ### `get_github_file_tree`
