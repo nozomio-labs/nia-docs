@@ -1645,7 +1645,7 @@ paths:
             type: integer
             minimum: 1
             maximum: 5000
-          description: Max repositories to return (default: all)
+          description: "Max repositories to return (default: all)"
         - name: offset
           in: query
           required: false
