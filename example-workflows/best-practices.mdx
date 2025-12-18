@@ -1,0 +1,228 @@
+---
+title: 'Best Practices'
+description: 'Optimize your Nia AI usage with proven strategies and techniques'
+---
+
+## Query Optimization
+
+### Effective Search Strategies
+
+**Be Specific and Contextual**
+- Use precise technical terms instead of generic descriptions
+- Include relevant context about your use case
+- Specify the type of information you need (implementation, examples, troubleshooting)
+
+**Example queries:**
+- Instead of: "How does authentication work?"
+- Use: "How does OAuth2 token refresh work in this authentication service?"
+
+**Leverage Multiple Search Types**
+- Start with semantic search for broad understanding
+- Use grep search for specific patterns or functions
+- Combine package search with documentation search for comprehensive coverage
+
+### Query Structure Best Practices
+
+**Progressive Refinement**
+1. Begin with high-level questions to understand the system
+2. Drill down to specific implementation details
+3. Use follow-up queries to clarify ambiguous results
+
+**Context Building**
+- Reference previous search results in follow-up queries
+- Use specific file paths or function names when available
+- Include relevant error messages or specific scenarios
+
+## Indexing Strategy
+
+### Repository Selection
+
+**Choose Wisely**
+- Index repositories you actively work with
+- Focus on well-maintained, actively developed projects
+- Consider indexing both main codebase and documentation repositories
+
+**Branch Strategy**
+- Index main/master branches for stable code
+- Index feature branches only when necessary for specific development
+- Use folder-specific indexing for large monorepos
+
+### Documentation Indexing
+
+**Target High-Value Content**
+- API documentation and reference guides
+- Tutorial and getting-started content
+- Architecture and design documents
+- Troubleshooting and FAQ sections
+
+**Avoid Indexing**
+- Blog posts and marketing content
+- User-generated content (comments, forums)
+- Frequently changing dynamic content
+- Large binary files or generated documentation
+
+## Tool Selection Guidelines
+
+### Package Search Tools
+
+**Use `nia_package_search_grep` when:**
+- Looking for specific function definitions
+- Finding exact code patterns
+- Searching for configuration options or constants
+- Debugging specific implementation details
+
+**Use `nia_package_search_hybrid` when:**
+- Understanding overall architecture
+- Finding usage examples and patterns
+- Exploring implementation approaches
+- Learning how features work conceptually
+
+**Use `nia_package_search_read_file` when:**
+- Need complete context around code snippets
+- Understanding function implementations
+- Analyzing error handling patterns
+- Reviewing complete class or module structure
+
+### Repository and Documentation Tools
+
+**Repository Management**
+- Use `index_repository` for active development projects
+- Use `search_codebase` for complex, multi-file queries
+- Use `visualize_codebase` for understanding project structure
+
+**Documentation Management**
+- Use `index_documentation` for comprehensive API references
+- Use `search_documentation` for conceptual questions
+- Combine with repository search for implementation details
+
+## Context Management
+
+### Effective Context Sharing
+
+**Save Context When:**
+- Completing a complex analysis or research
+- Switching between different coding agents
+- Sharing findings with team members
+- Creating reusable knowledge for future reference
+
+**Context Organization**
+- Use descriptive titles that summarize the work
+- Add relevant tags for easy discovery
+- Include key decisions and rationale
+- Save intermediate findings, not just final results
+
+### Context Retrieval
+
+**Search Strategies**
+- Use specific keywords related to your current task
+- Search by tags to find related work
+- Look for contexts with similar technical domains
+- Reference contexts that contain relevant code patterns
+
+## Performance Optimization
+
+### Rate Limit Management
+
+**Efficient Usage**
+- Batch related queries when possible
+- Use specific searches instead of broad exploratory queries
+- Cache results for repeated questions
+- Monitor usage through the dashboard
+
+**Query Optimization**
+- Start with targeted searches before broad exploration
+- Use grep search for exact matches when possible
+- Leverage package search for dependencies before indexing
+- Combine multiple tools in single conversations
+
+### Indexing Efficiency
+
+**Smart Indexing**
+- Index only necessary branches and folders
+- Use exclude patterns to skip irrelevant content
+- Monitor indexing progress and cancel unnecessary jobs
+- Delete unused indexes to free up quota
+
+## Integration Patterns
+
+### IDE Configuration
+
+**MCP Setup Best Practices**
+- Use pipx for global installation across projects
+- Configure environment variables consistently
+- Test configuration with simple queries before complex work
+- Keep API keys secure and rotate regularly
+
+**Multi-IDE Workflows**
+- Use context sharing to move between different IDEs
+- Maintain consistent naming conventions across configurations
+- Document custom configurations for team sharing
+
+### Team Collaboration
+
+**Shared Resources**
+- Establish naming conventions for indexed repositories
+- Document common indexing patterns and exclusions
+- Share context libraries for common tasks
+- Create team-specific documentation indexes
+
+## Troubleshooting Strategies
+
+### Common Issues Prevention
+
+**Configuration Issues**
+- Verify API key validity before complex operations
+- Test MCP server connectivity with simple queries
+- Keep installation methods consistent across team
+- Document platform-specific configuration steps
+
+**Search Quality Issues**
+- Use specific technical terminology
+- Include relevant context in queries
+- Verify search results with source content
+- Use multiple search approaches for comprehensive coverage
+
+### Debugging Workflows
+
+**Systematic Approach**
+1. Verify basic connectivity and authentication
+2. Test with simple, known queries
+3. Check indexing status for relevant resources
+4. Use status checking tools to monitor operations
+5. Review error messages for specific guidance
+
+**Escalation Process**
+- Check troubleshooting documentation first
+- Use community resources for common issues
+- Contact support with specific error details
+- Include relevant configuration and query examples
+
+## Advanced Techniques
+
+### Multi-Source Analysis
+
+**Combining Information Sources**
+- Use package search to understand dependencies
+- Index related documentation for comprehensive coverage
+- Cross-reference implementation with official docs
+- Validate findings across multiple sources
+
+**Research Workflows**
+- Start with web search for technology discovery
+- Use deep research for comprehensive analysis
+- Index promising technologies for detailed exploration
+- Document findings for future reference
+
+### Automation and Integration
+
+**Workflow Automation**
+- Create reusable context templates
+- Develop standard query patterns for common tasks
+- Use project initialization tools for consistent setup
+- Implement regular indexing schedules for active projects
+
+**API Integration**
+- Use direct API calls for programmatic access
+- Implement custom tools for specific workflows
+- Create monitoring and alerting for indexing status
+- Develop custom dashboards for usage tracking
