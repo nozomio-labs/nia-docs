@@ -395,7 +395,7 @@ components:
                     description: URL of the source
                   namespace:
                     type: string
-                    description: TurboPuffer namespace identifier
+                    description: Namespace identifier
                   file_path:
                     type: string
                     description: File path within the source (if applicable)
@@ -3007,7 +3007,7 @@ paths:
     post:
       summary: Index a research paper
       description: |
-        Index a research paper from arXiv. The paper's PDF is extracted using Firecrawl,
+        Index a research paper from arXiv. The paper's PDF is extracted,
         enriched with metadata from the arXiv API (title, authors, abstract, categories),
         and indexed into the vector store for semantic search.
 
@@ -3876,7 +3876,7 @@ paths:
       summary: Save conversation context
       description: |
         Save a new conversation context for cross-agent sharing.
-        Contexts are stored in MongoDB and indexed in Turbopuffer vector store for semantic search.
+        Contexts are stored and indexed in the vector store for semantic search.
         Supports organization-level contexts for team collaboration.
       operationId: saveContext
       tags:
@@ -4055,7 +4055,7 @@ paths:
       summary: Semantic search contexts
       description: |
         Semantic search conversation contexts using vector embeddings and hybrid (vector + BM25) search.
-        Uses Turbopuffer vector store for fast similarity search across context content.
+        Uses fast similarity search across context content.
         Returns results ranked by relevance with optional match highlights and workspace filtering.
       operationId: semanticSearchContexts
       tags:
