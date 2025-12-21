@@ -25,42 +25,43 @@
         "tab": "Guides",
         "groups": [
           {
-            "group": "Overview",
+            "group": "Getting Started",
             "pages": [
+              "welcome",
               "integrations/nia-mcp",
-              {
-                "group": "Tools & Features",
-                "pages": [
-                  "tools-features",
-                  "context-sharing"
-                ]
-              },
+              "api-guide",
+              "pricing",
               "troubleshooting"
             ]
           },
           {
-            "group": "Example Workflows",
+            "group": "Features",
+            "pages": [
+              "tools-features",
+              "pre-indexed-sources",
+              "context-sharing",
+              "oracle-research"
+            ]
+          },
+          {
+            "group": "Examples & Guides",
             "pages": [
               "example-workflows/overview",
-              "example-workflows/tips"
-            ]
-          },
-          {
-            "group": "Pricing",
-            "pages": [
-              "pricing"
-            ]
-          },
-          {
-            "group": "Privacy",
-            "pages": [
-              "privacy"
+              "example-workflows/custom-agents",
+              "example-workflows/tips",
+              "example-workflows/agent-rules"
             ]
           },
           {
             "group": "Enterprise",
             "pages": [
               "enterprise"
+            ]
+          },
+          {
+            "group": "Privacy",
+            "pages": [
+              "privacy"
             ]
           }
         ]

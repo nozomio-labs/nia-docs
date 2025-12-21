@@ -1,0 +1,136 @@
+---
+title: 'Oracle Research Agent'
+description: 'Autonomous research assistant for deep technical investigations'
+---
+
+<Info>
+  **Pro Feature** - Oracle Research Agent is available exclusively on Pro plans.
+</Info>
+
+## Overview
+
+Oracle Research Agent is Nia's autonomous research assistant that conducts deep investigations across codebases, documentation, and the web. It serves as a specialized "second brain" for external knowledge needs and technical research.
+
+<Frame>
+  <iframe
+    width="100%"
+    height="400"
+    src="https://www.youtube.com/embed/DWBwUUhzhzE"
+    title="Oracle Research Agent Demo"
+    frameBorder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowFullScreen
+  ></iframe>
+</Frame>
+
+## Key Capabilities
+
+Oracle is powered by the Nia API and includes:
+
+- **Web search** - Find information across the internet
+- **Code search** - Search through repository code
+- **Documentation search** - Query documentation sources
+- **Doc filesystem tools** - Navigate documentation with `doc_tree`, `doc_ls`, `doc_read`, `doc_grep`
+- **Package source code analysis** - Explore PyPI, NPM, Crates.io, Go modules
+- **Context preservation** - Organize findings for handoff to main agents
+
+## Research Strategy
+
+Oracle follows a progressive 3-step research pattern:
+
+<Steps>
+  <Step title="DISCOVER">
+    - Use `nia_web_search` for quick lookups and discovery
+    - Use `nia_deep_research_agent` for complex analysis, comparisons, and pros/cons evaluation
+  </Step>
+
+  <Step title="INDEX">
+    - Automatically index discovered resources
+    - Monitor status during indexing process
+  </Step>
+
+  <Step title="SEARCH">
+    - Use `search_codebase`, `search_documentation`, `regex_search`
+    - Use `read_source_content` for specific file analysis
+  </Step>
+</Steps>
+
+## Execution Methods
+
+### 1. Direct Streaming (Real-time)
+
+Use the `/v2/oracle` endpoint with SSE streaming for immediate results:
+
+```bash
+curl --request POST \
+  --url https://apigcp.trynia.ai/v2/oracle \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "query": "How does authentication work in the FastAPI codebase?",
+    "repositories": ["fastapi/fastapi"],
+    "data_sources": ["FastAPI Documentation"],
+    "output_format": "markdown report with code examples",
+    "model": "claude-opus-4-5-20251101"
+  }'
+```
+
+### 2. Job-based Execution (Recommended)
+
+Create asynchronous jobs via Hatchet workflow for better reliability:
+
+**Benefits:**
+- Queues jobs for reliable execution
+- Supports concurrency limits per user
+- Enables reconnection to running jobs
+- Provides job status tracking and history
+
+**Workflow:**
+1. Create job: `POST /v2/oracle/jobs`
+2. Subscribe to updates: `GET /v2/oracle/jobs/{job_id}/stream` (SSE)
+3. Check status: `GET /v2/oracle/jobs/{job_id}`
+
+## Real-time Event Types
+
+Both execution methods provide real-time streaming events:
+
+| Event Type | Description |
+|------------|-------------|
+| `iteration_start` | New research iteration beginning |
+| `tool_start` | Tool execution starting (includes action, args, reason) |
+| `tool_complete` | Tool finished with success/failure status |
+| `generating_report` | Final report synthesis starting |
+| `complete` | Research finished with full result |
+| `heartbeat` | Connection keep-alive (every 0.5s during idle) |
+| `error` | Error occurred during research |
+| `workflow_event` | Hatchet workflow state changes (job-based only) |
+
+## Example Workflows
+
+<Accordion title="Quick Discovery Example">
+  **User Query:** "Find popular JWT libraries for Python"
+
+  **Oracle Workflow:**
+  1. `nia_web_search("popular JWT libraries Python")`
+  2. Review results for top candidates
+  3. Auto-index top 2-3 repositories
+  4. `search_codebase` for implementation patterns
+  5. Present findings with sources
+</Accordion>
+
+## Additional Features
+
+- **Chat with results:** Follow up on research with `/v2/oracle/sessions/{session_id}/chat`
+- **View history:** List past sessions with `/v2/oracle/history`
+- **Session details:** Get full session info with `/v2/oracle/sessions/{session_id}`
+- **Message history:** Retrieve chat messages with `/v2/oracle/sessions/{session_id}/messages`
+
+## Response Format
+
+Completed research includes:
+- Final report (markdown or specified format)
+- Citations with source IDs and summaries
+- Tool call history
+- Iteration count and duration
+- Session ID for follow-ups
+

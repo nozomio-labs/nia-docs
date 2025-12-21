@@ -3989,7 +3989,7 @@ paths:
     get:
       summary: Text search contexts
       description: |
-        Search conversation contexts by content, title, summary, or tags using MongoDB text search.
+        Search conversation contexts by content, title, summary, or tags using text search.
         This is a simpler, faster alternative to semantic search for exact matches.
       operationId: searchContexts
       tags:
@@ -4142,7 +4142,7 @@ paths:
                         type: integer
                       vector_matches:
                         type: integer
-                      mongodb_matches:
+                      text_matches:
                         type: integer
                   suggestions:
                     type: object

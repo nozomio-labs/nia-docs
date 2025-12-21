@@ -1,0 +1,148 @@
+---
+title: "Building Custom Agents with Nia API"
+description: "Create powerful domain-specific agents using Nia's indexing and search API"
+---
+
+Build custom AI agents powered by comprehensive knowledge bases using Nia's API. Index any repository, documentation, or content—then use Nia's search API to retrieve ground truth information for accurate, grounded responses.
+
+---
+
+## Chromium Expert Agent
+
+<Frame>
+  <iframe
+    src="https://www.youtube.com/embed/_Av8-02sraA"
+    title="Building a Chromium Expert Agent with Nia API"
+    className="w-full aspect-video rounded-xl"
+    allowFullScreen
+  />
+</Frame>
+
+### Try It Live
+
+<Card title="Chromium Expert Agent" icon="chrome" href="https://chromium.trynia.ai/">
+  Experience the Chromium agent in action - ask any question about Chromium internals, architecture, or implementation details.
+</Card>
+
+## How It Works
+
+This agent was built by:
+
+1. **Indexing the Chromium Repository** - All major folders and components of the Chromium codebase were indexed using Nia's repository indexing API
+2. **Indexing Chromium Documentation** - Official Chromium docs and design documents were indexed for comprehensive coverage
+
+---
+
+## Paul Graham Essay Agent
+
+<Frame>
+  <iframe
+    src="https://www.youtube.com/embed/6wrhOFRzldI"
+    title="Paul Graham Essay Agent with Nia API"
+    className="w-full aspect-video rounded-xl"
+    allowFullScreen
+  />
+</Frame>
+
+Another example: a Paul Graham expert agent built by indexing all of his essays. Ask it anything about startups, writing, programming philosophy, or life advice—and get responses grounded in PG's actual writing.
+
+### Try It Live
+
+<Card title="Paul Graham Agent" icon="pen-nib" href="https://paulgraham.trynia.ai/">
+  Ask questions about startups, writing, technology, and life — grounded in 120+ essays.
+</Card>
+
+**What was indexed:**
+- All Paul Graham essays from paulgraham.com
+- Years of startup wisdom and insights
+- Programming and technology perspectives
+
+---
+
+## Naval Ravikant Agent
+
+<Frame>
+  <iframe
+    src="https://www.youtube.com/embed/Jxde9qWeBZ8"
+    title="Naval Ravikant Agent with Nia API"
+    className="w-full aspect-video rounded-xl"
+    allowFullScreen
+  />
+</Frame>
+
+A Naval Ravikant expert agent built by indexing his entire archive—tweets, podcast transcripts, essays, and interviews. Get grounded answers on wealth creation, happiness, philosophy, and decision-making.
+
+### Try It Live
+
+<Card title="Naval Agent" icon="compass" href="https://naval.trynia.ai/">
+  Ask questions about wealth, happiness, and life — grounded in Naval's wisdom.
+</Card>
+
+**What was indexed:**
+- Complete Naval archive and writings
+- Podcast transcripts and interviews
+- Tweetstorms and threads on wealth & happiness
+
+---
+
+## Community Showcase
+
+People are building incredible things with Nia's API:
+
+<CardGroup cols={2}>
+  <Card title="Code Review Agent" icon="code-pull-request">
+    **Ground truth for PR reviews** - An agent that fetches accurate information from package source code during code reviews, ensuring suggestions are based on actual implementation details rather than hallucinations.
+  </Card>
+  <Card title="Custom IDE Integration" icon="window">
+    **IDE with built-in Nia search** - A developer built their own IDE with Nia search tools integrated directly, enabling real-time ground truth lookups while coding.
+  </Card>
+</CardGroup>
+
+---
+
+## Building Your Own Agent
+
+You can build similar domain-specific agents for any large codebase or documentation set:
+
+<Steps>
+  <Step title="Index Your Sources">
+    Use the Nia API to index repositories and documentation:
+    
+    ```bash
+    # Index a repository
+    curl -X POST https://api.trynia.ai/v2/repositories \
+      -H "Authorization: Bearer $NIA_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"url": "https://github.com/chromium/chromium"}'
+    
+    # Index documentation
+    curl -X POST https://api.trynia.ai/v2/data-sources \
+      -H "Authorization: Bearer $NIA_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"url": "https://chromium.googlesource.com/chromium/src/+/main/docs/"}'
+    ```
+  </Step>
+
+  <Step title="Search and Retrieve">
+    Query your indexed sources using hybrid search:
+    
+    ```bash
+    curl -X POST https://api.trynia.ai/v2/search \
+      -H "Authorization: Bearer $NIA_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "query": "How does the renderer process communicate with the browser process?",
+        "repositories": ["chromium/chromium"]
+      }'
+    ```
+  </Step>
+
+  <Step title="Build Your Agent">
+    Integrate Nia search into your agent's RAG pipeline to provide grounded, accurate responses.
+  </Step>
+</Steps>
+
+<Info>
+  Check out the [API Reference](/api-reference) for complete documentation on indexing and search endpoints.
+</Info>
+

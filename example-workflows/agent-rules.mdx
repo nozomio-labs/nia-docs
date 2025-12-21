@@ -1,0 +1,75 @@
+---
+title: 'Pre-configured Agent Rules'
+description: 'Ready-to-use configurations for AI coding agents'
+---
+
+## Overview
+
+People use Nia for various purposes - from deep technical research to code exploration and documentation analysis. To help AI coding agents understand and use Nia more effectively as an MCP server, we've created a collection of pre-configured rules and prompts.
+
+## Agent Rules Repository
+
+<Card title="Nia Rules for Agents" icon="github" href="https://github.com/nozomio-labs/nia-rules-for-agents">
+  Open-source configuration files that teach AI coding agents how to effectively use Nia's capabilities.
+</Card>
+
+### What's Included
+
+The repository provides ready-to-use configuration files for popular AI coding agents:
+
+- **Claude** (`.claude/agents/`)
+- **Codex** (`.codex/prompts/`)
+- **Cursor** (`.cursor/rules/`)
+- **Windsurf** (`.windsurf/rules/`)
+- **Roo Code** (`.roo/rules/`)
+- **Cline** (`.clinerules`)
+- **General Agents** (`general-agents/`)
+
+### Quick Setup
+
+<Steps>
+  <Step title="Clone or Download">
+    Get the configuration files from the [repository](https://github.com/nozomio-labs/nia-rules-for-agents).
+  </Step>
+
+  <Step title="Copy Configuration">
+    Copy the appropriate configuration file to your agent's directory:
+
+    ```bash
+    # For Claude
+    cp .claude/agents/nia-oracle.md ~/.claude/agents/
+
+    # For Codex
+    cp .codex/prompts/nia-oracle.md ~/.codex/prompts/
+
+    # For Cursor  
+    cp .cursor/rules/nia-oracle.mdc ~/.cursor/rules/
+
+    # For Windsurf
+    cp .windsurf/rules/nia-oracle.md ~/.windsurf/rules/
+    ```
+  </Step>
+
+  <Step title="Enable Nia MCP">
+    Ensure your agent has access to Nia's MCP tools. See the [Installation guide](/integrations/nia-mcp) for setup instructions.
+  </Step>
+
+  <Step title="Start Using">
+    Your agent now understands how to leverage Nia's research and search capabilities effectively.
+  </Step>
+</Steps>
+
+## Contributing
+
+The repository is open-source and welcomes contributions:
+
+- Add configurations for new AI agents
+- Improve existing rule sets
+- Share workflow patterns and examples
+
+Visit the [repository](https://github.com/nozomio-labs/nia-rules-for-agents) to contribute or report issues.
+
+<Info>
+  These configurations are maintained by the Nia community and are designed to help agents make the most of Nia's MCP server capabilities.
+</Info>
+

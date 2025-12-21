@@ -39,20 +39,23 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     - **Supports:** GitHub repos, documentation sites, arXiv papers
   </Card>
 
-  <Card title="Repository Search" icon="github">
-    - **`search_codebase`** - AI-powered natural language code search
-    - **`regex_search`** - Regex pattern search over indexed repositories
+  <Card title="Universal Search" icon="magnifying-glass">
+    - **`search`** - Unified search across all indexed repos, docs, and papers
+    - **`code_grep`** - Regex search in indexed repository code
   </Card>
 
-  <Card title="Documentation Search" icon="book">
-    - **`search_documentation`** - Search indexed docs with natural language
+  <Card title="Documentation Navigation" icon="book">
+    - **`doc_tree`** - Get docs tree structure
+    - **`doc_ls`** - List docs directory contents
+    - **`doc_read`** - Read docs page by virtual path
+    - **`doc_grep`** - Regex search in docs
   </Card>
 
   <Card title="Resource Management" icon="folder">
     - **`manage_resource`** - Unified tool for all resource operations (list, status, rename, delete)
   </Card>
 
-  <Card title="Web Search & Research" icon="magnifying-glass">
+  <Card title="Web Search & Research" icon="globe">
     - **`nia_web_search`** - AI-powered search for repos, docs, and content
     - **`nia_deep_research_agent`** - Deep multi-step research and analysis
   </Card>
@@ -119,8 +122,8 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     - All other URLs → Documentation indexing
 
     **Parameters**:
-    - `url` (str, required): GitHub repository URL or documentation site URL
-    - `resource_type` (str, optional): Override auto-detection - "repository" or "documentation"
+    - `url` (str, required): GitHub repository URL, documentation site URL, or arXiv ID/URL
+    - `resource_type` (str, optional): Override auto-detection - "repository", "documentation", or "research_paper"
 
     **Repository-specific**:
     - `branch` (str, optional): Branch to index (defaults to main branch)
@@ -128,9 +131,12 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     **Documentation-specific**:
     - `url_patterns` (List[str], optional): URL patterns to include in crawling
     - `exclude_patterns` (List[str], optional): URL patterns to exclude from crawling
-    - `only_main_content` (bool, default=True): Extract main content only
+    - `only_main_content` (bool, default=True): Extract main content only, skip nav/footer
     - `check_llms_txt` (bool, default=True): Check for /llms.txt file
-    - `llms_txt_strategy` (str, default="prefer"): Strategy for handling llms.txt
+    - `llms_txt_strategy` (str, default="prefer"): Strategy for handling llms.txt - "prefer", "only", or "ignore"
+    - `wait_for` (int, optional): Wait time in milliseconds for dynamic content to load
+    - `include_screenshot` (bool, optional): Capture screenshots of pages
+    - `max_age` (int, optional): Cache max age in seconds
 
     **Usage**: Monitor progress with `manage_resource` action "status"
 
@@ -161,72 +167,126 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     **Best for**: Quick repository exploration without indexing overhead.
   </Accordion>
 
-  <Accordion title="Repository Search Tools">
-    ### `search_codebase`
-    Search indexed repositories using natural language queries.
+  <Accordion title="Universal Search Tools">
+    ### `search`
+    Unified search across all indexed repositories, documentation, and research papers. Omit sources for universal hybrid search.
 
     **Parameters**:
     - `query` (str, required): Natural language search question
-    - `repositories` (List[str], optional): List of repositories to search (owner/repo format)
-    - `include_sources` (bool, default=True): Include source code snippets
+    - `repositories` (List[str], optional): List of repositories to search (owner/repo format). Auto-detected if omitted
+    - `data_sources` (List[str], optional): Documentation/research paper sources. Accepts flexible identifiers: UUID, display_name, URL, or arXiv abs/pdf URL. Auto-detected if omitted
+    - `search_mode` (str, default="unified"): Search scope - "unified", "repositories", or "sources"
+    - `include_sources` (bool, default=True): Include source code/document snippets
 
     **Returns**: AI-analyzed results with code snippets and explanations.
 
-    ### `regex_search`
-    Perform regex pattern search over indexed repository source code.
+    **Best for**: Searching across your indexed knowledge base with natural language.
+
+    ### `code_grep`
+    Regex search in indexed repository code. Exhaustive full-scan search.
 
     **Parameters**:
-    - `repositories` (List[str], required): List of repositories to search (owner/repo format)
-    - `query` (str, required): Natural language query or regex pattern
-    - `pattern` (str, optional): Explicit regex pattern (overrides automatic extraction)
-    - `file_extensions` (List[str], optional): Filter by file extensions (e.g., [".js", ".tsx"])
-    - `languages` (List[str], optional): Filter by programming languages
-    - `max_results` (int, default=50): Maximum number of results
-    - `include_context` (bool, default=True): Include surrounding context lines
-    - `context_lines` (int, default=3): Number of context lines before/after match
+    - `repository` (str, required): Repository identifier (owner/repo format)
+    - `pattern` (str, required): Regex pattern to search for
+    - `path` (str, default=""): Path prefix to limit search scope
+    - `case_sensitive` (bool, default=False): Case-sensitive matching
+    - `fixed_string` (bool, default=False): Treat pattern as literal string
+    - `whole_word` (bool, default=False): Match whole words only
+    - `context_lines` (int, optional): Number of context lines around matches
+    - `A` (int, optional): Lines to show after each match
+    - `B` (int, optional): Lines to show before each match
+    - `max_matches_per_file` (int, default=10): Per-file match limit
+    - `max_total_matches` (int, default=100): Total match limit
+    - `output_mode` (str, default="content"): "content", "files_with_matches", or "count"
+    - `highlight` (bool, default=False): Highlight matches in output
+    - `exhaustive` (bool, default=True): Full scan (True) or BM25 pre-filter (False)
 
-    **Best for**: Finding exact code patterns, function definitions, specific syntax.
+    **Best for**: Finding exact code patterns, function definitions, specific syntax in repos.
   </Accordion>
 
-  <Accordion title="Documentation Search Tools">
-    ### `search_documentation`
-    Search indexed documentation with natural language queries.
+  <Accordion title="Documentation Navigation Tools">
+    ### `doc_tree`
+    Get the full tree structure of indexed documentation.
 
     **Parameters**:
-    - `query` (str, required): Comprehensive natural language question (not just keywords)
-    - `sources` (List[str], optional): List of documentation identifiers (UUIDs preferred, also supports display names or URLs)
-    - `include_sources` (bool, default=True): Include source references
+    - `source_identifier` (str, required): Documentation identifier (UUID, display_name, or URL)
 
-    **Important**: UUIDs are the preferred identifier format for best performance.
+    **Returns**: Hierarchical tree structure of all pages in the documentation.
+
+    ### `doc_ls`
+    List contents of a directory in indexed documentation.
+
+    **Parameters**:
+    - `source_identifier` (str, required): Documentation identifier (UUID, display_name, or URL)
+    - `path` (str, default="/"): Virtual path to list
+
+    **Returns**: List of files and directories at the specified path.
+
+    ### `doc_read`
+    Read a specific documentation page by its virtual path.
+
+    **Parameters**:
+    - `source_identifier` (str, required): Documentation identifier (UUID, display_name, or URL)
+    - `path` (str, required): Virtual path to the page
+    - `line_start` (int, optional): Starting line number
+    - `line_end` (int, optional): Ending line number
+    - `max_length` (int, optional): Maximum characters to return
+
+    **Returns**: Full content of the documentation page.
+
+    ### `doc_grep`
+    Regex search across indexed documentation.
+
+    **Parameters**:
+    - `source_identifier` (str, required): Documentation identifier (UUID, display_name, or URL)
+    - `pattern` (str, required): Regex pattern to search for
+    - `path` (str, default="/"): Path prefix to limit search scope
+    - `case_sensitive` (bool, default=False): Case-sensitive matching
+    - `fixed_string` (bool, default=False): Treat pattern as literal string
+    - `whole_word` (bool, default=False): Match whole words only
+    - `context_lines` (int, optional): Number of context lines around matches
+    - `A` (int, optional): Lines to show after each match
+    - `B` (int, optional): Lines to show before each match
+    - `max_matches_per_file` (int, default=10): Per-file match limit
+    - `max_total_matches` (int, default=100): Total match limit
+    - `output_mode` (str, default="content"): "content", "files_with_matches", or "count"
+    - `highlight` (bool, default=False): Highlight matches in output
+
+    **Best for**: Finding specific terms, patterns, or code examples in documentation.
   </Accordion>
 
   <Accordion title="Resource Management">
     ### `manage_resource`
-    Unified resource management tool for repositories and documentation.
+    Unified resource management tool for repositories, documentation, and research papers.
 
     **Actions**:
 
     #### Action: "list"
-    List all indexed repositories and documentation with their status.
+    List all indexed resources with their status.
 
     **Parameters**:
     - `action` (str, required): "list"
-    - `resource_type` (str, optional): Filter by "repository", "documentation", or None for all
+    - `resource_type` (str, optional): Filter by "repository", "documentation", "research_paper", or None for all
+    - `query` (str, optional): Text filter (matches repo/display_name/url/title/id)
+    - `limit` (int, default=10): Maximum items to return per section (1-100)
+    - `offset` (int, default=0): Pagination offset
+    - `view` (str, default="auto"): Output detail level - "auto", "summary", "compact", "detailed"
+    - `show_all` (bool, default=False): Ignore limit/offset and show all matches
 
     #### Action: "status"
     Check indexing progress and status of any resource.
 
     **Parameters**:
     - `action` (str, required): "status"
-    - `resource_type` (str, required): "repository" or "documentation"
-    - `identifier` (str, required): Repository name (owner/repo) or documentation UUID/URL
+    - `resource_type` (str, required): "repository", "documentation", or "research_paper"
+    - `identifier` (str, required): Repository name (owner/repo), documentation UUID/URL, or paper identifier
 
     #### Action: "rename"
     Rename a resource for better organization.
 
     **Parameters**:
     - `action` (str, required): "rename"
-    - `resource_type` (str, required): "repository" or "documentation"
+    - `resource_type` (str, required): "repository", "documentation", or "research_paper"
     - `identifier` (str, required): Resource identifier (owner/repo or UUID/URL)
     - `new_name` (str, required): New display name (1-100 characters)
 
@@ -235,12 +295,13 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
     **Parameters**:
     - `action` (str, required): "delete"
-    - `resource_type` (str, required): "repository" or "documentation"
+    - `resource_type` (str, required): "repository", "documentation", or "research_paper"
     - `identifier` (str, required): Resource identifier (owner/repo or UUID/URL)
 
     **Identifier Formats**:
     - For repositories: owner/repo format (e.g., "facebook/react")
     - For documentation: UUID preferred, also supports display name or URL
+    - For research papers: UUID or arXiv abs/pdf URL
   </Accordion>
 
   <Accordion title="Web Search & Research Tools">
@@ -250,10 +311,11 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     **Use Cases**: Finding specific repos/docs, trending technologies, similar content
 
     **Parameters**:
-    - `query` (str): Natural language search query
+    - `query` (str, required): Natural language search query
     - `num_results` (int, default=5): Number of results (max: 10)
-    - `category` (str, optional): Filter by type ("github", "company", etc.)
-    - `days_back` (int, optional): Recent content only
+    - `category` (str, optional): Filter by type - "github", "company", "research paper", "news", "tweet", "pdf"
+    - `days_back` (int, optional): Recency filter - only return content from last N days
+    - `find_similar_to` (str, optional): URL to find similar content for
 
     ### `nia_deep_research_agent`
     Comprehensive multi-step research and analysis.
@@ -261,7 +323,7 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     **Use Cases**: Comparative analysis, pros/cons evaluation, technology selection
 
     **Parameters**:
-    - `query` (str): Research question
+    - `query` (str, required): Research question
     - `output_format` (str, optional): Structure hint (e.g., "comparison table")
 
     **Tool Selection Guide**:
@@ -310,11 +372,27 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     - `context_id` (str, required): Unique context ID
 
     #### Action: "search"
-    Search contexts by keyword.
+    Search contexts by keyword (basic keyword matching).
 
     **Parameters**:
     - `action` (str, required): "search"
     - `query` (str, required): Search query (matches title, summary, content, tags)
+    - `limit` (int, default=20): Maximum results (1-100)
+
+    #### Action: "semantic-search"
+    Search contexts using AI-powered semantic understanding.
+
+    **Parameters**:
+    - `action` (str, required): "semantic-search"
+    - `query` (str, required): Natural language search query
+    - `limit` (int, default=20): Maximum results (1-100)
+
+    #### Action: "keyword-search"
+    Search contexts using exact keyword matching.
+
+    **Parameters**:
+    - `action` (str, required): "keyword-search"
+    - `query` (str, required): Keywords to search for
     - `limit` (int, default=20): Maximum results (1-100)
 
     #### Action: "update"

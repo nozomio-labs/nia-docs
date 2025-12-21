@@ -1,6 +1,6 @@
 ---
 title: 'Troubleshooting'
-description: 'Common issues and solutions for Nia MCP Server'
+description: 'Common issues and solutions for Nia'
 ---
 
 ## Common Issues
@@ -137,24 +137,17 @@ description: 'Common issues and solutions for Nia MCP Server'
     - Free tier includes 3 indexing jobs and limited searches
   </Accordion>
 
-  <Accordion title="Indexing never completes">
-    **Problem:** Repository or documentation indexing seems stuck.
+  <Accordion title="GitHub app stuck during onboarding">
+    **Problem:** The GitHub app installation doesn't complete or gets stuck during onboarding.
     
     **Solution:**
-    1. Use the status checking tools to monitor progress:
-       - `check_repository_status` for repositories
-       - `check_documentation_status` for documentation
+    1. Go to GitHub → Settings → Applications → Installed GitHub Apps
+    2. Find and remove the **Nia** app
+    3. Return to [app.trynia.ai](https://app.trynia.ai) and restart the onboarding process
     
-    2. Large repositories/sites may take several minutes to index
-    
-    3. Check for:
-       - Valid repository URL (must be public or you have access)
-       - Stable internet connection
-       - API key has remaining credits
-    
-    4. Try re-indexing if the process fails:
-       - Delete the failed index first
-       - Attempt indexing again with correct parameters
+    <Note>
+      You don't have to give Nia access to your own repositories. The GitHub app connection is only used to avoid GitHub's API rate limits when indexing public repositories. You can skip granting access to personal repos entirely.
+    </Note>
   </Accordion>
 </AccordionGroup>
 
