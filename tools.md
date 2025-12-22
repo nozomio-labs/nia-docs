@@ -1,5 +1,6 @@
 # Tools
 
+```python
 @mcp.tool()
 async def index(
     url: str,
@@ -4627,3 +4628,4 @@ def run():
         loop = asyncio.new_event_loop()
         loop.run_until_complete(cleanup())
         loop.close()
+```

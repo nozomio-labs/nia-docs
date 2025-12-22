@@ -10,7 +10,7 @@ info:
     - Research paper indexing (arXiv support with automatic metadata extraction)
     - AI-powered search across code, documentation, and research papers
     - Advanced regex pattern search over indexed repositories
-    - Package source code search across npm, PyPI, crates.io, and Go modules (powered by Chroma)
+    - Package source code search across npm, PyPI, crates.io, and Go modules
     - Web search and deep research capabilities
     - Cross-agent conversation context sharing with semantic search
     - Real-time status checking for indexing operations
@@ -1845,14 +1845,14 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
-  /repositories/{repository_id}/github-tree:
+  /repositories/{repository_id}/tree:
     get:
-      summary: Get GitHub tree structure
+      summary: Get repository tree structure
       description: |
         Get the file and folder structure directly from GitHub API (no indexing required).
         This endpoint provides a fast way to explore repository structure with flexible filtering
         options for paths and file extensions.
-      operationId: getGitHubTree
+      operationId: getRepositoryTree
       tags:
         - Repositories
       parameters:
@@ -1917,7 +1917,7 @@ paths:
           description: Show full paths instead of tree structure
       responses:
         '200':
-          description: GitHub tree retrieved successfully
+          description: Repository tree retrieved successfully
           content:
             application/json:
               schema:
@@ -1932,6 +1932,72 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '404':
           description: Repository not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /repositories/{repository_id}/content:
+    post:
+      summary: Get repository file content
+      description: |
+        Retrieve the full content of a file from an indexed repository.
+        Provide the file path within the repository to get its contents.
+      operationId: getRepositoryContent
+      tags:
+        - Repositories
+      parameters:
+        - name: repository_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Repository identifier in owner/repo format
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - file_path
+              properties:
+                file_path:
+                  type: string
+                  description: Path to the file within the repository
+                  example: "src/main.py"
+      responses:
+        '200':
+          description: File content retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  content:
+                    type: string
+                    description: Full file content
+                  metadata:
+                    type: object
+                    properties:
+                      file_path:
+                        type: string
+                      language:
+                        type: string
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Repository or file not found
           content:
             application/json:
               schema:
@@ -2005,7 +2071,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /query:
+  /search/query:
     post:
       summary: Query indexed repositories and documentation
       description: |
@@ -2014,9 +2080,9 @@ paths:
         - 'repositories': Search only code repositories (default)
         - 'sources': Search only documentation sources (returns vector search results without LLM processing)
         Supports both streaming and non-streaming responses.
-      operationId: query
+      operationId: searchQuery
       tags:
-        - Query
+        - Search
       requestBody:
         required: true
         content:
@@ -2064,15 +2130,15 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
-  /web-search:
+  /search/web:
     post:
       summary: Web search
       description: |
         Perform a web search to find relevant content.
         Supports filtering by category and time range, as well as finding similar content to a given URL.
-      operationId: webSearch
+      operationId: searchWeb
       tags:
-        - Search & Research
+        - Search
       requestBody:
         required: true
         content:
@@ -2097,7 +2163,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /deep-research:
+  /search/deep:
     post:
       summary: Deep research agent (Pro only)
       description: |
@@ -2105,9 +2171,9 @@ paths:
         This endpoint is only available for Pro subscription users. The research agent will
         analyze multiple sources, synthesize information, and provide comprehensive answers
         with citations.
-      operationId: deepResearch
+      operationId: searchDeep
       tags:
-        - Search & Research
+        - Search
       requestBody:
         required: true
         content:
@@ -2144,7 +2210,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /universal-search:
+  /search/universal:
     post:
       summary: Universal search across all public sources
       description: |
@@ -2159,34 +2225,15 @@ paths:
         Use this when you want to discover relevant content without knowing which specific sources to search.
         
         **Performance**: Typically returns results in 1-3 seconds for thousands of indexed sources.
-      operationId: universalSearch
+      operationId: searchUniversal
       tags:
-        - Search & Research
+        - Search
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/UniversalSearchRequest'
-            examples:
-              basic:
-                summary: Basic universal search
-                value:
-                  query: "How to implement authentication in FastAPI?"
-                  top_k: 20
-              filtered:
-                summary: Search only documentation
-                value:
-                  query: "React hooks best practices"
-                  top_k: 10
-                  include_repos: false
-                  include_docs: true
-              compressed:
-                summary: Get AI-compressed answer
-                value:
-                  query: "What is the difference between useState and useReducer?"
-                  top_k: 20
-                  compress_output: true
       responses:
         '200':
           description: Search completed successfully
@@ -2194,92 +2241,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UniversalSearchResponse'
-              examples:
-                success:
-                  summary: Successful search results
-                  value:
-                    results:
-                      - content: "FastAPI provides built-in support for OAuth2..."
-                        score: 0.95
-                        source:
-                          type: "documentation"
-                          url: "https://fastapi.tiangolo.com"
-                          namespace: "public-docs-abc123"
-                          file_path: "/security/oauth2"
-                      - content: "Example authentication implementation..."
-                        score: 0.89
-                        source:
-                          type: "repository"
-                          url: "https://github.com/fastapi/fastapi"
-                          namespace: "public-repo-def456"
-                          file_path: "examples/security/oauth2.py"
-                    sources_searched: 5
-                    query_time_ms: 1250
-                    errors: null
-                    answer: null
-                compressed:
-                  summary: AI-compressed answer
-                  value:
-                    results: []
-                    sources_searched: 5
-                    query_time_ms: 2500
-                    errors: null
-                    answer: "FastAPI supports OAuth2 authentication through its security utilities. Here's a basic example: [Source 1]..."
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '429':
           $ref: '#/components/responses/RateLimitError'
         '500':
-          description: Search failed
+          description: Search execution error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
-  /sources/content:
-    post:
-      summary: Get full source content
-      description: |
-        Retrieve the full content of a specific source file or document identified during search.
-        This endpoint allows fetching complete content when the truncated search results are insufficient.
-      operationId: getSourceContent
-      tags:
-        - Search & Research
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SourceContentRequest'
-      responses:
-        '200':
-          description: Source content retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SourceContentResponse'
-        '400':
-          description: Invalid source type
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          description: Access denied to source
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Source not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '429':
-          $ref: '#/components/responses/RateLimitError'
 
   /data-sources:
     get:
@@ -2450,11 +2421,13 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
-  /data-sources/{source_id}/rename:
-    patch:
-      summary: Rename a data source (Legacy)
-      description: Update the display name of an indexed data source using UUID identifier only
-      operationId: renameDataSourceLegacy
+  /data-sources/{source_id}/content:
+    post:
+      summary: Get data source page content
+      description: |
+        Retrieve the full content of a page from an indexed documentation source.
+        Provide the virtual path within the documentation to get its contents.
+      operationId: getDataSourceContent
       tags:
         - Data Sources
       parameters:
@@ -2463,16 +2436,27 @@ paths:
           required: true
           schema:
             type: string
-          description: UUID identifier of the data source to rename
+          description: |
+            Flexible data source identifier. Can be:
+            - UUID (e.g., "550e8400-e29b-41d4-a716-446655440000")
+            - Display name (e.g., "Vercel AI SDK - Core")
+            - URL (e.g., "https://docs.trynia.ai/")
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RenameRequest'
+              type: object
+              required:
+                - path
+              properties:
+                path:
+                  type: string
+                  description: Virtual path to the page within the documentation
+                  example: "/getting-started/installation"
       responses:
         '200':
-          description: Data source renamed successfully
+          description: Page content retrieved successfully
           content:
             application/json:
               schema:
@@ -2480,28 +2464,29 @@ paths:
                 properties:
                   success:
                     type: boolean
-                  source_id:
+                  content:
                     type: string
-                  display_name:
+                    description: Full page content in markdown format
+                  url:
                     type: string
-                  message:
-                    type: string
+                    description: Original URL of the page
+                  metadata:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                      total_lines:
+                        type: integer
         '400':
-          description: Invalid request (e.g., empty name)
+          description: Invalid request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          description: Access denied to data source
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
         '404':
-          description: Data source not found
+          description: Data source or page not found
           content:
             application/json:
               schema:
@@ -3004,6 +2989,58 @@ paths:
           $ref: '#/components/responses/RateLimitError'
 
   /research-papers:
+    get:
+      summary: List indexed research papers
+      description: |
+        List all research papers that have been indexed by the authenticated user.
+        Returns paper metadata including arXiv ID, title, authors, and indexing status.
+      operationId: listResearchPapers
+      tags:
+        - Research Papers
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Maximum number of papers to return
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of papers to skip (for pagination)
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [processing, completed, failed]
+          description: Filter by indexing status
+      responses:
+        '200':
+          description: Research papers retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  papers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ResearchPaperResponse'
+                  total:
+                    type: integer
+                    description: Total number of matching papers
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
     post:
       summary: Index a research paper
       description: |
@@ -3148,7 +3185,7 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
         '500':
-          description: Chroma service error or package not found
+          description: Service error or package not found
           content:
             application/json:
               schema:
@@ -3188,7 +3225,7 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
         '500':
-          description: Chroma service error or package not found
+          description: Service error or package not found
           content:
             application/json:
               schema:
@@ -3247,7 +3284,7 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
         '500':
-          description: Chroma service error or file not found
+          description: Service error or file not found
           content:
             application/json:
               schema:
@@ -3259,7 +3296,7 @@ paths:
       description: |
         Execute comprehensive Oracle research using the full autonomous agent with extended thinking.
         
-        The Oracle agent uses Claude's extended thinking capabilities to plan and execute multi-step
+        The Oracle agent uses extended thinking capabilities to plan and execute multi-step
         research autonomously. It has access to a diverse set of tools including:
         - **Discovery**: list_repositories, list_documentation
         - **Web Research**: run_web_search, web_fetch (server-side)
@@ -3325,8 +3362,8 @@ paths:
         - **heartbeat**: Connection keep-alive (every 0.5s during idle)
         - **error**: Error occurred during research
         
-        The Oracle agent uses Claude's extended thinking and has access to all tools including
-        web search, code search, documentation search, and the new doc filesystem tools
+        The Oracle agent uses extended thinking and has access to all tools including
+        web search, code search, documentation search, and the doc filesystem tools
         (doc_tree, doc_ls, doc_read, doc_grep).
       operationId: oracleResearchStream
       tags:
@@ -3365,11 +3402,11 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
 
-  /oracle/history:
+  /oracle/sessions:
     get:
-      summary: List Oracle research history
+      summary: List Oracle research sessions
       description: List recent Oracle research sessions for the authenticated API key
-      operationId: listOracleHistory
+      operationId: listOracleSessions
       tags:
         - Oracle Research
       parameters:
@@ -3391,7 +3428,7 @@ paths:
           description: Number of sessions to skip (for pagination)
       responses:
         '200':
-          description: Session history retrieved
+          description: Session list retrieved
           content:
             application/json:
               schema:
@@ -3404,11 +3441,11 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
-  /oracle/history/{session_id}:
+  /oracle/sessions/{session_id}:
     get:
       summary: Get Oracle research session details
       description: Retrieve full details of a specific Oracle research session
-      operationId: getOracleSession
+      operationId: getOracleSessionDetail
       tags:
         - Oracle Research
       parameters:
@@ -3530,7 +3567,7 @@ paths:
     post:
       summary: Create Oracle research job (Pro only)
       description: |
-        Create a new Oracle research job that runs asynchronously via Hatchet workflow.
+        Create a new Oracle research job that runs asynchronously.
         
         This is the recommended way to run Oracle research as it:
         - Queues jobs for reliable execution
@@ -3558,7 +3595,7 @@ paths:
                 properties:
                   job_id:
                     type: string
-                    description: Unique job identifier (Hatchet workflow run ID)
+                    description: Unique job identifier
                   session_id:
                     type: string
                     description: Research session identifier
@@ -3680,7 +3717,7 @@ paths:
           required: true
           schema:
             type: string
-          description: Job identifier (Hatchet workflow run ID)
+          description: Job identifier
       responses:
         '200':
           description: Job details retrieved successfully
@@ -3800,7 +3837,7 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimitError'
         '500':
-          description: Failed to cancel job in Hatchet
+          description: Failed to cancel job
           content:
             application/json:
               schema:
@@ -3824,7 +3861,7 @@ paths:
         - `generating_report`: Final report synthesis starting
         - `complete`: Research finished with full result
         - `error`: Error occurred
-        - `workflow_event`: Hatchet workflow state change
+        - `workflow_event`: Workflow state change
       operationId: streamOracleJob
       tags:
         - Oracle Research
@@ -3876,7 +3913,7 @@ paths:
       summary: Save conversation context
       description: |
         Save a new conversation context for cross-agent sharing.
-        Contexts are stored and indexed in the vector store for semantic search.
+        Contexts are stored and indexed in a vector store for semantic search.
         Supports organization-level contexts for team collaboration.
       operationId: saveContext
       tags:
@@ -3989,7 +4026,7 @@ paths:
     get:
       summary: Text search contexts
       description: |
-        Search conversation contexts by content, title, summary, or tags using text search.
+        Search conversation contexts by content, title, summary, or tags using MongoDB text search.
         This is a simpler, faster alternative to semantic search for exact matches.
       operationId: searchContexts
       tags:
@@ -4055,7 +4092,7 @@ paths:
       summary: Semantic search contexts
       description: |
         Semantic search conversation contexts using vector embeddings and hybrid (vector + BM25) search.
-        Uses fast similarity search across context content.
+        Uses vector store for fast similarity search across context content.
         Returns results ranked by relevance with optional match highlights and workspace filtering.
       operationId: semanticSearchContexts
       tags:
@@ -4142,7 +4179,7 @@ paths:
                         type: integer
                       vector_matches:
                         type: integer
-                      text_matches:
+                      mongodb_matches:
                         type: integer
                   suggestions:
                     type: object
@@ -4376,7 +4413,7 @@ tags:
   - name: Search & Research
     description: Web search, deep research, and universal search operations
   - name: Package Search
-    description: Chroma-powered package source code search across npm, PyPI, crates.io, and Go modules
+    description: Package source code search across npm, PyPI, crates.io, and Go modules
   - name: Context Sharing
     description: Cross-agent conversation context sharing with vector search capabilities
   - name: Oracle Research
