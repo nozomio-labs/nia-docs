@@ -70,6 +70,19 @@
       {
         "tab": "API Reference",
         "openapi": "/openapi-v2.yaml"
+      },
+      {
+        "tab": "Python SDK",
+        "groups": [
+          {
+            "group": "SDK",
+            "pages": [
+              "sdk/quickstart",
+              "sdk/authentication",
+              "sdk/examples"
+            ]
+          }
+        ]
       }
     ],
     "global": {

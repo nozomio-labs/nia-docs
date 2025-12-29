@@ -1,0 +1,110 @@
+---
+title: "Authentication"
+description: "Configure API keys and client authentication"
+---
+
+## Getting Your API Key
+
+1. Go to [app.trynia.ai](https://app.trynia.ai)
+2. Sign in or create an account
+3. Navigate to Settings → API Keys
+4. Create a new API key
+
+<Warning>
+Keep your API key secure. Never commit it to version control or expose it in client-side code.
+</Warning>
+
+## Client Configuration
+
+### Basic Setup
+
+```python
+from nia_ai_api_client import AuthenticatedClient
+
+client = AuthenticatedClient(
+    base_url="https://apigcp.trynia.ai/v2",
+    token="nia_your_api_key"
+)
+```
+
+### Environment Variables
+
+We recommend storing your API key in environment variables:
+
+```python
+import os
+from nia_ai_api_client import AuthenticatedClient
+
+client = AuthenticatedClient(
+    base_url="https://apigcp.trynia.ai/v2",
+    token=os.environ["NIA_API_KEY"]
+)
+```
+
+```bash
+export NIA_API_KEY="nia_your_api_key"
+```
+
+### Custom HTTP Client
+
+For advanced use cases, you can customize the underlying HTTP client:
+
+```python
+import httpx
+from nia_ai_api_client import AuthenticatedClient
+
+# Custom timeout
+client = AuthenticatedClient(
+    base_url="https://apigcp.trynia.ai/v2",
+    token="nia_your_api_key",
+    timeout=60.0
+)
+```
+
+### Context Manager
+
+Use the client as a context manager for automatic cleanup:
+
+```python
+from nia_ai_api_client import AuthenticatedClient
+from nia_ai_api_client.api.repositories import list_repositories
+
+with AuthenticatedClient(
+    base_url="https://apigcp.trynia.ai/v2",
+    token="nia_your_api_key"
+) as client:
+    repos = list_repositories.sync(client=client)
+```
+
+## Rate Limits
+
+API rate limits depend on your plan:
+
+| Plan | Requests/min | Indexed Repos |
+|------|--------------|---------------|
+| Free | 10 | 3 |
+| Pro | 60 | Unlimited |
+| Enterprise | Custom | Unlimited |
+
+<Info>
+Rate limit headers are included in all responses:
+- `X-RateLimit-Limit`
+- `X-RateLimit-Remaining`
+- `X-RateLimit-Reset`
+</Info>
+
+## Error Handling
+
+```python
+from nia_ai_api_client.api.repositories import list_repositories
+from nia_ai_api_client.types import Response
+
+response: Response = list_repositories.sync_detailed(client=client)
+
+if response.status_code == 200:
+    print(response.parsed)
+elif response.status_code == 401:
+    print("Invalid API key")
+elif response.status_code == 429:
+    print("Rate limited - retry after:", response.headers.get("Retry-After"))
+```

@@ -1,0 +1,302 @@
+---
+title: "Examples"
+description: "Complete code examples for the Nia AI SDK"
+---
+
+## Repository Operations
+
+### Index a Repository
+
+```python
+from nia_ai_api_client import AuthenticatedClient
+from nia_ai_api_client.api.repositories import index_repository
+from nia_ai_api_client.models import RepositoryRequest
+
+client = AuthenticatedClient(
+    base_url="https://apigcp.trynia.ai/v2",
+    token="nia_your_api_key"
+)
+
+# Index a public repository
+request = RepositoryRequest(repository="vercel/ai")
+result = index_repository.sync(client=client, body=request)
+print(f"Indexing started: {result.data.repository} - {result.data.status}")
+```
+
+### Check Repository Status
+
+```python
+from nia_ai_api_client.api.repositories import get_repository_status
+
+status = get_repository_status.sync(
+    client=client,
+    repository_id="vercel/ai"
+)
+
+print(f"Status: {status.status}")
+if status.progress:
+    print(f"Progress: {status.progress.percentage}%")
+```
+
+### Browse Repository Tree
+
+```python
+from nia_ai_api_client.api.repositories import get_repository_tree
+
+tree = get_repository_tree.sync(
+    client=client,
+    repository_id="vercel/ai"
+)
+
+for item in tree.items:
+    print(f"{'📁' if item.type == 'directory' else '📄'} {item.path}")
+```
+
+### Read File Content
+
+```python
+from nia_ai_api_client.api.repositories import get_repository_content
+
+content = get_repository_content.sync(
+    client=client,
+    repository_id="vercel/ai",
+    path="packages/ai/src/index.ts"
+)
+
+print(content.content)
+```
+
+### Grep Search in Repository
+
+```python
+from nia_ai_api_client.api.repositories import grep_repository
+from nia_ai_api_client.models import CodeGrepRequest
+
+request = CodeGrepRequest(
+    pattern="async function",
+    path="src/",  # optional path filter
+    context_lines=2
+)
+
+results = grep_repository.sync(
+    client=client,
+    repository_id="vercel/ai",
+    body=request
+)
+
+for match in results.matches:
+    print(f"{match.file}:{match.line_number}")
+    print(f"  {match.content}")
+```
+
+---
+
+## AI Search
+
+### Semantic Code Search
+
+```python
+from nia_ai_api_client.api.search import search_query
+from nia_ai_api_client.models import QueryRequest, QueryRequestMessagesItem
+
+request = QueryRequest(
+    messages=[
+        QueryRequestMessagesItem(
+            role="user",
+            content="How does streaming work in the AI SDK?"
+        )
+    ],
+    repositories=[{"repository": "vercel/ai"}],
+    include_sources=True
+)
+
+result = search_query.sync(client=client, body=request)
+
+print("Answer:", result.content)
+print("\nSources:")
+for source in result.sources:
+    print(f"  - {source.path}")
+```
+
+### Universal Search (Auto-routes to indexed sources)
+
+```python
+from nia_ai_api_client.api.search import search_universal
+from nia_ai_api_client.models import UniversalSearchRequest
+
+request = UniversalSearchRequest(
+    query="How to implement tool calling?"
+)
+
+result = search_universal.sync(client=client, body=request)
+print(result.content)
+```
+
+### Web Search
+
+```python
+from nia_ai_api_client.api.search import search_web
+from nia_ai_api_client.models import WebSearchRequest
+
+request = WebSearchRequest(
+    query="latest LLM developments 2024",
+    num_results=5
+)
+
+results = search_web.sync(client=client, body=request)
+for item in results.results:
+    print(f"{item.title}: {item.url}")
+```
+
+---
+
+## Documentation Sources
+
+### Index Documentation
+
+```python
+from nia_ai_api_client.api.data_sources import create_data_source
+from nia_ai_api_client.models import DataSourceRequest
+
+request = DataSourceRequest(
+    url="https://docs.anthropic.com",
+    display_name="Anthropic Docs"
+)
+
+result = create_data_source.sync(client=client, body=request)
+print(f"Indexing: {result.source_id}")
+```
+
+### List Data Sources
+
+```python
+from nia_ai_api_client.api.data_sources import list_data_sources
+
+sources = list_data_sources.sync(client=client)
+
+for source in sources.sources:
+    print(f"{source.display_name} ({source.status})")
+```
+
+### Search Documentation
+
+```python
+from nia_ai_api_client.api.search import search_query
+from nia_ai_api_client.models import QueryRequest, QueryRequestMessagesItem
+
+request = QueryRequest(
+    messages=[
+        QueryRequestMessagesItem(
+            role="user",
+            content="How to use Claude's tool use feature?"
+        )
+    ],
+    data_sources=["Anthropic Docs"],  # by display name
+    search_mode="sources"
+)
+
+result = search_query.sync(client=client, body=request)
+print(result.content)
+```
+
+---
+
+## Research Papers
+
+### Index arXiv Paper
+
+```python
+from nia_ai_api_client.api.research_papers import index_research_paper
+from nia_ai_api_client.models import ResearchPaperRequest
+
+request = ResearchPaperRequest(
+    url="https://arxiv.org/abs/2303.08774"  # GPT-4 paper
+)
+
+result = index_research_paper.sync(client=client, body=request)
+print(f"Paper: {result.title}")
+print(f"Authors: {', '.join(result.authors)}")
+```
+
+---
+
+## Package Search
+
+Search code in public packages without indexing:
+
+```python
+from nia_ai_api_client.api.package_search import package_search_hybrid
+from nia_ai_api_client.models import PackageSearchHybridRequest
+
+request = PackageSearchHybridRequest(
+    registry="py_pi",
+    package_name="openai",
+    semantic_queries=["How does streaming work?"]
+)
+
+results = package_search_hybrid.sync(client=client, body=request)
+for result in results.results:
+    print(f"{result.file}: {result.snippet}")
+```
+
+---
+
+## Oracle (Deep Research)
+
+### Start Research Job
+
+```python
+from nia_ai_api_client.api.oracle_research import create_oracle_job
+from nia_ai_api_client.models import OracleResearchRequest
+
+request = OracleResearchRequest(
+    query="Compare React Server Components vs traditional SSR",
+    repositories=["vercel/next.js"],
+    output_format="comparison table"
+)
+
+job = create_oracle_job.sync(client=client, body=request)
+print(f"Job ID: {job.job_id}")
+```
+
+### Check Job Status
+
+```python
+from nia_ai_api_client.api.oracle_research import get_oracle_job
+
+job = get_oracle_job.sync(client=client, job_id="job_123")
+
+print(f"Status: {job.status}")
+if job.status == "completed":
+    print(f"Result: {job.result}")
+```
+
+---
+
+## Context Sharing
+
+Save and retrieve context across sessions:
+
+```python
+from nia_ai_api_client.api.context_sharing import save_context, search_contexts
+from nia_ai_api_client.models import ContextShareRequest, ContextSearchRequest
+
+# Save context
+request = ContextShareRequest(
+    title="Auth implementation notes",
+    summary="Implemented OAuth2 flow with refresh tokens",
+    content="Detailed implementation notes...",
+    tags=["auth", "oauth"]
+)
+
+context = save_context.sync(client=client, body=request)
+print(f"Saved: {context.id}")
+
+# Search contexts
+search_request = ContextSearchRequest(query="authentication")
+results = search_contexts.sync(client=client, body=search_request)
+
+for ctx in results:
+    print(f"{ctx.title}: {ctx.summary}")
+```
+

@@ -1,0 +1,103 @@
+---
+title: "Python SDK"
+description: "Get started with the Nia AI Python SDK"
+---
+
+## Installation
+
+```bash
+pip install nia-ai-sdk
+```
+
+Or with uv:
+
+```bash
+uv add nia-ai-sdk
+```
+
+## Quick Start
+
+```python
+from nia_ai_api_client import AuthenticatedClient
+
+# Initialize the client
+client = AuthenticatedClient(
+    base_url="https://apigcp.trynia.ai/v2",
+    token="nia_your_api_key"
+)
+```
+
+## Basic Operations
+
+### List Your Repositories
+
+```python
+from nia_ai_api_client.api.repositories import list_repositories
+
+repos = list_repositories.sync(client=client)
+
+for repo in repos:
+    print(f"{repo.repository} - {repo.status}")
+```
+
+### Index a Repository
+
+```python
+from nia_ai_api_client.api.repositories import index_repository
+from nia_ai_api_client.models import RepositoryRequest
+
+request = RepositoryRequest(
+    repository="owner/repo",
+    branch="main"  # optional
+)
+
+result = index_repository.sync(client=client, body=request)
+print(f"Status: {result.data.status}")
+```
+
+### Search Code
+
+```python
+from nia_ai_api_client.api.search import search_query
+from nia_ai_api_client.models import QueryRequest, QueryRequestMessagesItem
+
+request = QueryRequest(
+    messages=[
+        QueryRequestMessagesItem(
+            role="user",
+            content="How does authentication work?"
+        )
+    ],
+    repositories=[{"repository": "owner/repo"}]
+)
+
+result = search_query.sync(client=client, body=request)
+print(result.content)
+```
+
+## Async Support
+
+All methods have async variants:
+
+```python
+import asyncio
+from nia_ai_api_client.api.repositories import list_repositories
+
+async def main():
+    repos = await list_repositories.asyncio(client=client)
+    for repo in repos:
+        print(repo.repository)
+
+asyncio.run(main())
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/sdk/authentication">
+    Configure API keys and authentication
+  </Card>
+  <Card title="Examples" icon="code" href="/sdk/examples">
+    Complete code examples for all operations
+  </Card>
+</CardGroup>
