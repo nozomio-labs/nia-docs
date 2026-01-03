@@ -1940,7 +1940,7 @@ paths:
           $ref: '#/components/responses/RateLimitError'
 
   /repositories/{repository_id}/content:
-    post:
+    get:
       summary: Get repository file content
       description: |
         Retrieve the full content of a file from an indexed repository.
@@ -1955,19 +1955,19 @@ paths:
           schema:
             type: string
           description: Repository identifier in owner/repo format
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - file_path
-              properties:
-                file_path:
-                  type: string
-                  description: Path to the file within the repository
-                  example: "src/main.py"
+        - name: path
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Path to the file within the repository
+          example: "src/main.py"
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Branch to read from (optional)
       responses:
         '200':
           description: File content retrieved successfully
@@ -2422,11 +2422,11 @@ paths:
           $ref: '#/components/responses/RateLimitError'
 
   /data-sources/{source_id}/content:
-    post:
+    get:
       summary: Get data source page content
       description: |
         Retrieve the full content of a page from an indexed documentation source.
-        Provide the virtual path within the documentation to get its contents.
+        Provide either a virtual path or direct URL to get the page contents.
       operationId: getDataSourceContent
       tags:
         - Data Sources
@@ -2441,19 +2441,19 @@ paths:
             - UUID (e.g., "550e8400-e29b-41d4-a716-446655440000")
             - Display name (e.g., "Vercel AI SDK - Core")
             - URL (e.g., "https://docs.trynia.ai/")
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - path
-              properties:
-                path:
-                  type: string
-                  description: Virtual path to the page within the documentation
-                  example: "/getting-started/installation"
+        - name: path
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Virtual path to the page within the documentation
+          example: "/getting-started/installation"
+        - name: url
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Direct URL of the page (alternative to path)
       responses:
         '200':
           description: Page content retrieved successfully
