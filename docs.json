@@ -38,6 +38,7 @@
             "group": "Features",
             "pages": [
               "tools-features",
+              "local-sync",
               "research-papers",
               "pre-indexed-sources",
               "context-sharing",

@@ -1,0 +1,211 @@
+---
+title: 'Local Sync'
+description: 'Continuously sync local folders, databases, and chat history to Nia.'
+---
+
+Nia Sync is a standalone CLI daemon that continuously synchronizes your local data sources with Nia, enabling AI agents to search your personal knowledge base.
+
+<Info>
+  **Privacy First**: Local folders are private to your account. They're searched separately from public repositories and documentation.
+</Info>
+
+---
+
+## Quick Install
+
+```bash
+curl -fsSL https://app.trynia.ai/install-sync | bash
+```
+
+Or install via pip:
+
+```bash
+pip install nia-sync
+```
+
+---
+
+## Getting Started
+
+<Steps>
+  <Step title="Login">
+    Authenticate with your Nia account:
+    ```bash
+    nia login
+    ```
+    This opens your browser for secure OAuth authentication.
+  </Step>
+
+  <Step title="Add a Source">
+    Add a local folder or database to sync:
+    ```bash
+    nia add ~/Documents/notes
+    ```
+    The CLI auto-detects known database paths (iMessage, browser history, etc.).
+  </Step>
+
+  <Step title="Start Syncing">
+    Start the sync daemon:
+    ```bash
+    nia start
+    ```
+    The daemon watches for file changes and syncs incrementally.
+  </Step>
+
+  <Step title="Check Status">
+    View all synced sources:
+    ```bash
+    nia status
+    ```
+  </Step>
+</Steps>
+
+---
+
+## CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `nia login` | Browser-based OAuth authentication |
+| `nia logout` | Clear stored credentials |
+| `nia status` | Show all configured sources with sync status |
+| `nia start` | Start sync daemon (watch mode by default) |
+| `nia --poll` | Start daemon in polling mode (no file watching) |
+| `nia once` | Run one-time sync then exit |
+| `nia add <path>` | Add new source for sync |
+| `nia link <ID> <path>` | Link cloud source to local path |
+| `nia remove <ID>` | Remove source from sync |
+| `nia upgrade` | Check and install updates |
+
+---
+
+## Supported Data Sources
+
+Nia Sync automatically extracts and indexes content from various data sources:
+
+<CardGroup cols={2}>
+  <Card title="Chat & Messages" icon="message">
+    - **iMessage** (`~/Library/Messages/chat.db`)
+    - **Telegram** (JSON exports, ZIP files)
+  </Card>
+
+  <Card title="Browser History" icon="globe">
+    - **Safari** (`~/Library/Safari/History.db`)
+    - **Chrome** / **Brave** / **Edge**
+    - **Firefox**
+  </Card>
+
+  <Card title="Databases" icon="database">
+    - Generic **SQLite** databases
+    - Auto-extracts tables into searchable text
+  </Card>
+
+  <Card title="Folders" icon="folder">
+    - Regular folders with text files
+    - Code, notes, documentation
+  </Card>
+</CardGroup>
+
+### Virtual File Format
+
+Database content is extracted into virtual text files for semantic search:
+
+| Source | Virtual Path Format |
+|--------|---------------------|
+| iMessage | `messages/{contact}/{date}_{row_id}_{direction}.txt` |
+| Safari/Chrome/Firefox | `history/{domain}/{date}_{id}.txt` |
+| Telegram | `telegram/{chat_name}/{date}_{msg_id}.txt` |
+
+---
+
+## Web UI
+
+You can also manage synced sources from the Nia web app:
+
+1. Go to [app.trynia.ai](https://app.trynia.ai)
+2. Navigate to **Settings → Local Sync**
+3. View sync status, add/remove sources, and configure sync intervals
+
+### Sync Intervals
+
+Configure how often sources are synced:
+
+| Interval | Description |
+|----------|-------------|
+| `5m` | Every 5 minutes |
+| `hourly` | Every hour |
+| `6h` | Every 6 hours |
+| `daily` | Once per day |
+
+---
+
+## Searching Local Folders
+
+Once synced, your local folders are searchable via MCP tools:
+
+```python
+# Search across local folders
+search(query="meeting notes from last week", local_folders=["folder-id-here"])
+
+# Read files from a local folder
+nia_read(source_type="local_folder", local_folder_id="folder-id-here", path="/notes/meeting.txt")
+
+# Grep in local folders
+nia_grep(source_type="local_folder", local_folder_id="folder-id-here", pattern="TODO")
+
+# Explore folder structure
+nia_explore(source_type="local_folder", local_folder_id="folder-id-here", action="tree")
+```
+
+<Note>
+  Local folders are private and searched separately from public repositories. Use `local_folders` parameter in `search()` to include them.
+</Note>
+
+---
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `NIA_API_URL` | `https://api.trynia.ai` | Override API base URL |
+
+### Config File
+
+Credentials are stored in `~/.nia-sync/config.json` with secure permissions (mode 0600).
+
+---
+
+## Limits
+
+| Limit | Value |
+|-------|-------|
+| Max files per folder | 5,000 |
+| Max total upload size | 100 MB per folder |
+| Max individual file size | 5 MB |
+| Max database size | 1 GB |
+| Max rows per table | 100,000 |
+
+---
+
+## Security
+
+<Info>
+  **350+ exclusion patterns** automatically protect sensitive files from being synced.
+</Info>
+
+The following are **never synced**:
+
+- **Credentials**: `.env`, `.pem`, `.key`, SSH keys, `*credentials*`, `*secrets*`, `*token*`
+- **Version control**: `.git`, `.svn`
+- **Dependencies**: `node_modules`, `venv`, `__pycache__`
+- **Build outputs**: `dist/`, `build/`, `.next/`
+
+API keys are stored locally with user-only read/write permissions and are never logged or transmitted in plaintext.
+
+---
+
+<Warning>
+**Need Help?** Join our [Discord community](https://discord.gg/BBSwUMrrfn) or reach out through [app.trynia.ai](https://app.trynia.ai/) for support.
+</Warning>

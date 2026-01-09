@@ -3,56 +3,47 @@ title: 'Installation'
 description: 'Install Nia MCP and configure it for your coding agent.'
 ---
 
-## Quick Install (Recommended)
+<Tabs>
+  <Tab title="New to Nia">
+    ## Quick Install
 
-Get started in seconds with our streamlined installer:
+    **Don't have an account yet?** Run this single command to get started:
 
-```bash
-curl -fsSL https://app.trynia.ai/cli | sh
-```
+    ```bash
+    curl -fsSL https://app.trynia.ai/cli | sh
+    ```
 
-This command will:
-- Launch a new onboarding UI in your browser
-- Guide you through account setup
-- Automatically configure your IDE with the MCP server
-- Get you up and running with minimal configuration
+    This will:
+    - Open a browser to create your account
+    - Generate your API key automatically
+    - Configure your IDE with Nia MCP
+    - Get you running in under a minute
+
+    <Info>
+      That's it! After running the command, follow the browser prompts and you're done.
+    </Info>
+  </Tab>
+
+  <Tab title="Already have an API key">
+    ## Configure Your IDE
+
+    **Already have a Nia account?** Copy your API key from [app.trynia.ai](https://app.trynia.ai) and configure your IDE below.
+
+    <Info>
+      **Remote Server** is recommended - no dependencies, no local process, always up-to-date. If remote keeps failing (especially in Claude Code), switch to Local Server.
+    </Info>
+
+    <Note>
+      **Local Server requires:** Python 3.8+ and `pipx` (recommended) or `uvx`
+    </Note>
+  </Tab>
+</Tabs>
 
 ---
 
-## Manual Installation
-
-If you prefer manual setup or need custom configuration, follow these steps:
-
-<Steps>
-  <Step title="Complete Onboarding">
-    Visit [app.trynia.ai](https://app.trynia.ai) and complete the onboarding process. Your API key will be automatically created.
-  </Step>
-
-  <Step title="Configure Your IDE">
-    Choose your coding agent below and follow the configuration instructions.
-  </Step>
-
-  <Step title="Restart Your Coding Agent">
-    Restart your coding assistant to load the new MCP server.
-  </Step>
-</Steps>
-
----
-
-## Client-Specific Installation
+## Client-Specific Configuration
 
 Choose your coding agent below for detailed configuration instructions. Each section includes both **Remote Server (Recommended)** and **Local Server** options.
-
-<Info>
-  **Remote Server** is recommended - no dependencies, no local process, always up-to-date.
-</Info>
-
-<Note>
-  **Prerequisites for Local Server:**
-  - Python 3.8+
-  - `pipx` (recommended) or `uvx`
-  - Your Nia API key from [app.trynia.ai](https://app.trynia.ai/)
-</Note>
 
 <Accordion title="Cursor">
   Go to: **Settings → Cursor Settings → MCP → Add new global MCP server**

@@ -34,13 +34,13 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
   </Card>
 
   <Card title="Universal Indexing" icon="database">
-    - **`index`** - Universal indexing tool (auto-detects repos, docs, or research papers from URL)
+    - **`index`** - Universal indexing tool (auto-detects repos, docs, research papers, or local folders)
     - **`get_github_file_tree`** - Get GitHub file structure without indexing
-    - **Supports:** GitHub repos, documentation sites, arXiv papers
+    - **Supports:** GitHub repos, documentation sites, arXiv papers, local folders
   </Card>
 
   <Card title="Universal Search" icon="magnifying-glass">
-    - **`search`** - Unified search across all indexed repos, docs, and papers
+    - **`search`** - Unified search across repos, docs, papers, and local folders
     - **`code_grep`** - Regex search in indexed repository code
   </Card>
 
@@ -49,6 +49,13 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     - **`doc_ls`** - List docs directory contents
     - **`doc_read`** - Read docs page by virtual path
     - **`doc_grep`** - Regex search in docs
+  </Card>
+
+  <Card title="Local Folder Tools" icon="folder-open">
+    - **`nia_read`** - Read files from synced local folders
+    - **`nia_grep`** - Regex search in local folders
+    - **`nia_explore`** - Browse local folder structure
+    - **Private**: Searched separately from public sources
   </Card>
 
   <Card title="Resource Management" icon="folder">
@@ -114,16 +121,17 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
   <Accordion title="Universal Indexing Tools">
     ### `index`
-    Universal indexing tool that intelligently detects and indexes GitHub repositories, documentation, or research papers.
+    Universal indexing tool that intelligently detects and indexes GitHub repositories, documentation, research papers, or local folders.
 
     **Auto-Detection**:
     - GitHub URLs (containing "github.com") → Repository indexing
     - arXiv URLs (containing "arxiv.org") → Research paper indexing
+    - Local folder path provided → Local folder indexing
     - All other URLs → Documentation indexing
 
     **Parameters**:
-    - `url` (str, required): GitHub repository URL, documentation site URL, or arXiv ID/URL
-    - `resource_type` (str, optional): Override auto-detection - "repository", "documentation", or "research_paper"
+    - `url` (str, optional): GitHub repository URL, documentation site URL, or arXiv ID/URL (not needed for local folders)
+    - `resource_type` (str, optional): Override auto-detection - "repository", "documentation", "research_paper", or "local_folder"
 
     **Repository-specific**:
     - `branch` (str, optional): Branch to index (defaults to main branch)
@@ -138,6 +146,11 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     - `include_screenshot` (bool, optional): Capture screenshots of pages
     - `max_age` (int, optional): Cache max age in seconds
 
+    **Local folder-specific**:
+    - `folder_path` (str, optional): Absolute path to a folder on your machine (e.g., `/Users/me/project`)
+    - `folder_name` (str, optional): Display name for the folder (defaults to folder basename)
+    - `files` (List[dict], optional): List of `{path, content}` dicts (auto-read if `folder_path` provided)
+
     **Usage**: Monitor progress with `manage_resource` action "status"
 
     **Examples**:
@@ -150,6 +163,9 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
     # Index a research paper from arXiv
     index("https://arxiv.org/abs/2401.12345")
+
+    # Index a local folder
+    index(folder_path="/Users/me/notes", folder_name="My Notes")
     ```
 
     ### `get_github_file_tree`
@@ -169,12 +185,13 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
   <Accordion title="Universal Search Tools">
     ### `search`
-    Unified search across all indexed repositories, documentation, and research papers. Omit sources for universal hybrid search.
+    Unified search across all indexed repositories, documentation, research papers, and local folders. Omit sources for universal hybrid search.
 
     **Parameters**:
     - `query` (str, required): Natural language search question
     - `repositories` (List[str], optional): List of repositories to search (owner/repo format). Auto-detected if omitted
     - `data_sources` (List[str], optional): Documentation/research paper sources. Accepts flexible identifiers: UUID, display_name, URL, or arXiv abs/pdf URL. Auto-detected if omitted
+    - `local_folders` (List[str], optional): Local folder IDs to search. Private folders are searched separately from public sources
     - `search_mode` (str, default="unified"): Search scope - "unified", "repositories", or "sources"
     - `include_sources` (bool, default=True): Include source code/document snippets
 
@@ -255,9 +272,62 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     **Best for**: Finding specific terms, patterns, or code examples in documentation.
   </Accordion>
 
+  <Accordion title="Local Folder Tools">
+    Tools for navigating and searching your synced local folders. Local folders are private and searched separately from public repositories.
+
+    ### `nia_read` (local_folder)
+    Read files from a synced local folder.
+
+    **Parameters**:
+    - `source_type` (str, required): "local_folder"
+    - `local_folder_id` (str, required): The folder's UUID or display name
+    - `path` (str, optional): Virtual path to the file
+    - `line_start` (int, optional): Starting line number
+    - `line_end` (int, optional): Ending line number
+    - `max_length` (int, optional): Maximum characters to return
+
+    ### `nia_grep` (local_folder)
+    Regex search across files in a local folder.
+
+    **Parameters**:
+    - `source_type` (str, required): "local_folder"
+    - `local_folder_id` (str, required): The folder's UUID or display name
+    - `pattern` (str, required): Regex pattern to search for
+    - `path` (str, default=""): Path prefix to limit search scope
+    - `case_sensitive` (bool, default=False): Case-sensitive matching
+    - `context_lines` (int, optional): Number of context lines around matches
+    - `max_matches_per_file` (int, default=10): Per-file match limit
+    - `max_total_matches` (int, default=100): Total match limit
+    - `output_mode` (str, default="content"): "content", "files_with_matches", or "count"
+
+    ### `nia_explore` (local_folder)
+    Browse the file structure of a local folder.
+
+    **Parameters**:
+    - `source_type` (str, required): "local_folder"
+    - `local_folder_id` (str, required): The folder's UUID or display name
+    - `action` (str, default="tree"): "tree" for full structure, "ls" for directory listing
+    - `path` (str, default="/"): Path for ls action
+    - `file_extensions` (List[str], optional): Filter by file extensions
+    - `exclude_extensions` (List[str], optional): Exclude file extensions
+    - `show_full_paths` (bool, default=False): Show full paths instead of tree
+
+    **Example**:
+    ```
+    # Read a file from local folder
+    nia_read(source_type="local_folder", local_folder_id="my-notes", path="/meetings/2024-01-15.txt")
+
+    # Search for TODOs in local folder
+    nia_grep(source_type="local_folder", local_folder_id="my-notes", pattern="TODO")
+
+    # Browse folder structure
+    nia_explore(source_type="local_folder", local_folder_id="my-notes", action="tree")
+    ```
+  </Accordion>
+
   <Accordion title="Resource Management">
     ### `manage_resource`
-    Unified resource management tool for repositories, documentation, and research papers.
+    Unified resource management tool for repositories, documentation, research papers, and local folders.
 
     **Actions**:
 
@@ -266,7 +336,7 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
     **Parameters**:
     - `action` (str, required): "list"
-    - `resource_type` (str, optional): Filter by "repository", "documentation", "research_paper", or None for all
+    - `resource_type` (str, optional): Filter by "repository", "documentation", "research_paper", "local_folder", or None for all
     - `query` (str, optional): Text filter (matches repo/display_name/url/title/id)
     - `limit` (int, default=10): Maximum items to return per section (1-100)
     - `offset` (int, default=0): Pagination offset
@@ -278,16 +348,16 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
     **Parameters**:
     - `action` (str, required): "status"
-    - `resource_type` (str, required): "repository", "documentation", or "research_paper"
-    - `identifier` (str, required): Repository name (owner/repo), documentation UUID/URL, or paper identifier
+    - `resource_type` (str, required): "repository", "documentation", "research_paper", or "local_folder"
+    - `identifier` (str, required): Repository name (owner/repo), documentation UUID/URL, paper identifier, or local folder ID
 
     #### Action: "rename"
     Rename a resource for better organization.
 
     **Parameters**:
     - `action` (str, required): "rename"
-    - `resource_type` (str, required): "repository", "documentation", or "research_paper"
-    - `identifier` (str, required): Resource identifier (owner/repo or UUID/URL)
+    - `resource_type` (str, required): "repository", "documentation", "research_paper", or "local_folder"
+    - `identifier` (str, required): Resource identifier (owner/repo, UUID/URL, or local folder ID)
     - `new_name` (str, required): New display name (1-100 characters)
 
     #### Action: "delete"
@@ -295,13 +365,14 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
     **Parameters**:
     - `action` (str, required): "delete"
-    - `resource_type` (str, required): "repository", "documentation", or "research_paper"
-    - `identifier` (str, required): Resource identifier (owner/repo or UUID/URL)
+    - `resource_type` (str, required): "repository", "documentation", "research_paper", or "local_folder"
+    - `identifier` (str, required): Resource identifier (owner/repo, UUID/URL, or local folder ID)
 
     **Identifier Formats**:
     - For repositories: owner/repo format (e.g., "facebook/react")
     - For documentation: UUID preferred, also supports display name or URL
     - For research papers: UUID or arXiv abs/pdf URL
+    - For local folders: UUID or display name
   </Accordion>
 
   <Accordion title="Web Search & Research Tools">
