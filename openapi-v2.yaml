@@ -368,6 +368,37 @@ components:
           type: boolean
           default: false
           description: Use AI to compress results into a concise answer with citations
+        max_tokens:
+          type: integer
+          minimum: 100
+          maximum: 100000
+          nullable: true
+          description: Maximum tokens in response. Results truncated when budget reached.
+        boost_source_types:
+          type: object
+          additionalProperties:
+            type: number
+          default:
+            repository: 1.2
+            documentation: 1.0
+            research_paper: 0.9
+          description: Source type boosts (override to customize or set {} to disable)
+        boost_languages:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Programming languages to boost (e.g., ['python', 'typescript'])
+        language_boost_factor:
+          type: number
+          minimum: 1.0
+          maximum: 5.0
+          default: 1.5
+          description: Boost multiplier for preferred languages
+        use_native_boosting:
+          type: boolean
+          default: true
+          description: Use TurboPuffer FTS v2 native Sum/Product boosting
 
     UniversalSearchResponse:
       type: object
@@ -380,15 +411,24 @@ components:
               content:
                 type: string
                 description: Text content of the search result
+              summary:
+                type: string
+                nullable: true
+                description: Extractive summary of the chunk (REFRAG-inspired)
               score:
                 type: number
                 description: Relevance score (higher is better)
+              confidence:
+                type: number
+                minimum: 0
+                maximum: 1
+                description: Normalized confidence score 0-1
               source:
                 type: object
                 properties:
                   type:
                     type: string
-                    enum: [repository, documentation]
+                    enum: [repository, documentation, research_paper]
                     description: Type of source
                   url:
                     type: string
@@ -418,6 +458,8 @@ components:
           type: string
           nullable: true
           description: AI-compressed answer (only when compress_output=true)
+        token_metadata:
+          $ref: '#/components/schemas/TokenMetadata'
 
     UsageSummaryResponse:
       type: object
@@ -1238,6 +1280,111 @@ components:
           type: string
           description: Programming language of the file
 
+    MemoryType:
+      type: string
+      enum: [scratchpad, episodic, fact, procedural]
+      description: |
+        Memory taxonomy type:
+        - scratchpad: Temporary working memory (1hr TTL)
+        - episodic: Session summaries (7d TTL)
+        - fact: Atomic factual statements (permanent)
+        - procedural: Tool/function definitions (permanent)
+
+    LineageInput:
+      type: object
+      description: Provenance tracking input for content artifacts
+      properties:
+        source_ids:
+          type: array
+          items:
+            type: string
+          description: Source identifiers (e.g., 'repo:owner/repo', 'doc:name')
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Confidence score 0-1
+        derived_from:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Parent context IDs if derived
+        tool_calls:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Tools used to create this artifact
+        model_version:
+          type: string
+          nullable: true
+          description: Model version that created this
+
+    LineageMetadata:
+      type: object
+      description: Provenance tracking metadata for content artifacts
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          description: When this artifact was created
+        source_ids:
+          type: array
+          items:
+            type: string
+          description: Source identifiers (e.g., 'repo:owner/repo', 'doc:name')
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          nullable: true
+          description: Confidence score 0-1
+        derived_from:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Parent context IDs if derived
+        tool_calls:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Tools used to create this artifact
+        model_version:
+          type: string
+          nullable: true
+          description: Model version that created this
+
+    TokenMetadata:
+      type: object
+      description: Token budget metadata for content responses
+      properties:
+        token_estimate:
+          type: integer
+          description: Estimated token count for returned content
+        total_available_tokens:
+          type: integer
+          nullable: true
+          description: Total tokens if reading full content
+        tokens_used:
+          type: integer
+          nullable: true
+          description: Tokens used in response (for searches)
+        tokens_remaining:
+          type: integer
+          nullable: true
+          description: Remaining tokens in budget
+        results_truncated:
+          type: boolean
+          nullable: true
+          description: Whether results were truncated due to budget
+        total_results_available:
+          type: integer
+          nullable: true
+          description: Total results available before truncation
+
     ContextShareRequest:
       type: object
       required:
@@ -1282,6 +1429,15 @@ components:
         workspace_override:
           type: string
           description: Optional custom workspace name (overrides auto-detection)
+        memory_type:
+          $ref: '#/components/schemas/MemoryType'
+        ttl_seconds:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: Custom TTL in seconds. If not set, uses memory_type default (scratchpad=3600, episodic=604800, fact/procedural=permanent)
+        lineage:
+          $ref: '#/components/schemas/LineageInput'
 
     ContextShareResponse:
       type: object
@@ -1328,6 +1484,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EditedFile'
+        memory_type:
+          $ref: '#/components/schemas/MemoryType'
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: When this context will expire (null for permanent memory types)
+        lineage:
+          $ref: '#/components/schemas/LineageMetadata'
 
     ContextShareUpdateRequest:
       type: object
@@ -1357,6 +1522,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EditedFile'
+        memory_type:
+          $ref: '#/components/schemas/MemoryType'
+        ttl_seconds:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: Custom TTL in seconds
+        lineage:
+          $ref: '#/components/schemas/LineageInput'
 
     OracleResearchRequest:
       type: object
@@ -3986,6 +4160,12 @@ paths:
           schema:
             type: string
           description: Filter by agent source (e.g., "cursor", "claude-code")
+        - name: memory_type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/MemoryType'
+          description: Filter by memory type (scratchpad, episodic, fact, procedural)
       responses:
         '200':
           description: Contexts retrieved successfully
