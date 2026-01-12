@@ -1,0 +1,123 @@
+---
+title: 'OpenCode Plugin'
+description: 'Integrate Nia knowledge tools directly into OpenCode with automatic research triggers and context sharing.'
+---
+
+The Nia OpenCode plugin integrates Nia's knowledge tools directly into [OpenCode](https://opencode.ai), providing automatic research triggers, context saving for cross-agent handoffs, and full MCP tool access.
+
+<Info>
+  **Automatic Detection**: The plugin detects when you need docs or research and prompts the agent to use Nia tools automatically.
+</Info>
+
+---
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Research Triggers" icon="magnifying-glass">
+    Automatically detects when you need documentation or research and prompts the agent to use Nia.
+  </Card>
+
+  <Card title="Save for Later" icon="floppy-disk">
+    Detects when you want to save context for cross-agent handoffs between sessions.
+  </Card>
+
+  <Card title="AGENTS.md Setup" icon="file-code">
+    Automatically adds Nia workflow instructions to your project's agent configuration.
+  </Card>
+
+  <Card title="MCP Integration" icon="plug">
+    Connects to Nia's MCP server for full tool access including search, grep, and explore.
+  </Card>
+</CardGroup>
+
+---
+
+## Installation
+
+Install the plugin using `bunx`:
+
+```bash
+bunx nia-opencode@latest install
+```
+
+The installer will prompt for your API key and configure everything automatically.
+
+### Non-Interactive Installation
+
+For automated setups or CI environments:
+
+```bash
+bunx nia-opencode@latest install --no-tui --api-key nk_xxx
+```
+
+<Note>
+  Get your API key from [app.trynia.ai](https://app.trynia.ai).
+</Note>
+
+---
+
+## Keyword Triggers
+
+The plugin listens for specific keywords in your conversations to automatically trigger Nia tools.
+
+### Research Triggers
+
+Use these phrases to trigger documentation and code research:
+
+| Phrase | Action |
+|--------|--------|
+| `research...` | Initiates Nia research |
+| `look up...` | Searches documentation |
+| `find docs...` | Finds relevant documentation |
+| `search codebase...` | Searches indexed repositories |
+| `grep for...` | Runs pattern search |
+| `index this repo` | Indexes current repository |
+
+### Save Triggers
+
+Use these phrases to save context for later or hand off to other agents:
+
+| Phrase | Action |
+|--------|--------|
+| `save this context` | Saves current session context |
+| `continue later` | Persists work for future sessions |
+| `hand off to Cursor` | Prepares context for Cursor handoff |
+| `pick this up tomorrow` | Saves context for later continuation |
+
+---
+
+## Available Tools
+
+Once installed, the following Nia tools are available in OpenCode:
+
+| Tool | Description |
+|------|-------------|
+| `nia.search` | Semantic search across repositories and documentation |
+| `nia.nia_research` | AI-powered research with quick, deep, and oracle modes |
+| `nia.index` | Index repositories, documentation, or local folders |
+| `nia.nia_read` | Read files from indexed sources |
+| `nia.nia_grep` | Regex search in indexed code |
+| `nia.nia_explore` | Explore file structures of indexed sources |
+| `nia.manage_resource` | List, rename, or delete indexed resources |
+| `nia.context` | Cross-agent context sharing and retrieval |
+
+---
+
+## Links
+
+<CardGroup cols={2}>
+  <Card title="GitHub" icon="github" href="https://github.com/nozomio-labs/nia-opencode">
+    View source code and contribute
+  </Card>
+
+  <Card title="npm" icon="npm" href="https://npmjs.com/package/nia-opencode">
+    Package on npm registry
+  </Card>
+</CardGroup>
+
+---
+
+<Warning>
+**Need Help?** Join our [Discord community](https://discord.gg/BBSwUMrrfn) or reach out through [app.trynia.ai](https://app.trynia.ai/) for support.
+</Warning>

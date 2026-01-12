@@ -46,12 +46,18 @@
             ]
           },
           {
+            "group": "Plugins and Rules",
+            "pages": [
+              "integrations/opencode",
+              "example-workflows/agent-rules"
+            ]
+          },
+          {
             "group": "Examples & Guides",
             "pages": [
               "example-workflows/overview",
               "example-workflows/custom-agents",
-              "example-workflows/tips",
-              "example-workflows/agent-rules"
+              "example-workflows/tips"
             ]
           },
           {
