@@ -3,41 +3,45 @@ title: 'Installation'
 description: 'Install Nia MCP and configure it for your coding agent.'
 ---
 
-<Tabs>
-  <Tab title="New to Nia">
-    ## Quick Install
+## Quick Install
 
-    **Don't have an account yet?** Run this single command to get started:
+Run a single command to install Nia:
 
-    ```bash
-    curl -fsSL https://app.trynia.ai/cli | sh
-    ```
+```bash
+npx nia-wizard        # npm
+pnpx nia-wizard       # pnpm
+bunx nia-wizard       # bun (fastest)
+yarn dlx nia-wizard   # yarn
+```
 
-    This will:
-    - Open a browser to create your account
-    - Generate your API key automatically
-    - Configure your IDE with Nia MCP
-    - Get you running in under a minute
+This wizard will:
+- Work for both new and existing users
+- Create your account or log you in
+- Generate your API key automatically
+- Auto-detect and configure your IDE
+- Get you running in under a minute
 
-    <Info>
-      That's it! After running the command, follow the browser prompts and you're done.
-    </Info>
-  </Tab>
+<Info>
+  That's it! The wizard handles everything - just follow the prompts and you're done.
+</Info>
 
-  <Tab title="Already have an API key">
-    ## Configure Your IDE
+<Accordion title="Alternative installation method">
+  ```bash
+  curl -fsSL https://app.trynia.ai/cli | sh
+  ```
+</Accordion>
 
-    **Already have a Nia account?** Copy your API key from [app.trynia.ai](https://app.trynia.ai) and configure your IDE below.
+---
 
-    <Info>
-      **Remote Server** is recommended - no dependencies, no local process, always up-to-date. If remote keeps failing (especially in Claude Code), switch to Local Server.
-    </Info>
+## Manual Configuration
 
-    <Note>
-      **Local Server requires:** Python 3.8+ and `pipx` (recommended) or `uvx`
-    </Note>
-  </Tab>
-</Tabs>
+<Info>
+  **Remote Server** is recommended - no dependencies, no local process, always up-to-date. If remote keeps failing (especially in Claude Code), switch to Local Server.
+</Info>
+
+<Note>
+  **Local Server requires:** Python 3.8+ and `pipx` (recommended) or `uvx`
+</Note>
 
 ---
 
@@ -1028,44 +1032,6 @@ Choose your coding agent below for detailed configuration instructions. Each sec
   }
   ```
 </Accordion>
-
----
-
-## Automated Setup Script
-
-Don't want to configure manually? Use our automated setup script.
-
-### Remote Setup (Recommended)
-
-```bash
-curl -fsSL https://app.trynia.ai/api/setup-script | bash -s -- YOUR_API_KEY IDE_NAME --remote
-```
-
-**Supported IDEs:**
-`cursor`, `vscode`, `windsurf`, `cline`, `antigravity`, `trae`, `continue`, `roo-code`, `kilo-code`, `gemini-cli`, `vibe`, `opencode`, `qodo-gen`, `qwen-coder`, `visual-studio`, `crush`, `copilot-agent`, `copilot-cli`, `claude-code`, `factory`, `amp`
-
-### Local Setup
-
-```bash
-curl -fsSL https://app.trynia.ai/api/setup-script | bash -s -- YOUR_API_KEY IDE_NAME
-```
-
-**Supported IDEs:**
-`cursor`, `vscode`, `windsurf`, `cline`, `antigravity`, `trae`, `continue`, `roo-code`, `kilo-code`, `gemini-cli`, `opencode`, `qodo-gen`, `qwen-coder`, `visual-studio`, `crush`, `copilot-agent`, `copilot-cli`, `claude-code`, `factory`, `codex`, `zed`, `augment`, `jetbrains`, `kiro`, `lm-studio`, `bolt-ai`, `perplexity`, `warp`, `amazon-q`, `claude-desktop`
-
-### Python CLI Alternative
-
-```bash
-# Remote
-pipx run nia-mcp-server setup YOUR_API_KEY --ide IDE_NAME --remote
-
-# Local
-pipx run nia-mcp-server setup YOUR_API_KEY --ide IDE_NAME
-```
-
-<Note>
-  **Not fully automated:** `zencoder` and `rovo-dev` require manual UI setup - the script prints the config for you to copy.
-</Note>
 
 ---
 
