@@ -143,22 +143,20 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 
   ```bash
   # For current project only (default)
-  claude mcp add nia --transport http "https://apigcp.trynia.ai/mcp" \
-    --header "Authorization: Bearer YOUR_API_KEY"
+  claude mcp add --transport http --header "Authorization: Bearer YOUR_API_KEY" nia "https://apigcp.trynia.ai/mcp"
 
   # For global installation (all projects)
-  claude mcp add nia --scope user --transport http "https://apigcp.trynia.ai/mcp" \
-    --header "Authorization: Bearer YOUR_API_KEY"
+  claude mcp add --transport http --header "Authorization: Bearer YOUR_API_KEY" --scope user nia "https://apigcp.trynia.ai/mcp"
   ```
 
   **Local Server:**
 
   ```bash
   # For current project only (default)
-  claude mcp add nia -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- pipx run --no-cache nia-mcp-server
+  claude mcp add -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ nia -- pipx run --no-cache nia-mcp-server
 
   # For global installation (all projects)
-  claude mcp add nia --scope user -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ -- pipx run --no-cache nia-mcp-server
+  claude mcp add --scope user -e NIA_API_KEY=YOUR_API_KEY -e NIA_API_URL=https://apigcp.trynia.ai/ nia -- pipx run --no-cache nia-mcp-server
   ```
 
   **Scope Options:**
