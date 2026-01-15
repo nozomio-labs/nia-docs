@@ -57,6 +57,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
   - **Windows**: `%APPDATA%\Cursor\mcp.json`
   - **Linux**: `~/.config/cursor/mcp.json`
 
+  See [Cursor MCP docs](https://docs.cursor.com/context/model-context-protocol) for more info.
+
   **Remote Server (Recommended):**
 
   ```json
@@ -97,10 +99,12 @@ Choose your coding agent below for detailed configuration instructions. Each sec
     - **macOS/Linux**: `~/.config/Code/User/mcp.json`
     - **Windows**: `%APPDATA%\Code\User\mcp.json`
 
+  See [VS Code MCP docs](https://code.visualstudio.com/docs/copilot/chat/mcp-servers) for more info.
+
   **Remote Server (Recommended):**
 
   ```json
-  {
+  "mcp": {
     "servers": {
       "nia": {
         "type": "http",
@@ -116,7 +120,7 @@ Choose your coding agent below for detailed configuration instructions. Each sec
   **Local Server:**
 
   ```json
-  {
+  "mcp": {
     "servers": {
       "nia": {
         "type": "stdio",
@@ -133,6 +137,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Claude Code">
+  See [Claude Code MCP docs](https://docs.anthropic.com/en/docs/claude-code/mcp) for more info.
+
   **Remote Server (Recommended):**
 
   ```bash
@@ -172,6 +178,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
   - **Windows**: `%APPDATA%\Windsurf\mcp.json`
   - **Linux**: `~/.config/windsurf/mcp.json`
 
+  See [Windsurf MCP docs](https://docs.windsurf.com/windsurf/cascade/mcp) for more info.
+
   **Remote Server (Recommended):**
 
   ```json
@@ -206,6 +214,14 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Cline">
+  You can directly edit MCP servers configuration:
+
+  1. Open **Cline**
+  2. Click the hamburger menu icon to enter the **MCP Servers** section
+  3. Choose **Remote Servers** tab
+  4. Click the **Edit Configuration** button
+  5. Add nia to `mcpServers`:
+
   **Remote Server (Recommended):**
 
   ```json
@@ -282,6 +298,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Google Antigravity">
+  Add this to your Antigravity MCP config file. See [Antigravity MCP docs](https://antigravity.google/docs/mcp) for more info.
+
   **Remote Server (Recommended):**
 
   ```json
@@ -316,6 +334,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Trae">
+  See [Trae documentation](https://docs.trae.ai/ide/model-context-protocol?_lang=en) for more details.
+
   **Remote Server (Recommended):**
 
   ```json
@@ -354,6 +374,12 @@ Choose your coding agent below for detailed configuration instructions. Each sec
   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
+  See [Claude Desktop MCP docs](https://modelcontextprotocol.io/quickstart/user) for more info.
+
+  **Remote Server (Recommended):**
+
+  Open Claude Desktop and navigate to **Settings → Connectors → Add Custom Connector**. Enter the name as `Nia` and the remote MCP server URL as `https://apigcp.trynia.ai/mcp`.
+
   **Local Server:**
 
   ```json
@@ -373,6 +399,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Gemini CLI">
+  See [Gemini CLI Configuration](https://google-gemini.github.io/gemini-cli/docs/tools/mcp-server.html) for details.
+
   Open `~/.gemini/settings.json` and add:
 
   **Remote Server (Recommended):**
@@ -432,7 +460,7 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Zed">
-  Add to your Zed `settings.json`:
+  Add this to your Zed `settings.json`. See [Zed Context Server docs](https://zed.dev/docs/assistant/context-servers) for more info.
 
   **Local Server:**
 
@@ -454,9 +482,19 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="OpenAI Codex">
+  See [OpenAI Codex](https://github.com/openai/codex) for more information.
+
   <Warning>
-    Codex requires extended timeout settings for NIA to work properly.
+    Codex requires extended timeout settings for NIA to work properly. If you see startup timeout errors, try increasing `startup_timeout_ms` to `40_000`.
   </Warning>
+
+  **Remote Server (Recommended):**
+
+  ```toml
+  [mcp_servers.nia]
+  url = "https://apigcp.trynia.ai/mcp"
+  http_headers = { "Authorization" = "Bearer YOUR_API_KEY" }
+  ```
 
   **Local Server:**
 
@@ -478,6 +516,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Roo Code">
+  See [Roo Code MCP docs](https://docs.roocode.com/features/mcp/using-mcp-in-roo) for more info.
+
   **Remote Server (Recommended):**
 
   ```json
@@ -513,12 +553,29 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Kilo Code">
-  Via UI:
-  1. Open Kilo Code → Settings icon → MCP Servers
-  2. Click **Add Server** → Choose **HTTP Server (Streamable HTTP Transport)**
-  3. Enter URL: `https://apigcp.trynia.ai/mcp`
-  4. Add Header - Key: `Authorization`, Value: `Bearer YOUR_API_KEY`
-  5. Click **Save**
+  You can configure the Nia MCP server in **Kilo Code** using either the UI or by editing your project's MCP configuration file.
+
+  Kilo Code supports two configuration levels:
+  - **Global MCP Configuration** — stored in `mcp_settings.json`
+  - **Project-level MCP Configuration** — stored in `.kilocode/mcp.json` (recommended)
+
+  ### Configure via Kilo Code UI
+
+  1. Open **Kilo Code**
+  2. Click the **Settings** icon in the top-right corner
+  3. Navigate to **Settings → MCP Servers**
+  4. Click **Add Server**
+  5. Choose **HTTP Server** (Streamable HTTP Transport)
+  6. Enter the details:
+     - **URL**: `https://apigcp.trynia.ai/mcp`
+     - **Headers → Add Header**
+       - **Key:** `Authorization`
+       - **Value:** `Bearer YOUR_API_KEY`
+  7. Click **Save**
+
+  ### Manual Configuration
+
+  Create `.kilocode/mcp.json`:
 
   **Remote Server (Recommended):**
 
@@ -531,6 +588,7 @@ Choose your coding agent below for detailed configuration instructions. Each sec
         "headers": {
           "Authorization": "Bearer YOUR_API_KEY"
         },
+        "alwaysAllow": [],
         "disabled": false
       }
     }
@@ -549,6 +607,7 @@ Choose your coding agent below for detailed configuration instructions. Each sec
           "NIA_API_KEY": "YOUR_API_KEY",
           "NIA_API_URL": "https://apigcp.trynia.ai/"
         },
+        "alwaysAllow": [],
         "disabled": false
       }
     }
@@ -557,6 +616,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="JetBrains AI Assistant">
+  See [JetBrains AI Assistant Documentation](https://www.jetbrains.com/help/ai-assistant/configure-an-mcp-server.html) for more details.
+
   1. Go to **Settings → Tools → AI Assistant → Model Context Protocol (MCP)**
   2. Click **+ Add**
   3. Select **As JSON** from the dropdown
@@ -581,6 +642,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Kiro">
+  See [Kiro Model Context Protocol Documentation](https://kiro.dev/docs/mcp/configuration/) for details.
+
   1. Navigate to **Kiro → MCP Servers**
   2. Click **+ Add**
   3. Add configuration:
@@ -604,6 +667,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="LM Studio">
+  See [LM Studio MCP Support](https://lmstudio.ai/blog/lmstudio-v0.3.17) for more information.
+
   Go to **Program → Install → Edit mcp.json**:
 
   ```json
@@ -623,10 +688,13 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Visual Studio 2022">
+  See [Visual Studio MCP Servers documentation](https://learn.microsoft.com/visualstudio/ide/mcp-servers?view=vs-2022) for more details.
+
   **Remote Server (Recommended):**
 
   ```json
   {
+    "inputs": [],
     "servers": {
       "nia": {
         "type": "http",
@@ -643,16 +711,15 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 
   ```json
   {
-    "mcp": {
-      "servers": {
-        "nia": {
-          "type": "stdio",
-          "command": "pipx",
-          "args": ["run", "--no-cache", "nia-mcp-server"],
-          "env": {
-            "NIA_API_KEY": "YOUR_API_KEY",
-            "NIA_API_URL": "https://apigcp.trynia.ai/"
-          }
+    "inputs": [],
+    "servers": {
+      "nia": {
+        "type": "stdio",
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
         }
       }
     }
@@ -661,6 +728,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="BoltAI">
+  See [BoltAI's Documentation](https://docs.boltai.com/docs/plugins/mcp-servers) for more info.
+
   Open **Settings → Plugins**, then add:
 
   ```json
@@ -680,6 +749,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Qodo Gen">
+  See [Qodo Gen docs](https://docs.qodo.ai/qodo-documentation/qodo-gen/qodo-gen-chat/agentic-mode/agentic-tools-mcps) for more details.
+
   1. Open the Qodo Gen chat panel
   2. Click **Connect more tools**
   3. Click **+ Add new MCP**
@@ -718,6 +789,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Qwen Coder">
+  See [Qwen Coder MCP Configuration](https://qwenlm.github.io/qwen-code-docs/en/tools/mcp-server/#how-to-set-up-your-mcp-server) for details.
+
   Open `~/.qwen/settings.json` and add:
 
   **Remote Server (Recommended):**
@@ -755,6 +828,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Perplexity Desktop">
+  See [Local and Remote MCPs for Perplexity](https://www.perplexity.ai/help-center/en/articles/11502712-local-and-remote-mcps-for-perplexity) for more information.
+
   1. Navigate to **Perplexity → Settings → Connectors**
   2. Click **Add Connector → Advanced**
   3. Server Name: `Nia`
@@ -773,6 +848,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Warp">
+  See [Warp Model Context Protocol Documentation](https://docs.warp.dev/knowledge-and-collaboration/mcp#adding-an-mcp-server) for details.
+
   1. Navigate to **Settings → AI → Manage MCP servers**
   2. Click **+ Add**
   3. Add configuration:
@@ -795,6 +872,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 
 <Accordion title="Copilot Coding Agent">
   Add to: **Repository → Settings → Copilot → Coding agent → MCP configuration**
+
+  See the [official GitHub documentation](https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/agents/copilot-coding-agent/extending-copilot-coding-agent-with-mcp) for more info.
 
   **Remote Server (Recommended):**
 
@@ -870,6 +949,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Amazon Q Developer CLI">
+  See [Amazon Q Developer CLI docs](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-mcp-configuration.html) for more details.
+
   ```json
   {
     "mcpServers": {
@@ -887,6 +968,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Opencode">
+  See [Opencode MCP docs](https://opencode.ai/docs/mcp-servers) for more info.
+
   **Remote Server (Recommended):**
 
   ```json
@@ -924,6 +1007,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Crush">
+  Add this to your Crush configuration file. See [Crush MCP docs](https://github.com/charmbracelet/crush#mcps) for more info.
+
   **Remote Server (Recommended):**
 
   ```json
@@ -962,6 +1047,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Amp">
+  See [Amp MCP docs](https://ampcode.com/manual#mcp) for more info.
+
   **Remote Server Only:**
 
   ```bash
@@ -970,7 +1057,7 @@ Choose your coding agent below for detailed configuration instructions. Each sec
 </Accordion>
 
 <Accordion title="Factory">
-  Factory's droid supports MCP servers through its CLI.
+  Factory's droid supports MCP servers through its CLI. See [Factory MCP docs](https://docs.factory.ai/cli/configuration/mcp) for more info.
 
   **Remote Server (Recommended):**
 
@@ -1013,6 +1100,163 @@ Choose your coding agent below for detailed configuration instructions. Each sec
   ```
 </Accordion>
 
+<Accordion title="Rovo Dev CLI">
+  Edit your Rovo Dev CLI MCP config:
+
+  ```bash
+  acli rovodev mcp
+  ```
+
+  **Remote Server (Recommended):**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "url": "https://apigcp.trynia.ai/mcp",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
+
+  **Local Server:**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "pipx",
+        "args": ["run", "--no-cache", "nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Smithery">
+  To install Nia MCP Server for any client automatically via [Smithery](https://smithery.ai):
+
+  ```bash
+  npx -y @smithery/cli@latest install nia-mcp-server --client <CLIENT_NAME> --key <YOUR_SMITHERY_KEY>
+  ```
+
+  You can find your Smithery key in the [Smithery.ai webpage](https://smithery.ai).
+</Accordion>
+
+<Accordion title="Zencoder">
+  1. Go to the Zencoder menu (...)
+  2. Select **Agent tools**
+  3. Click on **Add custom MCP**
+  4. Add the name and configuration:
+
+  ```json
+  {
+    "command": "pipx",
+    "args": ["run", "--no-cache", "nia-mcp-server"],
+    "env": {
+      "NIA_API_KEY": "YOUR_API_KEY",
+      "NIA_API_URL": "https://apigcp.trynia.ai/"
+    }
+  }
+  ```
+
+  5. Click **Install**
+</Accordion>
+
+<Accordion title="Emdash">
+  [Emdash](https://github.com/generalaction/emdash) is an orchestration layer for running multiple coding agents in parallel.
+
+  **What Emdash provides:**
+  - Global toggle: Settings → MCP → "Enable Nia MCP"
+  - Per-workspace enable: The Nia button in the ProviderBar
+
+  **What you still need to do:**
+  Configure your coding agent (Codex, Claude Code, Cursor, etc.) to connect to Nia MCP. Emdash does not modify your agent's config.
+
+  See the [Emdash repository](https://github.com/generalaction/emdash) for more information.
+</Accordion>
+
+<Accordion title="Using Bun or Deno">
+  Use these alternatives to run the local Nia MCP server with other runtimes.
+
+  **Bun:**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "bunx",
+        "args": ["nia-mcp-server"],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+
+  **Deno:**
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "deno",
+        "args": [
+          "run",
+          "--allow-env",
+          "--allow-net",
+          "npm:nia-mcp-server"
+        ],
+        "env": {
+          "NIA_API_KEY": "YOUR_API_KEY",
+          "NIA_API_URL": "https://apigcp.trynia.ai/"
+        }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Using Docker">
+  1. Create a `Dockerfile`:
+
+  ```dockerfile
+  FROM python:3.11-slim
+  WORKDIR /app
+  RUN pip install nia-mcp-server
+  CMD ["nia-mcp-server"]
+  ```
+
+  2. Build the image:
+
+  ```bash
+  docker build -t nia-mcp .
+  ```
+
+  3. Configure your MCP client:
+
+  ```json
+  {
+    "mcpServers": {
+      "nia": {
+        "command": "docker",
+        "args": ["run", "-i", "--rm", "-e", "NIA_API_KEY=YOUR_API_KEY", "-e", "NIA_API_URL=https://apigcp.trynia.ai/", "nia-mcp"],
+        "transportType": "stdio"
+      }
+    }
+  }
+  ```
+</Accordion>
+
 <Accordion title="Windows Configuration">
   On Windows, configuration differs slightly. Use `cmd` with `/c`:
 
@@ -1026,7 +1270,8 @@ Choose your coding agent below for detailed configuration instructions. Each sec
           "NIA_API_KEY": "YOUR_API_KEY",
           "NIA_API_URL": "https://apigcp.trynia.ai/"
         },
-        "disabled": false
+        "disabled": false,
+        "autoApprove": []
       }
     }
   }
