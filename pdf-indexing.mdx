@@ -1,0 +1,138 @@
+---
+title: 'PDF Indexing'
+description: 'Index and chat with any complex PDF using tree-guided hybrid search'
+---
+
+Index any PDF — research papers, SEC filings, legal documents, technical manuals — and have intelligent conversations with accurate, section-aware retrieval.
+
+<Frame>
+  <iframe
+    src="https://www.youtube.com/embed/uHl_gho2o6g"
+    title="PDF Indexing Demo"
+    className="w-full aspect-video rounded-xl"
+    allowFullScreen
+  />
+</Frame>
+
+---
+
+## Tree-Guided Hybrid Search
+
+Traditional RAG systems split documents into flat chunks, losing structure and context. Nia invented a different approach:
+
+<CardGroup cols={2}>
+  <Card title="Document Trees" icon="sitemap">
+    PDFs are parsed into hierarchical structures — sections, subsections, figures, tables — preserving the document's logical organization.
+  </Card>
+
+  <Card title="Section-Level Indexing" icon="layer-group">
+    Each section is indexed with its position in the hierarchy, enabling precise retrieval that knows *where* information lives.
+  </Card>
+
+  <Card title="Hybrid Signals" icon="code-merge">
+    Combines vector embeddings with non-vector signals (headers, page numbers, cross-references) for high recall with minimal context bloat.
+  </Card>
+
+  <Card title="Hierarchical Traversal" icon="arrows-split-up-and-left">
+    Agents traverse documents as trees instead of scanning flat chunks, finding relevant sections faster and more accurately.
+  </Card>
+</CardGroup>
+
+<Info>
+  **Why it matters:** High recall across large PDF corpora without stuffing context windows with irrelevant chunks. [Read the technical deep-dive →](https://www.trynia.ai/blog/tree-reasoning-pdf-search)
+</Info>
+
+---
+
+## Interactive Papers Playground
+
+Experience PDFs like never before at [app.trynia.ai/playground/papers](https://app.trynia.ai/playground/papers):
+
+<CardGroup cols={2}>
+  <Card title="PDF Viewer" icon="file-pdf">
+    View documents directly in the browser with a full-featured PDF viewer. Resizable panes let you read and chat side-by-side.
+  </Card>
+
+  <Card title="Document Tree" icon="folder-tree">
+    Navigate using an intelligent document tree. Jump to specific sections, figures, or equations instantly.
+  </Card>
+
+  <Card title="Session History" icon="clock-rotate-left">
+    Your conversations are saved. Return anytime to continue where you left off, or review past discussions.
+  </Card>
+
+  <Card title="LaTeX Rendering" icon="square-root-variable">
+    Full LaTeX support for mathematical expressions. Complex equations render beautifully in chat responses.
+  </Card>
+</CardGroup>
+
+---
+
+## How It Works
+
+<Steps>
+  <Step title="Index a PDF">
+    Provide an arXiv URL, paper ID, or upload directly:
+    - *"Index https://arxiv.org/abs/2401.12345"*
+    - *"Index this SEC filing"*
+  </Step>
+  
+  <Step title="Tree Extraction">
+    Nia parses the PDF structure — sections, headers, figures, tables — building a navigable document tree.
+  </Step>
+  
+  <Step title="Chat with Context">
+    Ask questions and get answers grounded in specific sections, with citations pointing to exact locations.
+  </Step>
+</Steps>
+
+---
+
+## Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Research Papers" icon="flask">
+    Index arXiv papers for literature reviews. Search across dozens of papers at once, compare methodologies, understand dense sections.
+  </Card>
+
+  <Card title="SEC Filings" icon="building-columns">
+    Navigate 10-Ks, 10-Qs, and proxy statements. Find specific disclosures, compare across years, extract financial data.
+  </Card>
+
+  <Card title="Legal Documents" icon="scale-balanced">
+    Index contracts, briefs, and regulations. Search for specific clauses, understand obligations, compare versions.
+  </Card>
+
+  <Card title="Technical Manuals" icon="book">
+    Index product documentation, API specs, or internal wikis. Get precise answers with section references.
+  </Card>
+</CardGroup>
+
+---
+
+## Quick Start
+
+```bash
+# In your AI coding agent, just say:
+"Index https://arxiv.org/abs/2401.12345"
+
+# Then ask questions:
+"What problem does this paper solve?"
+"Summarize section 3.2"
+"What are the limitations mentioned by the authors?"
+```
+
+Or use the [Papers Playground](https://app.trynia.ai/playground/papers) for a visual experience.
+
+---
+
+## Supported Sources
+
+| Source | Format | Example |
+|--------|--------|---------|
+| arXiv | URL or ID | `https://arxiv.org/abs/2401.12345` or `2401.12345` |
+| arXiv PDF | Direct PDF link | `https://arxiv.org/pdf/2401.12345` |
+
+<Info>
+  Support for direct PDF uploads and more sources coming soon.
+</Info>
