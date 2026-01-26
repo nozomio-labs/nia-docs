@@ -1,0 +1,151 @@
+---
+title: 'Scoped MCP Servers'
+description: 'Spin up specialized MCP servers for specific knowledge sources'
+---
+
+Don't want a general-purpose MCP with dozens of tools? Create a scoped MCP that focuses on just the knowledge you need.
+
+<Frame>
+  <iframe
+    src="https://www.youtube.com/embed/zGmomjk5GDI"
+    title="Scoped MCP Demo"
+    className="w-full aspect-video rounded-xl"
+    allowFullScreen
+  />
+</Frame>
+
+---
+
+## What are Scoped MCPs?
+
+Instead of using Nia's full MCP server with all tools, you can generate a specialized MCP server that:
+
+- **Focuses on a single source** — One framework, one documentation site, one research paper
+- **Has fewer tools** — Only the tools relevant to that source
+- **Reduces context noise** — Your agent sees only what's relevant
+
+---
+
+## How It Works
+
+<Steps>
+  <Step title="Pick a Pre-indexed Source">
+    Go to [app.trynia.ai](https://app.trynia.ai) and browse the Global Sources. Find the documentation, repository, or paper you want.
+  </Step>
+
+  <Step title="Generate Scoped MCP">
+    Click on the source and select "Create Scoped MCP". Nia generates a dedicated MCP configuration for that source.
+  </Step>
+
+  <Step title="Add to Your IDE">
+    Copy the generated configuration into your IDE's MCP settings. The scoped MCP connects only to that specific knowledge source.
+  </Step>
+</Steps>
+
+---
+
+## Example: Vercel AI SDK Scoped MCP
+
+Instead of querying all of Nia's knowledge, create an MCP that only knows about the Vercel AI SDK:
+
+```json
+{
+  "mcpServers": {
+    "nia-sdk-vercel-ai": {
+      "url": "https://apigcp.trynia.ai/mcp?source=https%3A%2F%2Fsdk.vercel.ai%2Fdocs",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+The `source` parameter is URL-encoded. For `https://sdk.vercel.ai/docs`, it becomes `https%3A%2F%2Fsdk.vercel.ai%2Fdocs`.
+
+Now your agent has access to Vercel AI SDK documentation without being distracted by other sources.
+
+---
+
+## Popular Scoped MCPs
+
+Some commonly requested scoped servers:
+
+| Source | Use Case |
+|--------|----------|
+| **Next.js** | React framework with App Router, Server Components |
+| **BetterAuth** | Authentication library for TypeScript |
+| **FastAPI** | Python web framework |
+| **Tailwind CSS** | Utility-first CSS framework |
+| **Prisma** | TypeScript ORM |
+| **LangChain** | LLM orchestration framework |
+
+<Info>
+  Any pre-indexed source can become a scoped MCP. If it's in Global Sources, you can create a focused server for it.
+</Info>
+
+---
+
+## When to Use Scoped MCPs
+
+<CardGroup cols={2}>
+  <Card title="Use Scoped MCP When" icon="bullseye">
+    - Working on a single-framework project
+    - Want minimal tool clutter
+    - Need faster, more focused responses
+    - Prefer explicit control over context
+  </Card>
+
+  <Card title="Use Full Nia MCP When" icon="layer-group">
+    - Working across multiple technologies
+    - Need indexing and research tools
+    - Want to search your own repos/docs
+    - Building with diverse dependencies
+  </Card>
+</CardGroup>
+
+---
+
+## Multiple Scoped MCPs
+
+You can run multiple scoped MCPs simultaneously:
+
+```json
+{
+  "mcpServers": {
+    "nia-nextjs": {
+      "url": "https://apigcp.trynia.ai/mcp?source=https%3A%2F%2Fnextjs.org%2Fdocs",
+      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
+    },
+    "nia-prisma": {
+      "url": "https://apigcp.trynia.ai/mcp?source=https%3A%2F%2Fwww.prisma.io%2Fdocs",
+      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
+    },
+    "nia-tailwind": {
+      "url": "https://apigcp.trynia.ai/mcp?source=https%3A%2F%2Ftailwindcss.com%2Fdocs",
+      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
+    }
+  }
+}
+```
+
+Each MCP operates independently, giving you precise control over what knowledge your agent can access.
+
+<Tip>
+  To get the URL-encoded source, take the documentation URL and encode special characters: `/` becomes `%2F`, `:` becomes `%3A`.
+</Tip>
+
+---
+
+## Scoped vs. Subscribed Sources
+
+| Scoped MCP | Subscribed Source (Full MCP) |
+|------------|------------------------------|
+| Dedicated MCP server per source | Single MCP, multiple sources |
+| Separate tool namespace | Shared tools query all subscribed |
+| Best for focused workflows | Best for cross-source queries |
+| Multiple MCP configs needed | One config, manage sources in UI |
+
+<Tip>
+  **Start with the full Nia MCP** if you're exploring. Switch to scoped MCPs once you know exactly which sources you need for a project.
+</Tip>

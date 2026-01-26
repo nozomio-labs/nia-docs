@@ -1746,6 +1746,256 @@ components:
         total:
           type: integer
 
+    # Dependency Analysis Schemas
+    DependencyAnalyzeRequest:
+      type: object
+      required:
+        - manifest_content
+      properties:
+        manifest_content:
+          type: string
+          description: Raw content of the manifest file
+        manifest_type:
+          type: string
+          enum: [package.json, requirements.txt, pyproject.toml, Cargo.toml, go.mod, Gemfile]
+          description: Manifest type. Auto-detected if not provided.
+        filename:
+          type: string
+          description: Original filename for type detection
+
+    DependencySubscribeRequest:
+      type: object
+      required:
+        - manifest_content
+      properties:
+        manifest_content:
+          type: string
+          description: Raw content of the manifest file
+        manifest_type:
+          type: string
+          enum: [package.json, requirements.txt, pyproject.toml, Cargo.toml, go.mod, Gemfile]
+          description: Manifest type. Auto-detected if not provided.
+        filename:
+          type: string
+          description: Original filename for type detection
+        include_dev_dependencies:
+          type: boolean
+          default: false
+          description: Include devDependencies/dev-dependencies
+        max_new_indexes:
+          type: integer
+          minimum: 0
+          maximum: 500
+          default: 150
+          description: Max number of new indexes to start (0-500)
+
+    DependencyItem:
+      type: object
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+          nullable: true
+        registry:
+          type: string
+        is_dev:
+          type: boolean
+
+    MappingItem:
+      type: object
+      properties:
+        name:
+          type: string
+        registry:
+          type: string
+        docs_url:
+          type: string
+          nullable: true
+        mapping_source:
+          type: string
+        confidence:
+          type: number
+
+    AnalyzeResponse:
+      type: object
+      properties:
+        manifest_type:
+          type: string
+        total_dependencies:
+          type: integer
+        dependencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DependencyItem'
+        mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingItem'
+        unmapped_count:
+          type: integer
+        unmapped_packages:
+          type: array
+          items:
+            type: string
+
+    SubscriptionResultItem:
+      type: object
+      properties:
+        name:
+          type: string
+        action:
+          type: string
+        docs_url:
+          type: string
+          nullable: true
+        global_source_id:
+          type: string
+          nullable: true
+        namespace:
+          type: string
+          nullable: true
+        message:
+          type: string
+
+    SubscriptionResults:
+      type: object
+      properties:
+        instant_access:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionResultItem'
+        wait_for_indexing:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionResultItem'
+        started_indexing:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionResultItem'
+        not_found:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionResultItem'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionResultItem'
+        skipped:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionResultItem'
+
+    SubscriptionSummary:
+      type: object
+      properties:
+        instant_access:
+          type: integer
+        wait_for_indexing:
+          type: integer
+        started_indexing:
+          type: integer
+        not_found:
+          type: integer
+        errors:
+          type: integer
+        skipped:
+          type: integer
+
+    SubscribeResponse:
+      type: object
+      properties:
+        manifest_type:
+          type: string
+        total_dependencies:
+          type: integer
+        results:
+          $ref: '#/components/schemas/SubscriptionResults'
+        summary:
+          $ref: '#/components/schemas/SubscriptionSummary'
+
+    # Advisor Schemas
+    CodebaseContext:
+      type: object
+      properties:
+        files:
+          type: object
+          additionalProperties:
+            type: string
+          description: Map of file_path to file_content
+        file_tree:
+          type: string
+          nullable: true
+          description: Directory structure (from tree command or similar)
+        dependencies:
+          type: object
+          additionalProperties:
+            type: string
+          nullable: true
+          description: Dependency files content (package.json, requirements.txt, etc.)
+        git_diff:
+          type: string
+          nullable: true
+          description: Git diff output for recent changes
+        summary:
+          type: string
+          nullable: true
+          description: Brief summary of the codebase/project
+        focus_paths:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Specific paths the user is working on
+
+    AdvisorSearchScope:
+      type: object
+      properties:
+        repositories:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Repository identifiers to search
+        data_sources:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Documentation source IDs to search
+
+    AdvisorRequest:
+      type: object
+      required:
+        - query
+        - codebase
+      properties:
+        query:
+          type: string
+          description: User's question
+        codebase:
+          $ref: '#/components/schemas/CodebaseContext'
+        search_scope:
+          $ref: '#/components/schemas/AdvisorSearchScope'
+        output_format:
+          type: string
+          enum: [explanation, checklist, diff, structured]
+          default: explanation
+          description: Output format
+
+    AdvisorResponse:
+      type: object
+      properties:
+        advice:
+          type: string
+          description: Tailored advice based on codebase and documentation
+        sources_searched:
+          type: integer
+          description: Number of sources searched
+        output_format:
+          type: string
+          description: Output format used
+
     Error:
       type: object
       required:
@@ -3558,7 +3808,7 @@ paths:
                 description: |
                   Stream of Server-Sent Events with JSON payloads. Event types:
                   - connected: Connection established
-                  - iteration_start: {type, iteration, max_iterations}
+                  - iteration_start: {type, iteration}
                   - tool_start: {type, action, args, reason, iteration}
                   - tool_complete: {type, action, success, result_summary, iteration}
                   - generating_report: {type, message}
@@ -4581,6 +4831,197 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /dependencies/analyze:
+    post:
+      summary: Analyze package manifest
+      description: |
+        Parse a package manifest and return dependency information with documentation URL mappings.
+        This is a preview - no subscriptions are created.
+
+        Supports: package.json, requirements.txt, pyproject.toml, Cargo.toml, go.mod, Gemfile
+
+        Returns dependency list with mapped documentation URLs using 3-tier strategy:
+        1. Curated static mapping (instant, 100% confidence)
+        2. Registry API lookup (fast, 90% confidence)
+        3. AI inference (slower, varies confidence)
+      operationId: analyzeDependencies
+      tags:
+        - Dependencies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DependencyAnalyzeRequest'
+      responses:
+        '200':
+          description: Dependencies analyzed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeResponse'
+        '400':
+          description: Invalid manifest content or type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Failed to analyze manifest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /dependencies/subscribe:
+    post:
+      summary: Subscribe to documentation for manifest dependencies
+      description: |
+        Parse a package manifest and automatically subscribe to documentation for all dependencies.
+
+        For each dependency:
+        1. Map package name to documentation URL (curated → registry API → AI)
+        2. Check if documentation is already indexed globally
+        3. If indexed: instant access
+        4. If indexing: subscribe and wait
+        5. If not indexed: start indexing (up to max_new_indexes)
+
+        Returns categorized results showing what happened to each dependency.
+      operationId: subscribeDependencies
+      tags:
+        - Dependencies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DependencySubscribeRequest'
+      responses:
+        '200':
+          description: Subscription completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscribeResponse'
+        '400':
+          description: Invalid manifest content or type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Failed to subscribe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /dependencies/upload:
+    post:
+      summary: Upload manifest file and subscribe to dependencies
+      description: |
+        Upload a package manifest file and subscribe to documentation for all dependencies.
+        Accepts multipart form data with the manifest file.
+      operationId: uploadDependencies
+      tags:
+        - Dependencies
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Manifest file to upload
+                include_dev_dependencies:
+                  type: boolean
+                  default: false
+                  description: Include dev dependencies
+                max_new_indexes:
+                  type: integer
+                  minimum: 0
+                  maximum: 500
+                  default: 150
+                  description: Max new indexes to start
+      responses:
+        '200':
+          description: Subscription completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscribeResponse'
+        '400':
+          description: Invalid file or content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Failed to process upload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /advisor:
+    post:
+      summary: Context-aware code advisor
+      description: |
+        Analyze codebase context against Nia's indexed documentation to get tailored recommendations.
+
+        Takes structured codebase context (files, dependencies, etc.) and a query,
+        searches relevant documentation, and returns tailored advice that maps
+        documentation to the user's specific code.
+      operationId: advisorAnalyze
+      tags:
+        - Advisor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdvisorRequest'
+      responses:
+        '200':
+          description: Analysis completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvisorResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Failed to analyze
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 tags:
   - name: Repositories
     description: Repository indexing and status operations
@@ -4600,3 +5041,7 @@ tags:
     description: Autonomous AI research agent with extended thinking, web search, code analysis, and documentation exploration capabilities
   - name: Usage
     description: API usage tracking and billing information
+  - name: Dependencies
+    description: Package manifest analysis and documentation subscription for dependencies
+  - name: Advisor
+    description: Context-aware code advisor that analyzes your codebase against indexed documentation
