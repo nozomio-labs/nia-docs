@@ -764,6 +764,13 @@ components:
             - prefer: Start with llms.txt URLs, then crawl additional pages if under limit
             - only: Only index URLs listed in llms.txt
             - ignore: Skip llms.txt check (traditional behavior)
+        focus_instructions:
+          type: string
+          maxLength: 500
+          description: |
+            Natural language instructions for what section to index.
+            Finds the matching section root URL and indexes all pages under it.
+            Example: "Only API reference" indexes /docs/api-reference/* instead of entire site.
 
     DataSourceResponse:
       type: object
