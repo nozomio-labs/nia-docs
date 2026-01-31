@@ -3780,8 +3780,12 @@ paths:
 
   /oracle/stream:
     post:
-      summary: Oracle research with real-time streaming (Pro only)
+      summary: "[DEPRECATED] Oracle research with real-time streaming (Pro only)"
+      deprecated: true
       description: |
+        **DEPRECATED**: Use `/oracle/jobs` to create a job and `/oracle/jobs/{id}/stream` for streaming instead.
+        The Jobs API provides better reliability, reconnection support, and job management.
+        
         Execute Oracle research with Server-Sent Events (SSE) streaming for real-time progress updates.
         
         This endpoint streams research progress including:
