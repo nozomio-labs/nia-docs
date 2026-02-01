@@ -1,0 +1,171 @@
+---
+title: 'ClawHub Skill'
+description: 'Index and search code repositories, documentation, research papers, and HuggingFace datasets with Nia AI in Clawdbot.'
+---
+
+The Nia skill for [Clawdbot](https://clawhub.ai) provides direct API access to Nia for indexing and searching code repositories, documentation, research papers, and HuggingFace datasets.
+
+<Info>
+  **Shell-Based Integration**: Uses lightweight shell scripts with `curl` and `jq` for maximum compatibility and portability.
+</Info>
+
+---
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Repository Indexing" icon="code-branch">
+    Index GitHub repositories and search through code with semantic and regex search.
+  </Card>
+
+  <Card title="Documentation Search" icon="book">
+    Index entire documentation sites and search across all pages.
+  </Card>
+
+  <Card title="Research Papers" icon="file-lines">
+    Index arXiv papers by ID, URL, or PDF link for AI-powered research.
+  </Card>
+
+  <Card title="HuggingFace Datasets" icon="database">
+    Index and search HuggingFace datasets by name or URL.
+  </Card>
+</CardGroup>
+
+---
+
+## Installation
+
+### 1. Get Your API Key
+
+Either run the guided wizard:
+
+```bash
+npx nia-wizard@latest
+```
+
+Or sign up at [trynia.ai](https://trynia.ai) to get your key.
+
+### 2. Store the Key
+
+```bash
+mkdir -p ~/.config/nia
+echo "your-api-key-here" > ~/.config/nia/api_key
+```
+
+### 3. Requirements
+
+- `curl`
+- `jq`
+
+<Note>
+  Most systems have these pre-installed. On macOS, install with `brew install jq` if needed.
+</Note>
+
+---
+
+## Nia-First Workflow
+
+Before using web fetch or web search, you should:
+
+1. **Check indexed sources first** using `repos-list.sh` or `sources-list.sh`
+2. **If source exists**: Use `search-universal.sh`, `repos-grep.sh`, `sources-read.sh` for targeted queries
+3. **If source doesn't exist but you know the URL**: Index it with `repos-index.sh` or `sources-index.sh`, then search
+4. **Only if source unknown**: Use `search-web.sh` or `search-deep.sh` to discover URLs, then index
+
+<Info>
+  **Why this matters**: Indexed sources provide more accurate, complete context than web fetches. Web fetch returns truncated/summarized content while Nia provides full source code and documentation.
+</Info>
+
+---
+
+## Available Scripts
+
+All scripts are in `./scripts/`. Base URL: `https://apigcp.trynia.ai/v2`
+
+### Repositories
+
+| Script | Description |
+|--------|-------------|
+| `repos-list.sh` | List indexed repos |
+| `repos-index.sh "owner/repo" [branch]` | Index a repo |
+| `repos-status.sh "owner/repo"` | Get repo status |
+| `repos-tree.sh "owner/repo" [branch]` | Get repo tree |
+| `repos-read.sh "owner/repo" "path/to/file"` | Read file |
+| `repos-grep.sh "owner/repo" "pattern"` | Grep code |
+
+### Data Sources (Docs, Papers, Datasets)
+
+| Script | Description |
+|--------|-------------|
+| `sources-list.sh [type]` | List sources (documentation, research_paper, huggingface_dataset) |
+| `sources-index.sh "https://docs.example.com"` | Index docs |
+| `sources-tree.sh "source_id_or_name"` | Get source tree |
+| `sources-read.sh "source_id" "/path"` | Read from source |
+| `sources-grep.sh "source_id" "pattern"` | Grep content |
+
+### Research Papers (arXiv)
+
+| Script | Description |
+|--------|-------------|
+| `papers-list.sh` | List indexed papers |
+| `papers-index.sh "2312.00752"` | Index paper (ID, URL, or PDF URL) |
+
+### HuggingFace Datasets
+
+| Script | Description |
+|--------|-------------|
+| `datasets-list.sh` | List indexed datasets |
+| `datasets-index.sh "squad"` | Index dataset (name, owner/dataset, or URL) |
+
+### Search
+
+| Script | Description |
+|--------|-------------|
+| `search-universal.sh "query"` | Search ALL indexed sources |
+| `search-web.sh "query" [num_results]` | Web search |
+| `search-deep.sh "query"` | Deep research (Pro) |
+
+### Package Search
+
+| Script | Description |
+|--------|-------------|
+| `package-grep.sh "npm" "react" "pattern"` | Grep package (npm, py_pi, crates_io, golang_proxy) |
+| `package-hybrid.sh "npm" "react" "query"` | Semantic search in packages |
+
+### Oracle Research (Pro)
+
+| Script | Description |
+|--------|-------------|
+| `oracle.sh "research query"` | Run autonomous research |
+| `oracle-sessions.sh` | List research sessions |
+
+---
+
+## API Reference
+
+| Type | Endpoint | Identifier Examples |
+|------|----------|---------------------|
+| Repository | `POST /repositories` | `owner/repo`, `microsoft/vscode` |
+| Documentation | `POST /data-sources` | `https://docs.example.com` |
+| Research Paper | `POST /research-papers` | `2312.00752`, arXiv URL |
+| HuggingFace Dataset | `POST /huggingface-datasets` | `squad`, `owner/dataset` |
+
+---
+
+## Links
+
+<CardGroup cols={2}>
+  <Card title="ClawHub" icon="paw" href="https://www.clawhub.ai/arlanrakh/nia">
+    View skill on ClawHub
+  </Card>
+
+  <Card title="Get API Key" icon="key" href="https://app.trynia.ai">
+    Sign up for Nia API access
+  </Card>
+</CardGroup>
+
+---
+
+<Warning>
+**Need Help?** Join our [Discord community](https://discord.gg/BBSwUMrrfn) or reach out through [app.trynia.ai](https://app.trynia.ai/) for support.
+</Warning>

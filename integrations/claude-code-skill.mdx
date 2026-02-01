@@ -1,0 +1,146 @@
+---
+title: 'Claude Code Plugin'
+description: 'Index and search code repositories, documentation, research papers, and HuggingFace datasets with Nia AI in Claude Code.'
+---
+
+The Nia plugin for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) provides direct access to Nia for indexing and searching code repositories, documentation, research papers, and HuggingFace datasets.
+
+<Info>
+  **Marketplace Install**: Install directly from the Claude Code marketplace with a single command.
+</Info>
+
+---
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Repository Indexing" icon="code-branch">
+    Index GitHub repositories and search through code with semantic and regex search.
+  </Card>
+
+  <Card title="Documentation Search" icon="book">
+    Index entire documentation sites and search across all pages.
+  </Card>
+
+  <Card title="Research Papers" icon="file-lines">
+    Index arXiv papers by ID, URL, or PDF link for AI-powered research.
+  </Card>
+
+  <Card title="HuggingFace Datasets" icon="database">
+    Index and search HuggingFace datasets by name or URL.
+  </Card>
+</CardGroup>
+
+---
+
+## Installation
+
+### From Marketplace
+
+```bash
+/install nia
+```
+
+### From GitHub
+
+```bash
+/plugin marketplace add nozomio-labs/nia-plugin
+/plugin install nia@nozomio-labs/nia-plugin
+```
+
+---
+
+## Setup
+
+### 1. Get Your API Key
+
+Either run the guided wizard:
+
+```bash
+npx nia-wizard@latest
+```
+
+Or sign up at [trynia.ai](https://trynia.ai) to get your key.
+
+### 2. Store the Key
+
+```bash
+mkdir -p ~/.config/nia
+echo "your-api-key" > ~/.config/nia/api_key
+```
+
+### 3. Requirements
+
+- `curl`
+- `jq`
+
+<Note>
+  Most systems have these pre-installed. On macOS, install with `brew install jq` if needed.
+</Note>
+
+---
+
+## Available Scripts
+
+| Script | Description |
+|--------|-------------|
+| `repos-list.sh` | List indexed repositories |
+| `repos-index.sh` | Index a GitHub repository |
+| `repos-tree.sh` | Get repository file tree |
+| `repos-read.sh` | Read file from repository |
+| `repos-grep.sh` | Search code in repository |
+| `sources-list.sh` | List indexed data sources |
+| `sources-index.sh` | Index documentation URL |
+| `sources-tree.sh` | Get source tree |
+| `sources-read.sh` | Read from source |
+| `papers-list.sh` | List indexed papers |
+| `papers-index.sh` | Index arXiv paper |
+| `datasets-list.sh` | List HuggingFace datasets |
+| `datasets-index.sh` | Index HuggingFace dataset |
+| `search-universal.sh` | Search all indexed sources |
+| `search-web.sh` | Web search |
+| `search-deep.sh` | Deep research (Pro) |
+| `package-grep.sh` | Search package source code |
+| `global-subscribe.sh` | Subscribe to public source |
+| `oracle.sh` | Run autonomous research (Pro) |
+
+---
+
+## Usage Examples
+
+```bash
+# List indexed repositories
+./scripts/repos-list.sh
+
+# Index a repository
+./scripts/repos-index.sh "owner/repo"
+
+# Search all indexed sources
+./scripts/search-universal.sh "how does auth work?"
+
+# Index documentation
+./scripts/sources-index.sh "https://docs.stripe.com"
+
+# Grep repository code
+./scripts/repos-grep.sh "vercel/ai" "streamText"
+```
+
+---
+
+## Links
+
+<CardGroup cols={2}>
+  <Card title="GitHub" icon="github" href="https://github.com/nozomio-labs/nia-plugin">
+    View source code and contribute
+  </Card>
+
+  <Card title="Get API Key" icon="key" href="https://app.trynia.ai">
+    Sign up for Nia API access
+  </Card>
+</CardGroup>
+
+---
+
+<Warning>
+**Need Help?** Join our [Discord community](https://discord.gg/BBSwUMrrfn) or reach out through [app.trynia.ai](https://app.trynia.ai/) for support.
+</Warning>

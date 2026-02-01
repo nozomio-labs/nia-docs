@@ -52,6 +52,8 @@
             "group": "Plugins and Rules",
             "pages": [
               "integrations/opencode",
+              "integrations/openclaw",
+              "integrations/claude-code-skill",
               "example-workflows/agent-rules"
             ]
           },
