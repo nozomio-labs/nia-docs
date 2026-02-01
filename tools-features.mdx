@@ -8,11 +8,12 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     Ask your coding agent: *"Use package search to find how error handling is implemented in the `requests` Python library"* or *"Search the numpy package for array manipulation examples"*
   </Step>
 
-  <Step title="Index Documentation, Repositories, or Research Papers">
-    Try indexing public documentation, a repository, or research papers:
+  <Step title="Index Documentation, Repositories, Research Papers, or Datasets">
+    Try indexing public documentation, a repository, research papers, or HuggingFace datasets:
     - *"Index https://docs.trynia.ai/"*
     - *"Index https://github.com/browser-use/browser-use"*
     - *"Index https://arxiv.org/abs/2401.12345"* (arXiv papers)
+    - *"Index https://huggingface.co/datasets/openai/gsm8k"* (HuggingFace datasets)
     - *"Use nia deep research to compare the best GraphRAG frameworks and then index the one with least latency."*
   </Step>
 
@@ -87,12 +88,13 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     **Auto-Detection**:
     - GitHub URLs (containing "github.com") → Repository indexing
     - arXiv URLs (containing "arxiv.org") → Research paper indexing
+    - HuggingFace dataset URLs (containing "huggingface.co/datasets") → Dataset indexing
     - Local folder path provided → Local folder indexing
     - All other URLs → Documentation indexing
 
     **Parameters**:
-    - `url` (str, optional): GitHub repository URL, documentation site URL, or arXiv ID/URL (not needed for local folders)
-    - `resource_type` (str, optional): Override auto-detection - "repository", "documentation", "research_paper", or "local_folder"
+    - `url` (str, optional): GitHub repository URL, documentation site URL, arXiv ID/URL, or HuggingFace dataset URL (not needed for local folders)
+    - `resource_type` (str, optional): Override auto-detection - "repository", "documentation", "research_paper", "huggingface_dataset", or "local_folder"
 
     **Repository-specific**:
     - `branch` (str, optional): Branch to index (defaults to main branch)
@@ -124,6 +126,9 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
     # Index a research paper from arXiv
     index("https://arxiv.org/abs/2401.12345")
+
+    # Index a HuggingFace dataset (auto-detected)
+    index("https://huggingface.co/datasets/openai/gsm8k")
 
     # Index a local folder
     index(folder_path="/Users/me/notes", folder_name="My Notes")
@@ -209,13 +214,13 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
   </Accordion>
 
   <Accordion title="Navigation & Reading Tools">
-    These tools work across all source types: repositories, documentation, packages, and local folders. The `source_type` parameter determines which source to target.
+    These tools work across all source types: repositories, documentation, packages, local folders, and HuggingFace datasets. The `source_type` parameter determines which source to target.
 
     ### `nia_read`
     Read content from any source type.
 
     **Parameters**:
-    - `source_type` (str, required): "repository", "documentation", "package", or "local_folder"
+    - `source_type` (str, required): "repository", "documentation", "package", "local_folder", or "huggingface_dataset"
     - For **repository**: `source_identifier` (owner/repo:path/to/file)
     - For **documentation**: `doc_source_id` (UUID, display_name, or URL) + `path`
     - For **package**: `registry`, `package_name`, `filename_sha256`, `start_line`, `end_line`
@@ -227,7 +232,7 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     Regex search in any source type.
 
     **Parameters**:
-    - `source_type` (str, required): "repository", "documentation", "package", or "local_folder"
+    - `source_type` (str, required): "repository", "documentation", "package", "local_folder", or "huggingface_dataset"
     - `pattern` (str, required): Regex pattern to search for
     - For **repository**: `repository` (owner/repo format)
     - For **documentation**: `doc_source_id` (UUID, display_name, or URL)
@@ -242,7 +247,7 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     Browse file structure of any source type.
 
     **Parameters**:
-    - `source_type` (str, required): "repository", "documentation", or "local_folder"
+    - `source_type` (str, required): "repository", "documentation", "local_folder", or "huggingface_dataset"
     - `action` (str, default="tree"): "tree" for full structure, "ls" for directory listing
     - For **repository**: `repository` (owner/repo format)
     - For **documentation**: `doc_source_id`
@@ -264,7 +269,7 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
   <Accordion title="Resource Management">
     ### `manage_resource`
-    Unified resource management tool for repositories, documentation, research papers, and local folders.
+    Unified resource management tool for repositories, documentation, research papers, HuggingFace datasets, and local folders.
 
     **Actions**:
 
@@ -273,7 +278,7 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
     **Parameters**:
     - `action` (str, required): "list"
-    - `resource_type` (str, optional): Filter by "repository", "documentation", "research_paper", "local_folder", or None for all
+    - `resource_type` (str, optional): Filter by "repository", "documentation", "research_paper", "huggingface_dataset", "local_folder", or None for all
     - `query` (str, optional): Text filter (matches repo/display_name/url/title/id)
     - `limit` (int, default=10): Maximum items to return per section (1-100)
     - `offset` (int, default=0): Pagination offset
@@ -285,7 +290,7 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
     **Parameters**:
     - `action` (str, required): "status"
-    - `resource_type` (str, required): "repository", "documentation", "research_paper", or "local_folder"
+    - `resource_type` (str, required): "repository", "documentation", "research_paper", "huggingface_dataset", or "local_folder"
     - `identifier` (str, required): Repository name (owner/repo), documentation UUID/URL, paper identifier, or local folder ID
 
     #### Action: "rename"
@@ -293,7 +298,7 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
     **Parameters**:
     - `action` (str, required): "rename"
-    - `resource_type` (str, required): "repository", "documentation", "research_paper", or "local_folder"
+    - `resource_type` (str, required): "repository", "documentation", "research_paper", "huggingface_dataset", or "local_folder"
     - `identifier` (str, required): Resource identifier (owner/repo, UUID/URL, or local folder ID)
     - `new_name` (str, required): New display name (1-100 characters)
 
@@ -302,7 +307,7 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
     **Parameters**:
     - `action` (str, required): "delete"
-    - `resource_type` (str, required): "repository", "documentation", "research_paper", or "local_folder"
+    - `resource_type` (str, required): "repository", "documentation", "research_paper", "huggingface_dataset", or "local_folder"
     - `identifier` (str, required): Resource identifier (owner/repo, UUID/URL, or local folder ID)
 
     #### Action: "subscribe"
@@ -310,7 +315,7 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
     **Parameters**:
     - `action` (str, required): "subscribe"
-    - `resource_type` (str, required): "repository", "documentation", or "research_paper"
+    - `resource_type` (str, required): "repository", "documentation", "research_paper", or "huggingface_dataset"
     - `identifier` (str, required): URL of the source to subscribe to
 
     **Example**:
@@ -322,6 +327,7 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     - For repositories: owner/repo format (e.g., "facebook/react") or GitHub URL
     - For documentation: UUID preferred, also supports display name or URL
     - For research papers: UUID or arXiv abs/pdf URL
+    - For HuggingFace datasets: UUID or dataset_id (e.g., "openai/gsm8k", "squad")
     - For local folders: UUID or display name
   </Accordion>
 

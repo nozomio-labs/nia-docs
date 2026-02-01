@@ -1,0 +1,246 @@
+---
+title: 'HuggingFace Datasets'
+description: 'Index and search HuggingFace datasets for semantic retrieval in your AI workflows.'
+---
+
+## Overview
+
+Nia supports indexing [HuggingFace datasets](https://huggingface.co/datasets) for semantic and agentic search. This enables your AI agents to query dataset contents, understand schema structures, and retrieve relevant rows using natural language.
+
+Try it now in the [Interactive Playground →](https://app.trynia.ai/playground/datasets)
+
+<Info>
+HuggingFace dataset indexing uses **5 credits** per dataset. Large datasets (100K+ rows) are automatically sampled for efficient indexing while preserving representativeness.
+</Info>
+
+## Quick Start
+
+<Steps>
+  <Step title="Index a Dataset">
+    Ask your coding agent to index a HuggingFace dataset:
+    ```
+    "Index https://huggingface.co/datasets/openai/gsm8k"
+    "Index the squad dataset from HuggingFace"
+    ```
+  </Step>
+
+  <Step title="Search the Dataset">
+    Once indexed, search with natural language:
+    ```
+    "Search the gsm8k dataset for math problems about fractions"
+    "Find examples in squad about historical events"
+    ```
+  </Step>
+
+  <Step title="Explore and Read">
+    Use `nia_explore` and `nia_read` to browse dataset structure:
+    ```
+    "Show me the structure of the indexed gsm8k dataset"
+    "Read rows from the train split of squad"
+    ```
+  </Step>
+</Steps>
+
+## Supported URL Formats
+
+The `index` tool auto-detects HuggingFace dataset URLs:
+
+```
+# Standard dataset URLs
+https://huggingface.co/datasets/squad
+https://huggingface.co/datasets/openai/gsm8k
+
+# Dataset viewer URLs (also supported)
+https://huggingface.co/datasets/rajpurkar/squad/viewer
+```
+
+You can also specify the resource type explicitly:
+```
+index(url="https://huggingface.co/datasets/squad", resource_type="huggingface_dataset")
+```
+
+## Indexing Strategy
+
+Nia uses intelligent sampling based on dataset size to balance coverage and performance:
+
+| Dataset Size | Strategy | Rows Indexed |
+|--------------|----------|--------------|
+| < 200K rows | Full | All rows |
+| 200K - 2M rows | Sampled | Up to 100K rows |
+| > 2M rows | Sampled | Up to 25K rows |
+
+<Note>
+Binary columns (images, audio, arrays) are automatically excluded. Only text-compatible columns (strings, numbers, booleans) are indexed for semantic search.
+</Note>
+
+## What Gets Indexed
+
+For each dataset, Nia extracts and indexes:
+
+- **Row content**: Text from all compatible columns, formatted and chunked for semantic retrieval
+- **Dataset metadata**: Schema, splits, column types, row counts, license info
+- **Configuration info**: Available configs and the selected configuration
+
+## MCP Tools
+
+### Indexing
+
+Use the unified `index` tool:
+
+```python
+# Via MCP tool
+index(url="https://huggingface.co/datasets/openai/gsm8k")
+
+# Or via API
+POST /v2/huggingface-datasets
+{
+  "url": "https://huggingface.co/datasets/openai/gsm8k"
+}
+```
+
+### Searching
+
+Use `search` with the dataset as a data source:
+
+```python
+search(
+    query="math problems involving percentages",
+    data_sources=["openai/gsm8k"]  # or use the source UUID
+)
+```
+
+### Reading
+
+Use `nia_read` to read dataset content:
+
+```python
+nia_read(
+    source_type="huggingface_dataset",
+    doc_source_id="openai/gsm8k",  # dataset ID or source UUID
+    path="/"  # optional path filter
+)
+```
+
+### Grep (Regex Search)
+
+Use `nia_grep` to search with regex patterns:
+
+```python
+nia_grep(
+    source_type="huggingface_dataset",
+    doc_source_id="openai/gsm8k",
+    pattern="\\d+%"  # find percentage values
+)
+```
+
+### Exploring
+
+Use `nia_explore` to see dataset structure:
+
+```python
+nia_explore(
+    source_type="huggingface_dataset",
+    doc_source_id="openai/gsm8k",
+    action="tree"
+)
+```
+
+## Managing Datasets
+
+### List Indexed Datasets
+
+```python
+manage_resource(action="list", resource_type="huggingface_dataset")
+```
+
+### Check Status
+
+```python
+manage_resource(
+    action="status",
+    resource_type="huggingface_dataset",
+    identifier="openai/gsm8k"
+)
+```
+
+### Delete a Dataset
+
+```python
+manage_resource(
+    action="delete",
+    resource_type="huggingface_dataset",
+    identifier="openai/gsm8k"
+)
+```
+
+## Global Source Deduplication
+
+HuggingFace datasets participate in Nia's global source pool:
+
+- If someone has already indexed `openai/gsm8k`, you can subscribe instantly without re-indexing
+- Use `manage_resource(action="subscribe", identifier="https://huggingface.co/datasets/openai/gsm8k")` to subscribe to an existing index
+- Set `add_as_global_source=False` when indexing to keep datasets private
+
+## API Endpoints
+
+### Index a Dataset
+
+```bash
+POST /v2/huggingface-datasets
+Authorization: Bearer nk_xxx
+
+{
+  "url": "https://huggingface.co/datasets/openai/gsm8k",
+  "config": "main",  # optional dataset config
+  "add_as_global_source": true
+}
+```
+
+### Response
+
+```json
+{
+  "id": "source-uuid",
+  "status": "indexing",
+  "dataset_id": "gsm8k",
+  "metadata": {
+    "owner": "openai",
+    "description": "Grade school math problems...",
+    "splits": ["train", "test"],
+    "columns": [
+      {"name": "question", "type": "string"},
+      {"name": "answer", "type": "string"}
+    ],
+    "row_count": 8792,
+    "sampling_strategy": "full"
+  }
+}
+```
+
+## Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Fine-tuning Data Discovery" icon="database">
+    Search through datasets to find relevant training examples for your specific use case.
+  </Card>
+
+  <Card title="Benchmark Analysis" icon="chart-line">
+    Query benchmark datasets to understand evaluation metrics and test case distribution.
+  </Card>
+
+  <Card title="Data Augmentation" icon="layer-group">
+    Find similar examples across multiple datasets to augment your training data.
+  </Card>
+
+  <Card title="Dataset Documentation" icon="book">
+    Let your agents understand dataset schemas and find specific examples on demand.
+  </Card>
+</CardGroup>
+
+## Limitations
+
+- **Binary data**: Images, audio, and array columns are excluded from indexing
+- **Large datasets**: Very large datasets (>2M rows) are sampled to maintain performance
+- **Streaming**: Datasets must support HuggingFace's streaming mode
+- **Private datasets**: Requires `HF_TOKEN` environment variable for private dataset access
+

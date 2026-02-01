@@ -1,15 +1,33 @@
 openapi: 3.1.0
 info:
   title: Nia AI API
-  version: '2.1.0'
+  version: '2.2.0'
   description: |
-    Nia AI API allows developers to index and query code repositories, documentation, and research papers using advanced AI understanding.
-    The API provides capabilities for:
+    Nia AI API allows developers to index and query code repositories, documentation, research papers, and HuggingFace datasets using advanced AI understanding.
+
+    ## Architecture Overview
+
+    The API has two main resource types:
+
+    **1. Repositories** (`/repositories/*`)
+    - GitHub repositories
+    - Endpoints: tree, content, grep
+
+    **2. Data Sources** (`/data-sources/*`)
+    - Documentation/websites
+    - Research papers (arXiv)
+    - HuggingFace datasets
+    - Shared endpoints: tree, read, grep, ls
+
+    Each source type has its own POST endpoint for indexing, but once indexed, they share common operations.
+
+    ## Capabilities
     - Repository indexing and management (including direct GitHub tree access)
     - Documentation/website indexing and management
     - Research paper indexing (arXiv support with automatic metadata extraction)
-    - AI-powered search across code, documentation, and research papers
-    - Advanced regex pattern search over indexed repositories
+    - HuggingFace dataset indexing for semantic search over dataset content
+    - AI-powered search across code, documentation, papers, and datasets
+    - Advanced regex pattern search (grep) over all indexed sources
     - Package source code search across npm, PyPI, crates.io, and Go modules
     - Web search and deep research capabilities
     - Cross-agent conversation context sharing with semantic search
@@ -89,8 +107,8 @@ components:
                 description: |
                   Flexible data source identifier (recommended). Can be:
                   - UUID (e.g., "550e8400-e29b-41d4-a716-446655440000")
-                  - Display name (e.g., "Vercel AI SDK - Core")
-                  - URL (e.g., "https://docs.trynia.ai/")
+                  - Display name (e.g., "Vercel AI SDK - Core", "openai/gsm8k")
+                  - URL (e.g., "https://docs.trynia.ai/", "https://arxiv.org/abs/2312.00752")
               - type: object
                 required:
                   - source_id
@@ -106,15 +124,23 @@ components:
                     type: string
                     description: Flexible data source identifier
           description: |
-            List of documentation/web sources to query. Supports flexible identifiers:
-            - String format (recommended): ["Vercel AI SDK - Core", "https://docs.trynia.ai/"]
-            - Legacy object format: [{"source_id": "uuid"}]
-            - New object format: [{"identifier": "display-name-or-url"}]
+            List of data sources to query. **Supports all source types:**
+            - Documentation/websites
+            - Research papers (arXiv)
+            - HuggingFace datasets
+
+            Flexible identifier formats:
+            - String (recommended): ["Vercel AI SDK - Core", "openai/gsm8k", "https://arxiv.org/abs/2312.00752"]
+            - Legacy object: [{"source_id": "uuid"}]
+            - New object: [{"identifier": "display-name-or-url"}]
         search_mode:
           type: string
           enum: [repositories, sources]
           default: repositories
-          description: "Search mode: 'repositories' searches only code, 'sources' searches only documentation"
+          description: |
+            Search mode:
+            - 'repositories': Search GitHub repositories only
+            - 'sources': Search data sources only (documentation, research papers, HuggingFace datasets)
         stream:
           type: boolean
           default: false
@@ -358,6 +384,10 @@ components:
           type: boolean
           default: true
           description: Include documentation sources in search
+        include_huggingface_datasets:
+          type: boolean
+          default: false
+          description: Include HuggingFace dataset sources in search (excluded by default to prevent search pollution)
         alpha:
           type: number
           minimum: 0.0
@@ -382,6 +412,7 @@ components:
             repository: 1.2
             documentation: 1.0
             research_paper: 0.9
+            huggingface_dataset: 0.85
           description: Source type boosts (override to customize or set {} to disable)
         boost_languages:
           type: array
@@ -428,7 +459,7 @@ components:
                 properties:
                   type:
                     type: string
-                    enum: [repository, documentation, research_paper]
+                    enum: [repository, documentation, research_paper, huggingface_dataset]
                     description: Type of source
                   url:
                     type: string
@@ -913,6 +944,225 @@ components:
           type: string
           nullable: true
           description: Error message if status is 'failed'
+
+    HuggingFaceDatasetRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          description: |
+            HuggingFace dataset URL or identifier. Supports multiple formats:
+            - Full URL: https://huggingface.co/datasets/squad
+            - Owner/dataset: dair-ai/emotion
+            - Dataset name: squad
+          example: "dair-ai/emotion"
+        config:
+          type: string
+          nullable: true
+          description: Dataset configuration name (for multi-config datasets)
+        add_as_global_source:
+          type: boolean
+          default: true
+          description: Add to global shared pool (default true). Set false for private indexing.
+
+    HuggingFaceDatasetResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the data source
+        dataset_id:
+          type: string
+          description: Dataset identifier (e.g., "squad", "emotion")
+        url:
+          type: string
+          description: Canonical HuggingFace dataset URL
+        status:
+          type: string
+          enum: [pending, processing, completed, failed, error]
+          description: Current indexing status
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        owner:
+          type: string
+          nullable: true
+          description: Dataset owner/organization
+        description:
+          type: string
+          nullable: true
+          description: Dataset description
+        splits:
+          type: array
+          items:
+            type: string
+          description: Available dataset splits (e.g., ["train", "test", "validation"])
+        columns:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              dtype:
+                type: string
+          description: Dataset columns with names and data types
+        row_count:
+          type: integer
+          default: 0
+          description: Total number of rows in the dataset
+        indexed_row_count:
+          type: integer
+          default: 0
+          description: Number of rows actually indexed (may differ due to sampling)
+        chunk_count:
+          type: integer
+          default: 0
+          description: Number of text chunks created
+        sampling_strategy:
+          type: string
+          nullable: true
+          description: Sampling strategy used (full or sampled)
+        license:
+          type: string
+          nullable: true
+          description: Dataset license
+        error:
+          type: string
+          nullable: true
+          description: Error message if status is 'failed'
+
+    HuggingFaceDatasetListItem:
+      type: object
+      properties:
+        id:
+          type: string
+        dataset_id:
+          type: string
+          nullable: true
+        url:
+          type: string
+          nullable: true
+        status:
+          type: string
+        source_type:
+          type: string
+          default: huggingface_dataset
+        is_active:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+        chunk_count:
+          type: integer
+          nullable: true
+        display_name:
+          type: string
+          nullable: true
+        owner:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        splits:
+          type: array
+          items:
+            type: string
+          nullable: true
+        row_count:
+          type: integer
+          nullable: true
+        indexed_row_count:
+          type: integer
+          nullable: true
+        sampling_strategy:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true
+
+    HuggingFaceDatasetListResponse:
+      type: object
+      properties:
+        datasets:
+          type: array
+          items:
+            $ref: '#/components/schemas/HuggingFaceDatasetListItem'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    GlobalSourceSubscribeRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          description: |
+            URL of the source to subscribe to. Supports:
+            - GitHub repository: https://github.com/owner/repo
+            - Documentation: https://docs.example.com
+            - arXiv paper: https://arxiv.org/abs/2312.00752 or 2312.00752
+            - HuggingFace dataset: https://huggingface.co/datasets/squad or squad
+          example: "https://github.com/vercel/ai-sdk"
+        source_type:
+          type: string
+          enum: [repository, documentation, research_paper, huggingface_dataset]
+          description: Source type. Auto-detected from URL if not provided.
+
+    GlobalSourceSubscribeResponse:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [instant_access, wait_for_indexing, not_indexed, use_private, indexing_started]
+          description: |
+            Action taken:
+            - instant_access: Source is indexed and ready for immediate use
+            - wait_for_indexing: Source is being indexed, you've been subscribed
+            - not_indexed: Source is not indexed, use the index endpoint instead
+            - use_private: You have a private index of this source
+            - indexing_started: Indexing has been triggered (HuggingFace datasets)
+        message:
+          type: string
+          description: Human-readable description of the action
+        global_source_id:
+          type: string
+          nullable: true
+          description: Canonical ID of the global source
+        namespace:
+          type: string
+          nullable: true
+          description: TurboPuffer namespace for the source
+        status:
+          type: string
+          nullable: true
+          description: Current status of the global source (indexed, indexing, pending, failed)
+        local_reference_id:
+          type: string
+          nullable: true
+          description: ID of the created local reference (project or data_source)
+        display_name:
+          type: string
+          nullable: true
+          description: Display name of the source
 
     GitHubTreeRequest:
       type: object
@@ -2504,16 +2754,22 @@ paths:
 
   /search/query:
     post:
-      summary: Query indexed repositories and documentation
+      summary: Query indexed sources
       description: |
-        Send a query to get AI-powered insights about indexed repositories or documentation sources.
-        Supports two search modes:
-        - 'repositories': Search only code repositories (default)
-        - 'sources': Search only documentation sources (returns vector search results without LLM processing)
+        Send a query to get AI-powered insights about indexed sources.
+
+        **Queryable source types:**
+        - **repositories**: GitHub repositories (pass via `repositories` param)
+        - **data_sources**: Documentation, research papers, AND HuggingFace datasets (pass via `data_sources` param)
+
+        **Search modes:**
+        - `repositories`: Search only code repositories (default)
+        - `sources`: Search only data sources (docs, papers, datasets) - returns vector search results without LLM processing
+
         Supports both streaming and non-streaming responses.
       operationId: searchQuery
       tags:
-        - Search
+        - Search & Research
       requestBody:
         required: true
         content:
@@ -2569,7 +2825,7 @@ paths:
         Supports filtering by category and time range, as well as finding similar content to a given URL.
       operationId: searchWeb
       tags:
-        - Search
+        - Search & Research
       requestBody:
         required: true
         content:
@@ -2604,7 +2860,7 @@ paths:
         with citations.
       operationId: searchDeep
       tags:
-        - Search
+        - Search & Research
       requestBody:
         required: true
         content:
@@ -2645,20 +2901,26 @@ paths:
     post:
       summary: Universal search across all public sources
       description: |
-        Search across ALL indexed public sources (repositories and documentation) in a single query.
-        
+        Search across ALL indexed public sources in a single query.
+
+        **Searches across:**
+        - GitHub repositories
+        - Documentation/websites
+        - Research papers (arXiv)
+        - HuggingFace datasets (when `include_huggingface_datasets=true`)
+
         This endpoint performs a two-phase hybrid search:
         1. **Discovery Phase**: Fast O(1) search across a universal index to identify relevant sources
         2. **Deep Search Phase**: Targeted searches into the top matching source namespaces for comprehensive results
-        
+
         Results are combined using Reciprocal Rank Fusion (RRF) for optimal ranking.
-        
+
         Use this when you want to discover relevant content without knowing which specific sources to search.
-        
+
         **Performance**: Typically returns results in 1-3 seconds for thousands of indexed sources.
       operationId: searchUniversal
       tags:
-        - Search
+        - Search & Research
       requestBody:
         required: true
         content:
@@ -2686,7 +2948,15 @@ paths:
   /data-sources:
     get:
       summary: List all data sources
-      description: List all indexed documentation and web sources for the authenticated user
+      description: |
+        List all indexed data sources for the authenticated user.
+
+        **Supported source types:**
+        - `documentation` / `web` - Indexed websites and documentation
+        - `research_paper` - arXiv papers
+        - `huggingface_dataset` - HuggingFace datasets
+
+        Use the `source_type` query parameter to filter by type.
       operationId: listDataSources
       tags:
         - Data Sources
@@ -2768,7 +3038,10 @@ paths:
   /data-sources/{source_id}:
     get:
       summary: Get data source details
-      description: Get detailed information about a specific data source
+      description: |
+        Get detailed information about a specific data source.
+
+        **Works with all source types:** documentation, research papers, and HuggingFace datasets.
       operationId: getDataSource
       tags:
         - Data Sources
@@ -2781,8 +3054,8 @@ paths:
           description: |
             Flexible data source identifier. Can be:
             - UUID (e.g., "550e8400-e29b-41d4-a716-446655440000")
-            - Display name (e.g., "Vercel AI SDK - Core")
-            - URL (e.g., "https://docs.trynia.ai/")
+            - Display name (e.g., "Vercel AI SDK - Core", "openai/gsm8k")
+            - URL (e.g., "https://docs.trynia.ai/", "https://arxiv.org/abs/2312.00752")
       responses:
         '200':
           description: Data source details retrieved successfully
@@ -2927,11 +3200,19 @@ paths:
 
   /data-sources/{source_id}/tree:
     get:
-      summary: Get documentation tree structure
+      summary: Get data source tree structure
       description: |
-        Get the filesystem-like tree structure of indexed documentation.
-        Shows all indexed pages organized as a virtual file tree, making it easy
-        to browse documentation structure without remembering URLs.
+        Get the tree structure of an indexed data source.
+
+        **Works with all source types:**
+
+        - **Documentation:** Returns a filesystem-like tree structure of indexed pages,
+          making it easy to browse documentation without remembering URLs.
+
+        - **Research Papers:** Returns the document structure with sections and subsections.
+
+        - **HuggingFace Datasets:** Returns a tree showing dataset splits and columns,
+          with metadata about row counts and sampling strategy.
       operationId: getDocumentationTree
       tags:
         - Data Sources
@@ -2957,17 +3238,75 @@ paths:
                   success:
                     type: boolean
                   tree:
-                    type: object
-                    description: Nested tree structure of documentation pages
+                    oneOf:
+                      - type: object
+                        description: Nested tree structure of documentation pages
+                      - type: array
+                        description: Tree structure for HuggingFace datasets (splits with columns)
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              description: Split name (e.g., "train", "test", "validation")
+                            type:
+                              type: string
+                              enum: [split]
+                            children:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    description: Column name
+                                  type:
+                                    type: string
+                                    enum: [column]
                   tree_string:
                     type: string
                     description: Formatted text representation of the tree
+                  tree_type:
+                    type: string
+                    enum: [documentation, huggingface_dataset]
+                    description: Type of tree structure returned
                   base_url:
                     type: string
-                    description: Base URL of the documentation
+                    description: Base URL of the documentation (documentation sources only)
                   page_count:
                     type: integer
-                    description: Total number of indexed pages
+                    description: Total number of indexed pages (documentation sources only)
+                  dataset_id:
+                    type: string
+                    description: Dataset identifier (HuggingFace datasets only)
+                  owner:
+                    type: string
+                    nullable: true
+                    description: Dataset owner/organization (HuggingFace datasets only)
+                  description:
+                    type: string
+                    nullable: true
+                    description: Dataset description (HuggingFace datasets only)
+                  splits:
+                    type: array
+                    items:
+                      type: string
+                    description: Available dataset splits (HuggingFace datasets only)
+                  columns:
+                    type: array
+                    items:
+                      type: string
+                    description: Dataset column names (HuggingFace datasets only)
+                  row_count:
+                    type: integer
+                    description: Total number of rows in dataset (HuggingFace datasets only)
+                  indexed_row_count:
+                    type: integer
+                    description: Number of rows actually indexed (HuggingFace datasets only)
+                  sampling_strategy:
+                    type: string
+                    nullable: true
+                    description: Sampling strategy used (full or sampled) (HuggingFace datasets only)
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
@@ -2987,11 +3326,13 @@ paths:
 
   /data-sources/{source_id}/ls:
     get:
-      summary: List documentation directory contents
+      summary: List data source directory contents
       description: |
-        List contents of a virtual directory in the documentation.
+        List contents of a virtual directory in the data source.
         Shows files (pages) and subdirectories at the specified path,
         similar to the Unix 'ls' command.
+
+        **Works with all source types:** documentation, research papers, and HuggingFace datasets.
       operationId: listDocumentationDirectory
       tags:
         - Data Sources
@@ -3054,10 +3395,16 @@ paths:
 
   /data-sources/{source_id}/read:
     get:
-      summary: Read documentation page content
+      summary: Read data source content
       description: |
-        Read content of a documentation page by its virtual filesystem path.
-        More intuitive than remembering URLs - just use the path from doc_tree or doc_ls.
+        Read content from a data source by its virtual filesystem path.
+
+        **Works with all source types:**
+
+        - **Documentation:** Read page content by virtual path (e.g., "/api/authentication.md")
+        - **Research Papers:** Read paper sections by path
+        - **HuggingFace Datasets:** Read dataset rows (returns formatted row content)
+
         Supports line range slicing and length truncation for efficient content retrieval.
       operationId: readDocumentationPage
       tags:
@@ -3129,6 +3476,20 @@ paths:
                   truncated:
                     type: boolean
                     description: Whether content was truncated due to max_length limit
+                  # HuggingFace dataset specific fields
+                  split:
+                    type: string
+                    description: Dataset split name (HuggingFace datasets only)
+                  row_index:
+                    type: integer
+                    description: Row index in the dataset (HuggingFace datasets only)
+                  chunks_returned:
+                    type: integer
+                    description: Number of chunks returned (HuggingFace datasets only)
+                  source_type:
+                    type: string
+                    enum: [documentation, huggingface_dataset, research_paper]
+                    description: Type of the data source
                   metadata:
                     type: object
                     properties:
@@ -3159,16 +3520,21 @@ paths:
 
   /data-sources/{source_id}/grep:
     post:
-      summary: Search documentation with regex
+      summary: Search data source with regex
       description: |
-        Search documentation content with a regex pattern.
-        Like the Unix 'grep' command, but for indexed documentation.
-        Searches through all pages and returns matches with context.
-        
+        Search data source content with a regex pattern.
+        Like the Unix 'grep' command, but for indexed content.
+
+        **Works with all source types:**
+
+        - **Documentation:** Searches through all pages and returns matches with context
+        - **Research Papers:** Searches paper content for patterns
+        - **HuggingFace Datasets:** Searches dataset rows and returns matches with split/row info
+
         By default (exhaustive=true), iterates through ALL indexed chunks to find every match,
         providing true grep-like behavior. For faster but potentially incomplete results,
         set exhaustive=false to use BM25 keyword search first.
-        
+
         Supports asymmetric context lines (A for after, B for before),
         case sensitivity, whole word matching, and multiple output modes.
       operationId: grepDocumentation
@@ -3275,35 +3641,71 @@ paths:
                 properties:
                   success:
                     type: boolean
+                  source_type:
+                    type: string
+                    enum: [documentation, huggingface_dataset, research_paper]
+                    description: Type of data source searched
                   matches:
                     type: array
-                    description: Matches grouped by file (when output_mode is 'content')
+                    description: |
+                      Matches (format depends on source_type):
+                      - For documentation: grouped by file with nested matches
+                      - For HuggingFace datasets: flat list with split/row_index
                     items:
-                      type: object
-                      properties:
-                        path:
-                          type: string
-                          description: Virtual path of the matched file
-                        url:
-                          type: string
-                          description: Actual URL of the page
-                        matches:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              line_number:
-                                type: integer
-                              line:
+                      oneOf:
+                        - type: object
+                          title: HuggingFaceGrepMatch
+                          description: Flat match for HuggingFace datasets
+                          properties:
+                            path:
+                              type: string
+                              description: Path in format "split/row_N"
+                            split:
+                              type: string
+                              description: Dataset split name (train, test, validation)
+                            row_index:
+                              type: integer
+                              description: Row index in the dataset
+                            line:
+                              type: string
+                              description: The matched line content
+                            line_number:
+                              type: integer
+                              description: Line number within the row
+                            context:
+                              type: array
+                              items:
                                 type: string
-                                description: The matched line
-                              context:
-                                type: array
-                                items:
-                                  type: string
-                                description: Context lines around the match
-                              context_start_line:
-                                type: integer
+                              description: Context lines around the match
+                            context_start_line:
+                              type: integer
+                        - type: object
+                          title: DocGrepFileMatch
+                          description: Grouped match for documentation
+                          properties:
+                            path:
+                              type: string
+                              description: Virtual path of the matched file
+                            url:
+                              type: string
+                              description: Actual URL of the page
+                            matches:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  line_number:
+                                    type: integer
+                                  line:
+                                    type: string
+                                    description: The matched line
+                                  context:
+                                    type: array
+                                    items:
+                                      type: string
+                                    description: Context lines around the match
+                                  context_start_line:
+                                    type: integer
                   files:
                     type: array
                     items:
@@ -3576,6 +3978,278 @@ paths:
           $ref: '#/components/responses/RateLimitError'
         '500':
           description: Internal server error during indexing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /huggingface-datasets:
+    get:
+      summary: List indexed HuggingFace datasets
+      description: |
+        List all HuggingFace datasets that have been indexed by the authenticated user.
+        Returns dataset metadata including splits, columns, row counts, and indexing status.
+      operationId: listHuggingFaceDatasets
+      tags:
+        - HuggingFace Datasets
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Maximum number of datasets to return
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of datasets to skip (for pagination)
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [processing, completed, failed]
+          description: Filter by indexing status
+        - name: organization_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by organization ID
+      responses:
+        '200':
+          description: HuggingFace datasets retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HuggingFaceDatasetListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+    post:
+      summary: Index a HuggingFace dataset
+      description: |
+        Index a HuggingFace dataset for semantic search. The dataset is fetched from
+        the HuggingFace Hub, text columns are extracted and chunked, and embeddings
+        are created for semantic search.
+
+        Supports multiple input formats:
+        - Full URL: https://huggingface.co/datasets/squad
+        - Owner/dataset format: dair-ai/emotion
+        - Dataset name only: squad
+
+        Large datasets are automatically sampled to manage storage and indexing time.
+        Datasets are globally deduplicated - if another user has already indexed a dataset,
+        you'll get instant access to the existing index.
+      operationId: indexHuggingFaceDataset
+      tags:
+        - HuggingFace Datasets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HuggingFaceDatasetRequest'
+            examples:
+              owner_dataset:
+                summary: Using owner/dataset format
+                value:
+                  url: "dair-ai/emotion"
+              full_url:
+                summary: Using full HuggingFace URL
+                value:
+                  url: "https://huggingface.co/datasets/squad"
+              dataset_name:
+                summary: Using dataset name only
+                value:
+                  url: "squad"
+              with_config:
+                summary: With specific configuration
+                value:
+                  url: "glue"
+                  config: "sst2"
+      responses:
+        '200':
+          description: HuggingFace dataset indexing started or completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HuggingFaceDatasetResponse'
+              examples:
+                processing:
+                  summary: Dataset indexing started
+                  value:
+                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    dataset_id: "emotion"
+                    url: "https://huggingface.co/datasets/dair-ai/emotion"
+                    status: "processing"
+                    created_at: "2024-01-15T10:30:00Z"
+                    updated_at: "2024-01-15T10:30:00Z"
+                    owner: "dair-ai"
+                    description: "Emotion is a dataset of English Twitter messages with six basic emotions."
+                    splits: ["train", "test", "validation"]
+                    columns: [{"name": "text", "dtype": "string"}, {"name": "label", "dtype": "int64"}]
+                    row_count: 20000
+                    indexed_row_count: 0
+                    chunk_count: 0
+                completed:
+                  summary: Dataset already indexed (instant access)
+                  value:
+                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    dataset_id: "emotion"
+                    url: "https://huggingface.co/datasets/dair-ai/emotion"
+                    status: "completed"
+                    created_at: "2024-01-15T10:30:00Z"
+                    updated_at: "2024-01-15T10:35:00Z"
+                    owner: "dair-ai"
+                    description: "Emotion is a dataset of English Twitter messages with six basic emotions."
+                    splits: ["train", "test", "validation"]
+                    columns: [{"name": "text", "dtype": "string"}, {"name": "label", "dtype": "int64"}]
+                    row_count: 20000
+                    indexed_row_count: 20000
+                    chunk_count: 500
+                    sampling_strategy: "full"
+        '400':
+          description: Invalid HuggingFace dataset URL format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Invalid HuggingFace dataset URL: invalid. Expected formats: https://huggingface.co/datasets/squad, squad, or owner/dataset"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Dataset not found on HuggingFace Hub
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Dataset not found or inaccessible: nonexistent/dataset"
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Internal server error during indexing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /global-sources/subscribe:
+    post:
+      summary: Subscribe to a global source
+      description: |
+        Subscribe to an existing globally indexed public source for instant access.
+
+        This endpoint checks if a public source (repository, documentation, research paper,
+        or HuggingFace dataset) is already indexed globally. If it is, it creates a local
+        reference for the user so they can search it immediately without re-indexing.
+
+        **Supported source types:**
+        - **repository**: GitHub repositories (https://github.com/owner/repo)
+        - **documentation**: Documentation websites (https://docs.example.com)
+        - **research_paper**: arXiv papers (https://arxiv.org/abs/2312.00752 or 2312.00752)
+        - **huggingface_dataset**: HuggingFace datasets (https://huggingface.co/datasets/squad or squad)
+
+        **Behavior by source type:**
+        - For repositories, documentation, and research papers: Returns instant_access if indexed,
+          wait_for_indexing if currently being indexed, or not_indexed if not found.
+        - For HuggingFace datasets: If not already indexed, automatically triggers indexing
+          and returns indexing_started.
+
+        Use this when you want to access a public source that may already be indexed by others.
+        If the source is not yet indexed, use the appropriate index endpoint instead
+        (e.g., POST /repositories, POST /data-sources, POST /research-papers, POST /huggingface-datasets).
+      operationId: subscribeToGlobalSource
+      tags:
+        - Global Sources
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlobalSourceSubscribeRequest'
+            examples:
+              github_repo:
+                summary: Subscribe to a GitHub repository
+                value:
+                  url: "https://github.com/vercel/ai-sdk"
+              documentation:
+                summary: Subscribe to documentation
+                value:
+                  url: "https://docs.anthropic.com"
+              arxiv_paper:
+                summary: Subscribe to an arXiv paper
+                value:
+                  url: "2312.00752"
+              huggingface_dataset:
+                summary: Subscribe to a HuggingFace dataset
+                value:
+                  url: "https://huggingface.co/datasets/squad"
+                  source_type: "huggingface_dataset"
+      responses:
+        '200':
+          description: Subscription processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalSourceSubscribeResponse'
+              examples:
+                instant_access:
+                  summary: Source is indexed and ready
+                  value:
+                    action: "instant_access"
+                    message: "Successfully subscribed to global repository. You can now search it immediately."
+                    global_source_id: "github:vercel/ai-sdk"
+                    namespace: "repo_vercel_ai-sdk"
+                    status: "indexed"
+                    local_reference_id: "proj_abc123"
+                    display_name: "vercel/ai-sdk"
+                wait_for_indexing:
+                  summary: Source is being indexed
+                  value:
+                    action: "wait_for_indexing"
+                    message: "Source is currently being indexed (status: indexing). You've been subscribed and will have access when complete."
+                    global_source_id: "github:owner/repo"
+                    namespace: "repo_owner_repo"
+                    status: "indexing"
+                    local_reference_id: null
+                    display_name: "owner/repo"
+                not_indexed:
+                  summary: Source is not indexed
+                  value:
+                    action: "not_indexed"
+                    message: "No global source found for this URL. Use the `index` tool to add it first."
+                    global_source_id: null
+                    namespace: null
+                    status: null
+                    local_reference_id: null
+                    display_name: null
+                indexing_started:
+                  summary: HuggingFace dataset indexing started
+                  value:
+                    action: "indexing_started"
+                    message: "HuggingFace dataset indexing started. Check back in a few minutes."
+                    global_source_id: "hf:squad"
+                    namespace: "hf_squad"
+                    status: "indexing"
+                    local_reference_id: "ds_xyz789"
+                    display_name: "squad"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          description: Subscription processing error
           content:
             application/json:
               schema:
@@ -5035,13 +5709,20 @@ paths:
 
 tags:
   - name: Repositories
-    description: Repository indexing and status operations
+    description: GitHub repository indexing and operations (tree, content, grep)
   - name: Query
     description: AI-powered code and documentation querying operations
   - name: Data Sources
-    description: Documentation and web content indexing operations
+    description: |
+      Unified operations for documentation, research papers, and HuggingFace datasets.
+      All three source types share the same endpoints for tree, read, grep, and ls operations.
+      Use source_type filter when listing to filter by type.
   - name: Research Papers
-    description: Research paper indexing from arXiv with automatic metadata extraction
+    description: Index research papers from arXiv. Once indexed, use Data Sources endpoints for tree/read/grep.
+  - name: HuggingFace Datasets
+    description: Index HuggingFace datasets. Once indexed, use Data Sources endpoints for tree/read/grep.
+  - name: Global Sources
+    description: Subscribe to globally indexed public sources (repos, docs, papers, datasets) for instant access without re-indexing
   - name: Search & Research
     description: Web search, deep research, and universal search operations
   - name: Package Search

@@ -40,6 +40,7 @@
               "tools-features",
               "local-sync",
               "pdf-indexing",
+              "huggingface-datasets",
               "pre-indexed-sources",
               "explore-chat",
               "scoped-mcp",
