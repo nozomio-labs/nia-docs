@@ -867,6 +867,97 @@ components:
         error_code:
           type: string
           description: Error code for programmatic error handling
+        category_id:
+          type: string
+          nullable: true
+          description: Optional category ID for organizing data sources
+
+    CategoryCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Category name
+          example: "ML Papers"
+        color:
+          type: string
+          maxLength: 7
+          description: Hex color code (e.g., #FF5733)
+          example: "#4CAF50"
+        order:
+          type: integer
+          minimum: 0
+          description: Display order for sorting categories
+
+    CategoryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Category name
+        color:
+          type: string
+          maxLength: 7
+          description: Hex color code (e.g., #FF5733)
+        order:
+          type: integer
+          minimum: 0
+          description: Display order for sorting categories
+
+    CategoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the category
+        name:
+          type: string
+          description: Category name
+        user_id:
+          type: string
+          description: Owner user ID
+        organization_id:
+          type: string
+          nullable: true
+          description: Organization ID if category belongs to an organization
+        color:
+          type: string
+          nullable: true
+          description: Hex color code
+        order:
+          type: integer
+          description: Display order
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CategoriesListResponse:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryResponse'
+        total:
+          type: integer
+          description: Total number of categories
+
+    CategoryAssignRequest:
+      type: object
+      properties:
+        category_id:
+          type: string
+          nullable: true
+          description: Category ID to assign, or null to remove category
 
     ResearchPaperRequest:
       type: object
@@ -2979,6 +3070,12 @@ paths:
           schema:
             type: string
           description: Optional source type filter (e.g. web|documentation|research_paper|text)
+        - name: category_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional category filter. Use 'uncategorized' for sources without category
         - name: limit
           in: query
           required: false
@@ -3814,6 +3911,199 @@ paths:
                 $ref: '#/components/schemas/Error'
         '404':
           description: Data source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /data-sources/{source_id}/category:
+    patch:
+      summary: Assign category to data source
+      description: |
+        Assign a category to a data source, or remove category by passing null.
+        Works with all data source types (documentation, research papers, HuggingFace datasets).
+      operationId: assignDataSourceCategory
+      tags:
+        - Data Sources
+        - Categories
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: |
+            Flexible data source identifier. Can be:
+            - UUID (e.g., "550e8400-e29b-41d4-a716-446655440000")
+            - Display name (e.g., "Vercel AI SDK - Core")
+            - URL (e.g., "https://docs.trynia.ai/")
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryAssignRequest'
+      responses:
+        '200':
+          description: Category assigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  source_id:
+                    type: string
+                  category_id:
+                    type: string
+                    nullable: true
+        '400':
+          description: Invalid request (e.g., category not found)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Access denied to data source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /categories:
+    get:
+      summary: List categories
+      description: List all categories for the authenticated user/organization.
+      operationId: listCategories
+      tags:
+        - Categories
+      responses:
+        '200':
+          description: Categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoriesListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+    post:
+      summary: Create category
+      description: Create a new category for organizing data sources.
+      operationId: createCategory
+      tags:
+        - Categories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreate'
+      responses:
+        '200':
+          description: Category created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '400':
+          description: Invalid request (e.g., duplicate name)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /categories/{category_id}:
+    patch:
+      summary: Update category
+      description: Update an existing category (name, color, or order).
+      operationId: updateCategory
+      tags:
+        - Categories
+      parameters:
+        - name: category_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Category UUID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdate'
+      responses:
+        '200':
+          description: Category updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '400':
+          description: Invalid request (e.g., duplicate name, no updates provided)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+    delete:
+      summary: Delete category
+      description: |
+        Delete a category. Data sources with this category will become uncategorized.
+      operationId: deleteCategory
+      tags:
+        - Categories
+      parameters:
+        - name: category_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Category UUID
+      responses:
+        '200':
+          description: Category deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Category not found
           content:
             application/json:
               schema:
