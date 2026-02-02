@@ -3,36 +3,21 @@ info:
   title: Nia AI API
   version: '2.2.0'
   description: |
-    Nia AI API allows developers to index and query code repositories, documentation, research papers, and HuggingFace datasets using advanced AI understanding.
+    Nia AI API provides a single, consistent `sources` resource for all indexed content.
 
-    ## Architecture Overview
+    ## Core Resources
 
-    The API has two main resource types:
+    **Sources** (`/sources`)
+    - `repository`
+    - `documentation`
+    - `research_paper`
+    - `huggingface_dataset`
+    - `local_folder`
 
-    **1. Repositories** (`/repositories/*`)
-    - GitHub repositories
-    - Endpoints: tree, content, grep
+    **Search** (`/search`)
+    - `mode`: query | web | deep | universal
 
-    **2. Data Sources** (`/data-sources/*`)
-    - Documentation/websites
-    - Research papers (arXiv)
-    - HuggingFace datasets
-    - Shared endpoints: tree, read, grep, ls
-
-    Each source type has its own POST endpoint for indexing, but once indexed, they share common operations.
-
-    ## Capabilities
-    - Repository indexing and management (including direct GitHub tree access)
-    - Documentation/website indexing and management
-    - Research paper indexing (arXiv support with automatic metadata extraction)
-    - HuggingFace dataset indexing for semantic search over dataset content
-    - AI-powered search across code, documentation, papers, and datasets
-    - Advanced regex pattern search (grep) over all indexed sources
-    - Package source code search across npm, PyPI, crates.io, and Go modules
-    - Web search and deep research capabilities
-    - Cross-agent conversation context sharing with semantic search
-    - Real-time status checking for indexing operations
-    - Streaming responses for interactive applications
+    Legacy endpoints are deprecated and will be removed in a future version. Prefer `/sources` and `/search` for new integrations.
   
 servers:
   - url: https://apigcp.trynia.ai/v2
@@ -52,6 +37,234 @@ components:
       description: API key must be provided in the Authorization header
 
   schemas:
+    SourceType:
+      type: string
+      enum: [repository, documentation, research_paper, huggingface_dataset, local_folder]
+      description: Unified source type
+
+    Pagination:
+      type: object
+      required: [total, limit, offset, has_more]
+      properties:
+        total:
+          type: integer
+          description: Total number of items
+        limit:
+          type: integer
+          description: Items per page
+        offset:
+          type: integer
+          description: Current offset
+        has_more:
+          type: boolean
+          description: Whether more items exist
+
+    Source:
+      type: object
+      required: [id, type]
+      properties:
+        id:
+          type: string
+          description: Source identifier
+        type:
+          $ref: '#/components/schemas/SourceType'
+        identifier:
+          type: string
+          description: Canonical identifier (repo slug, URL, or folder path)
+        display_name:
+          type: string
+          description: Human-readable name
+        status:
+          type: string
+          description: Indexing status
+        created_at:
+          type: string
+          description: Creation timestamp (ISO)
+        updated_at:
+          type: string
+          description: Last update timestamp (ISO)
+        category_id:
+          type: string
+          nullable: true
+          description: Category assignment
+        is_global:
+          type: boolean
+          description: Whether the source is global/shared
+        global_source_id:
+          type: string
+          nullable: true
+          description: Global source ID if applicable
+        global_namespace:
+          type: string
+          nullable: true
+          description: Global namespace if applicable
+        metadata:
+          type: object
+          description: Type-specific metadata
+          additionalProperties: true
+
+    SourceListResponse:
+      type: object
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Source'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    LocalFolderFile:
+      type: object
+      required: [path, content]
+      properties:
+        path:
+          type: string
+        content:
+          type: string
+
+    DatabaseFile:
+      type: object
+      required: [filename, content]
+      properties:
+        filename:
+          type: string
+        content:
+          type: string
+          description: Base64-encoded content
+
+    SourceCreateRequest:
+      type: object
+      required: [type]
+      properties:
+        type:
+          $ref: '#/components/schemas/SourceType'
+        repository:
+          type: string
+          description: Repository slug (owner/repo)
+        branch:
+          type: string
+        url:
+          type: string
+          description: Documentation or dataset URL
+        folder_name:
+          type: string
+        folder_path:
+          type: string
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalFolderFile'
+        database:
+          $ref: '#/components/schemas/DatabaseFile'
+        add_as_global_source:
+          type: boolean
+          default: true
+        url_patterns:
+          type: array
+          items:
+            type: string
+        exclude_patterns:
+          type: array
+          items:
+            type: string
+        limit:
+          type: integer
+        max_depth:
+          type: integer
+        wait_for:
+          type: integer
+        is_pdf:
+          type: boolean
+        display_name:
+          type: string
+        focus_instructions:
+          type: string
+
+    SourceUpdateRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+        category_id:
+          type: string
+          nullable: true
+
+    SourceDeleteResponse:
+      type: object
+      required: [id, status]
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+
+    SourceResolveResponse:
+      type: object
+      required: [id, type]
+      properties:
+        id:
+          type: string
+        type:
+          $ref: '#/components/schemas/SourceType'
+        display_name:
+          type: string
+        identifier:
+          type: string
+
+    QuerySearchRequest:
+      allOf:
+        - $ref: '#/components/schemas/QueryRequest'
+        - type: object
+          required: [mode]
+          properties:
+            mode:
+              type: string
+              enum: [query]
+
+    WebSearchRequestWithMode:
+      allOf:
+        - $ref: '#/components/schemas/WebSearchRequest'
+        - type: object
+          required: [mode]
+          properties:
+            mode:
+              type: string
+              enum: [web]
+
+    DeepResearchRequestWithMode:
+      allOf:
+        - $ref: '#/components/schemas/DeepResearchRequest'
+        - type: object
+          required: [mode]
+          properties:
+            mode:
+              type: string
+              enum: [deep]
+
+    UniversalSearchRequestWithMode:
+      allOf:
+        - $ref: '#/components/schemas/UniversalSearchRequest'
+        - type: object
+          required: [mode]
+          properties:
+            mode:
+              type: string
+              enum: [universal]
+
+    SearchRequest:
+      oneOf:
+        - $ref: '#/components/schemas/QuerySearchRequest'
+        - $ref: '#/components/schemas/WebSearchRequestWithMode'
+        - $ref: '#/components/schemas/DeepResearchRequestWithMode'
+        - $ref: '#/components/schemas/UniversalSearchRequestWithMode'
+      discriminator:
+        propertyName: mode
+        mapping:
+          query: '#/components/schemas/QuerySearchRequest'
+          web: '#/components/schemas/WebSearchRequestWithMode'
+          deep: '#/components/schemas/DeepResearchRequestWithMode'
+          universal: '#/components/schemas/UniversalSearchRequestWithMode'
     RepositoryRequest:
       type: object
       required:
@@ -135,12 +348,13 @@ components:
             - New object: [{"identifier": "display-name-or-url"}]
         search_mode:
           type: string
-          enum: [repositories, sources]
-          default: repositories
+          enum: [repositories, sources, unified]
+          default: unified
           description: |
             Search mode:
+            - 'unified': Smart routing based on provided sources (default)
             - 'repositories': Search GitHub repositories only
-            - 'sources': Search data sources only (documentation, research papers, HuggingFace datasets)
+            - 'sources': Search data sources only (documentation, research papers, HuggingFace datasets, local folders)
         stream:
           type: boolean
           default: false
@@ -149,6 +363,35 @@ components:
           type: boolean
           default: true
           description: Whether to include full source texts in the response (when false, only file paths are returned)
+        local_folders:
+          type: array
+          items:
+            oneOf:
+              - type: string
+                description: Local folder identifier (UUID or display name)
+              - type: object
+                required:
+                  - local_folder_id
+                properties:
+                  local_folder_id:
+                    type: string
+                    description: Local folder UUID identifier
+              - type: object
+                required:
+                  - identifier
+                properties:
+                  identifier:
+                    type: string
+                    description: Flexible local folder identifier (display name or UUID)
+          description: |
+            List of local folders to query. Local folders are private and user-scoped.
+
+            Flexible identifier formats:
+            - String (recommended): ["folder-uuid", "My Notes"]
+            - Object: [{"local_folder_id": "uuid"}] or [{"identifier": "display-name"}]
+        category:
+          type: string
+          description: Filter local folder results by classification category (e.g., "Work", "Personal")
 
     RepositoryStatus:
       type: object
@@ -795,6 +1038,13 @@ components:
             - prefer: Start with llms.txt URLs, then crawl additional pages if under limit
             - only: Only index URLs listed in llms.txt
             - ignore: Skip llms.txt check (traditional behavior)
+        display_name:
+          type: string
+          description: Custom display name for the source
+        is_pdf:
+          type: boolean
+          default: false
+          description: Whether this is a direct PDF URL (disables crawling, uses longer timeout)
         focus_instructions:
           type: string
           maxLength: 500
@@ -2344,6 +2594,321 @@ components:
           type: string
           description: Output format used
 
+    # =========================================================================
+    # Local Folder Schemas
+    # =========================================================================
+
+    FileItem:
+      type: object
+      required:
+        - path
+        - content
+      properties:
+        path:
+          type: string
+          description: Relative file path (e.g., 'src/main.py', 'notes/meeting.md')
+          example: "notes/meeting.md"
+        content:
+          type: string
+          description: File content as UTF-8 string
+
+    CreateLocalFolderRequest:
+      type: object
+      required:
+        - files
+      properties:
+        folder_name:
+          type: string
+          description: Display name for the folder
+          example: "My Notes"
+        folder_path:
+          type: string
+          description: Original folder path on user's machine (metadata only, not used for reading)
+          example: "/Users/me/Documents/notes"
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileItem'
+          description: List of files with path and content to index
+          minItems: 1
+
+    ClassificationInfo:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            type: string
+          description: List of detected categories
+        distribution:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Category distribution counts
+        total_classified:
+          type: integer
+          description: Total items classified
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+          description: Classification status
+        progress:
+          type: integer
+          nullable: true
+          description: Classification progress (0-100)
+        classified_at:
+          type: string
+          nullable: true
+          description: When classification completed (ISO timestamp)
+
+    ContinuousSyncInfo:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether continuous sync is enabled
+        last_sync:
+          type: string
+          nullable: true
+          description: Last sync timestamp
+        sync_cursor:
+          type: object
+          nullable: true
+          description: Cursor for incremental sync
+
+    LocalFolderItem:
+      type: object
+      required:
+        - id
+        - display_name
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Local folder UUID
+        display_name:
+          type: string
+          description: Display name
+        folder_path:
+          type: string
+          nullable: true
+          description: Original folder path (metadata)
+        status:
+          type: string
+          enum: [processing, completed, indexed, failed]
+          description: Indexing status
+        file_count:
+          type: integer
+          default: 0
+          description: Number of files indexed
+        chunk_count:
+          type: integer
+          default: 0
+          description: Number of chunks created
+        created_at:
+          type: string
+          nullable: true
+          description: Creation timestamp (ISO)
+        updated_at:
+          type: string
+          nullable: true
+          description: Last update timestamp (ISO)
+        error:
+          type: string
+          nullable: true
+          description: Error message if status is 'failed'
+        classification:
+          $ref: '#/components/schemas/ClassificationInfo'
+        source_subtype:
+          type: string
+          nullable: true
+          enum: [database, folder]
+          description: Source subtype
+        db_type:
+          type: string
+          nullable: true
+          description: Database type (imessage, whatsapp, generic)
+        continuous_sync:
+          $ref: '#/components/schemas/ContinuousSyncInfo'
+        category_id:
+          type: string
+          nullable: true
+          description: Category ID if assigned
+
+    LocalFolderListResponse:
+      type: object
+      properties:
+        local_folders:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocalFolderItem'
+        total:
+          type: integer
+          description: Total number of local folders
+
+    RenameLocalFolderRequest:
+      type: object
+      required:
+        - new_name
+      properties:
+        new_name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: New display name
+
+    LocalFolderTreeResponse:
+      type: object
+      properties:
+        tree:
+          type: object
+          description: File tree structure
+        total_files:
+          type: integer
+          description: Total number of files
+
+    LocalFolderReadRequest:
+      type: object
+      properties:
+        path:
+          type: string
+          description: File path to read
+        line_start:
+          type: integer
+          description: Start line (1-indexed)
+        line_end:
+          type: integer
+          description: End line (1-indexed)
+
+    LocalFolderReadResponse:
+      type: object
+      properties:
+        content:
+          type: string
+          description: File content
+        path:
+          type: string
+          description: File path
+        total_lines:
+          type: integer
+          description: Total lines in file
+
+    LocalFolderGrepRequest:
+      type: object
+      required:
+        - pattern
+      properties:
+        pattern:
+          type: string
+          description: Regex pattern to search
+        path:
+          type: string
+          description: Path prefix filter
+        case_sensitive:
+          type: boolean
+          default: false
+        context_lines:
+          type: integer
+          default: 2
+          description: Lines of context around matches
+        max_matches:
+          type: integer
+          default: 100
+          description: Maximum matches to return
+
+    LocalFolderGrepResponse:
+      type: object
+      properties:
+        matches:
+          type: array
+          items:
+            type: object
+            properties:
+              file_path:
+                type: string
+              line_number:
+                type: integer
+              content:
+                type: string
+              context_before:
+                type: array
+                items:
+                  type: string
+              context_after:
+                type: array
+                items:
+                  type: string
+        total_matches:
+          type: integer
+
+    DatabaseUploadRequest:
+      type: object
+      required:
+        - database
+      properties:
+        database:
+          type: object
+          required:
+            - filename
+            - content
+          properties:
+            filename:
+              type: string
+              description: Database filename
+            content:
+              type: string
+              format: byte
+              description: Base64-encoded database content
+
+    CreateDatabaseFolderRequest:
+      type: object
+      required:
+        - folder_name
+        - db_type
+        - database
+      properties:
+        folder_name:
+          type: string
+          description: Display name for the folder
+        db_type:
+          type: string
+          enum: [imessage, whatsapp, generic]
+          description: Database type
+        database:
+          type: object
+          required:
+            - filename
+            - content
+          properties:
+            filename:
+              type: string
+            content:
+              type: string
+              format: byte
+              description: Base64-encoded SQLite database
+
+    SyncResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        new_items:
+          type: integer
+          description: Number of new items synced
+        updated_items:
+          type: integer
+          description: Number of items updated
+
+    ContinuousSyncUpdateRequest:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Enable or disable continuous sync
+
     Error:
       type: object
       required:
@@ -2390,6 +2955,345 @@ components:
             $ref: '#/components/schemas/Error'
 
 paths:
+  /sources:
+    get:
+      tags: [Sources]
+      summary: List sources
+      description: List all sources with consistent pagination and filters.
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SourceType'
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: category_id
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceListResponse'
+    post:
+      tags: [Sources]
+      summary: Create source
+      description: Create and index a new source.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceCreateRequest'
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+
+  /sources/resolve:
+    get:
+      tags: [Sources]
+      summary: Resolve source identifier
+      description: Resolve a name or URL to a source ID.
+      parameters:
+        - name: identifier
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SourceType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceResolveResponse'
+
+  /sources/{source_id}:
+    get:
+      tags: [Sources]
+      summary: Get source
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SourceType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+    patch:
+      tags: [Sources]
+      summary: Update source
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SourceType'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceUpdateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+    delete:
+      tags: [Sources]
+      summary: Delete source
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SourceType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceDeleteResponse'
+
+  /sources/{source_id}/tree:
+    get:
+      tags: [Sources]
+      summary: Get source tree
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SourceType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /sources/{source_id}/content:
+    get:
+      tags: [Sources]
+      summary: Get source content
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SourceType'
+        - name: path
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: url
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /sources/{source_id}/grep:
+    post:
+      tags: [Sources]
+      summary: Grep within a source
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SourceType'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /sources/{source_id}/sync:
+    post:
+      tags: [Sources]
+      summary: Sync source
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SourceType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /sources/{source_id}/classification:
+    get:
+      tags: [Sources]
+      summary: Get source classification
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SourceType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+    patch:
+      tags: [Sources]
+      summary: Update source classification
+      parameters:
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SourceType'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /search:
+    post:
+      tags: [Search]
+      summary: Unified search
+      description: Single search endpoint with mode discriminator.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
   /repositories:
     get:
       summary: List all repositories
@@ -5997,7 +6901,719 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  # ===========================================================================
+  # Local Folders - Private, user-scoped file storage and search
+  # ===========================================================================
+
+  /local-folders:
+    post:
+      summary: Create and index a local folder
+      description: |
+        Upload local folder files for private indexing. Local folders are user-scoped and never public.
+
+        **Usage:**
+        - Send file contents directly in the request body
+        - Files are validated, chunked, and indexed for semantic search
+        - Use with `/search/query` endpoint with `local_folders` parameter to search
+
+        **Limits:**
+        - Max 1000 files per folder
+        - Max 5MB per file
+        - Max 100MB total per folder
+      operationId: createLocalFolder
+      tags:
+        - Local Folders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLocalFolderRequest'
+      responses:
+        '200':
+          description: Local folder created and indexing started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalFolderItem'
+        '400':
+          description: Invalid request (no files, too many files, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+    get:
+      summary: List local folders
+      description: List all local folders for the authenticated user.
+      operationId: listLocalFolders
+      tags:
+        - Local Folders
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+          description: Maximum folders to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Pagination offset
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [processing, completed, indexed, failed]
+          description: Filter by status
+      responses:
+        '200':
+          description: List of local folders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalFolderListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /local-folders/{local_folder_id}:
+    get:
+      summary: Get local folder details
+      description: Get details of a specific local folder.
+      operationId: getLocalFolder
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+      responses:
+        '200':
+          description: Local folder details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalFolderItem'
+        '404':
+          description: Local folder not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    delete:
+      summary: Delete local folder
+      description: Delete a local folder and all its indexed content.
+      operationId: deleteLocalFolder
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+      responses:
+        '200':
+          description: Local folder deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '404':
+          description: Local folder not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /local-folders/{local_folder_id}/rename:
+    patch:
+      summary: Rename local folder
+      description: Update the display name of a local folder.
+      operationId: renameLocalFolder
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenameLocalFolderRequest'
+      responses:
+        '200':
+          description: Local folder renamed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalFolderItem'
+        '404':
+          description: Local folder not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /local-folders/{local_folder_id}/tree:
+    get:
+      summary: Get local folder file tree
+      description: Get the file tree structure of a local folder.
+      operationId: getLocalFolderTree
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+      responses:
+        '200':
+          description: File tree
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalFolderTreeResponse'
+        '404':
+          description: Local folder not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /local-folders/{local_folder_id}/ls:
+    get:
+      summary: List directory contents
+      description: List files in a specific directory path within the local folder.
+      operationId: listLocalFolderDirectory
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+        - name: path
+          in: query
+          schema:
+            type: string
+            default: "/"
+          description: Directory path to list
+      responses:
+        '200':
+          description: Directory listing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  path:
+                    type: string
+                  entries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        type:
+                          type: string
+                          enum: [file, directory]
+                        size:
+                          type: integer
+        '404':
+          description: Local folder or path not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /local-folders/{local_folder_id}/read:
+    get:
+      summary: Read file content
+      description: Read the content of a file within the local folder.
+      operationId: readLocalFolderFile
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+        - name: path
+          in: query
+          required: true
+          schema:
+            type: string
+          description: File path to read
+        - name: line_start
+          in: query
+          schema:
+            type: integer
+          description: Start line (1-indexed)
+        - name: line_end
+          in: query
+          schema:
+            type: integer
+          description: End line (1-indexed)
+      responses:
+        '200':
+          description: File content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalFolderReadResponse'
+        '404':
+          description: File not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /local-folders/{local_folder_id}/grep:
+    post:
+      summary: Search in local folder
+      description: Search for a pattern across all files in the local folder using regex.
+      operationId: grepLocalFolder
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocalFolderGrepRequest'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalFolderGrepResponse'
+        '404':
+          description: Local folder not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /local-folders/{local_folder_id}/classify:
+    post:
+      summary: Start classification
+      description: Start AI-powered classification of files in the local folder into categories.
+      operationId: classifyLocalFolder
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+      responses:
+        '200':
+          description: Classification started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+        '404':
+          description: Local folder not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /local-folders/{local_folder_id}/classification:
+    get:
+      summary: Get classification status
+      description: Get the classification status and results for a local folder.
+      operationId: getLocalFolderClassification
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+      responses:
+        '200':
+          description: Classification info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassificationInfo'
+        '404':
+          description: Local folder not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /local-folders/{local_folder_id}/classification/items:
+    get:
+      summary: Get classified items
+      description: Get items classified into a specific category.
+      operationId: getLocalFolderClassifiedItems
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by category
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+          description: Maximum items to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Pagination offset
+      responses:
+        '200':
+          description: Classified items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        chunk_id:
+                          type: string
+                        category:
+                          type: string
+                        content_preview:
+                          type: string
+                        file_path:
+                          type: string
+                  total:
+                    type: integer
+        '404':
+          description: Local folder not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /local-folders/{local_folder_id}/sync:
+    post:
+      summary: Sync local folder
+      description: Trigger a sync of the local folder content with updated files.
+      operationId: syncLocalFolder
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - files
+              properties:
+                files:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/FileItem'
+                  description: Updated file contents
+      responses:
+        '200':
+          description: Sync completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResponse'
+        '404':
+          description: Local folder not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /local-folders/{local_folder_id}/sync-upload:
+    post:
+      summary: Sync with database upload
+      description: |
+        Sync a database-type local folder by uploading the database file.
+        Extracts only new content since last sync using stored cursor.
+      operationId: syncLocalFolderWithUpload
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatabaseUploadRequest'
+      responses:
+        '200':
+          description: Sync completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResponse'
+        '400':
+          description: Not a database folder or invalid database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Local folder not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /local-folders/{local_folder_id}/continuous-sync:
+    get:
+      summary: Get continuous sync status
+      description: Get the continuous sync configuration and status for a local folder.
+      operationId: getLocalFolderContinuousSync
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+      responses:
+        '200':
+          description: Continuous sync info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContinuousSyncInfo'
+        '404':
+          description: Local folder not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    patch:
+      summary: Update continuous sync settings
+      description: Enable or disable continuous sync for a local folder.
+      operationId: updateLocalFolderContinuousSync
+      tags:
+        - Local Folders
+      parameters:
+        - name: local_folder_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Local folder ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContinuousSyncUpdateRequest'
+      responses:
+        '200':
+          description: Continuous sync updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContinuousSyncInfo'
+        '404':
+          description: Local folder not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /local-folders/from-database:
+    post:
+      summary: Create from database
+      description: |
+        Create a local folder by extracting text from a SQLite database.
+        Supports iMessage, WhatsApp, and generic SQLite databases.
+      operationId: createLocalFolderFromDatabase
+      tags:
+        - Local Folders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDatabaseFolderRequest'
+      responses:
+        '200':
+          description: Local folder created from database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalFolderItem'
+        '400':
+          description: Invalid database or unsupported format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /local-folders/preview-db:
+    post:
+      summary: Preview database content
+      description: Preview tables and sample content from a SQLite database before creating a local folder.
+      operationId: previewDatabase
+      tags:
+        - Local Folders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatabaseUploadRequest'
+      responses:
+        '200':
+          description: Database preview
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tables:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        row_count:
+                          type: integer
+                        columns:
+                          type: array
+                          items:
+                            type: string
+                  sample_content:
+                    type: array
+                    items:
+                      type: string
+                  detected_type:
+                    type: string
+                    description: Auto-detected database type (imessage, whatsapp, generic)
+        '400':
+          description: Invalid database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
 tags:
+  - name: Sources
+    description: Unified source management (repositories, documentation, research papers, datasets, local folders)
+  - name: Search
+    description: Unified search endpoint with mode discriminator
   - name: Repositories
     description: GitHub repository indexing and operations (tree, content, grep)
   - name: Query
@@ -6027,3 +7643,17 @@ tags:
     description: Package manifest analysis and documentation subscription for dependencies
   - name: Advisor
     description: Context-aware code advisor that analyzes your codebase against indexed documentation
+  - name: Local Folders
+    description: |
+      Private, user-scoped file storage and semantic search.
+
+      Local folders allow you to upload and index personal files (notes, documents, code) for AI-powered search.
+      Unlike other sources, local folders are never public and are isolated per user.
+
+      **Key features:**
+      - Upload files directly via API (no filesystem access required)
+      - Semantic search with the `/search/query` endpoint using `local_folders` parameter
+      - File operations: tree, ls, read, grep
+      - AI-powered classification into categories
+      - Database import (iMessage, WhatsApp, SQLite)
+      - Continuous sync support
