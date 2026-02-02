@@ -56,9 +56,9 @@ pip install nia-sync
   <Step title="Start Syncing">
     Start the sync daemon:
     ```bash
-    nia start
+    nia
     ```
-    The daemon watches for file changes and syncs incrementally.
+    The daemon watches for file changes and syncs incrementally in real-time.
   </Step>
 
   <Step title="Check Status">
@@ -73,18 +73,193 @@ pip install nia-sync
 
 ## CLI Commands
 
+### Core Commands
+
 | Command | Description |
 |---------|-------------|
+| `nia` | Start sync daemon (watch mode by default) |
 | `nia login` | Browser-based OAuth authentication |
 | `nia logout` | Clear stored credentials |
 | `nia status` | Show all configured sources with sync status |
-| `nia start` | Start sync daemon (watch mode by default) |
-| `nia --poll` | Start daemon in polling mode (no file watching) |
+| `nia status --json` | Output status as JSON for scripting |
 | `nia once` | Run one-time sync then exit |
 | `nia add <path>` | Add new source for sync |
 | `nia link <ID> <path>` | Link cloud source to local path |
 | `nia remove <ID>` | Remove source from sync |
 | `nia upgrade` | Check and install updates |
+
+### Search & Query
+
+Search your indexed sources directly from the terminal:
+
+```bash
+# Basic search with streaming AI response
+nia search "meeting notes from last week"
+
+# Search specific folders
+nia search "project updates" --local-folder my-notes --local-folder work-docs
+
+# Show source snippets alongside the answer
+nia search "authentication code" --sources
+
+# Raw text output (no markdown rendering)
+nia search "api endpoints" --no-markdown
+
+# JSON output for scripting
+nia search "config values" --json --no-stream
+```
+
+| Flag | Description |
+|------|-------------|
+| `-l, --local-folder` | Limit search to specific folder(s). Accepts ID prefix or display name |
+| `--sources` | Show source snippets used to generate the answer |
+| `--markdown/--no-markdown` | Toggle rich Markdown rendering (default: on) |
+| `--stream/--no-stream` | Toggle streaming response (default: on) |
+| `-j, --json` | Output raw JSON for programmatic use |
+| `-n, --limit` | Max source snippets to display |
+
+### Monitoring & Debugging
+
+| Command | Description |
+|---------|-------------|
+| `nia info <ID>` | Show detailed info for a source (chunk count, last sync, errors) |
+| `nia logs` | Show sync logs for all sources |
+| `nia logs <ID>` | Show sync logs for a specific source |
+| `nia logs --tail` | Continuously tail new logs |
+| `nia logs --errors` | Only show error logs |
+| `nia diff` | Dry-run: show what would sync without uploading |
+| `nia diff <ID>` | Dry-run for a specific source |
+| `nia doctor` | Run diagnostics for common issues (auth, API, disk access) |
+| `nia whoami` | Show current authenticated user |
+| `nia version` | Show CLI version |
+| `nia version --check` | Check for available updates |
+
+### Sync Control
+
+| Command | Description |
+|---------|-------------|
+| `nia pause <ID>` | Pause continuous sync for a source |
+| `nia resume <ID>` | Resume continuous sync for a source |
+| `nia resync <ID>` | Force full resync by resetting cursor |
+| `nia resync --all` | Force full resync for all sources |
+
+### Web Integration
+
+Open Nia web app pages directly from the CLI:
+
+```bash
+nia open dashboard      # Open main dashboard
+nia open activity       # Open activity feed
+nia open local-sync     # Open local sync settings
+nia open api-keys       # Open API keys page
+nia open billing        # Open billing page
+nia open docs           # Open documentation
+nia open <source-id>    # Open specific source detail page
+```
+
+---
+
+## Configuration Management
+
+### Config Commands
+
+Manage CLI settings directly from the terminal:
+
+```bash
+# View all config
+nia config list
+
+# Get a specific value
+nia config get api_url
+
+# Set a value
+nia config set api_url "https://api.trynia.ai"
+```
+
+### Ignore Patterns
+
+Customize which files are excluded from sync:
+
+```bash
+# List current ignore patterns
+nia ignore list
+
+# Ignore a directory name
+nia ignore add --dir node_modules
+
+# Ignore a file name
+nia ignore add --file .DS_Store
+
+# Ignore a file extension
+nia ignore add --ext .log
+
+# Ignore a path substring
+nia ignore add --path /build/
+
+# Remove an ignore pattern
+nia ignore remove --ext .log
+```
+
+### Watch Directories
+
+Configure which directories are scanned for auto-linking sources:
+
+```bash
+# List watched directories
+nia watch list
+
+# Add a directory to watch
+nia watch add ~/Projects
+
+# Remove a watch directory
+nia watch remove ~/Projects
+```
+
+<Tip>
+When you create a folder in a watched directory that matches an unlinked source's name, Nia automatically discovers and links it.
+</Tip>
+
+---
+
+## Source ID Shortcuts
+
+You don't need to type full UUIDs. Nia accepts:
+
+- **ID prefixes**: `nia info a3f2` matches `a3f2b1c8-...`
+- **Display names**: `nia pause "My Notes"` matches by folder name
+
+If a prefix is ambiguous (matches multiple sources), you'll be prompted with the matches.
+
+---
+
+## Daemon Mode
+
+Running `nia` without arguments starts the sync daemon with real-time file watching:
+
+```
+NIA Nia Sync Engine
+
+● real-time file watching
+● 3 source(s) active
+● Auto-refresh every 30s
+
+Ctrl+C to stop
+```
+
+The daemon:
+- Watches for file changes using native filesystem events
+- Syncs changes within seconds of detection
+- Periodically refreshes the source list from the web UI
+- Auto-discovers new folders matching unlinked sources
+- Sends heartbeats to mark daemon as online
+
+### Daemon Flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--watch/--poll` | `--watch` | Real-time watching vs interval polling |
+| `-f, --fallback` | 600 | Fallback sync interval in seconds (catches missed events) |
+| `-r, --refresh` | 30 | How often to check for new sources from web UI |
 
 ---
 
