@@ -689,6 +689,10 @@ components:
           type: boolean
           default: true
           description: Use TurboPuffer FTS v2 native Sum/Product boosting
+        expand_symbols:
+          type: boolean
+          default: false
+          description: Extract function/class names from results and search for usages (cAST-inspired symbol expansion)
 
     UniversalSearchResponse:
       type: object
