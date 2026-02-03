@@ -144,6 +144,9 @@ components:
           description: Repository slug (owner/repo)
         branch:
           type: string
+        ref:
+          type: string
+          description: Git ref to index (branch, tag, or commit SHA). Takes precedence over branch.
         url:
           type: string
           description: Documentation or dataset URL
@@ -278,6 +281,10 @@ components:
           type: string
           description: Branch to index (defaults to repository's default branch)
           example: "main"
+        ref:
+          type: string
+          description: Git ref to index (branch, tag, or commit SHA). Takes precedence over branch.
+          example: "v1.2.3"
 
     QueryRequest:
       type: object
@@ -1476,6 +1483,9 @@ components:
           type: string
           enum: [repository, documentation, research_paper, huggingface_dataset]
           description: Source type. Auto-detected from URL if not provided.
+        ref:
+          type: string
+          description: Git ref for repositories (branch, tag, or commit SHA).
 
     GlobalSourceSubscribeResponse:
       type: object
@@ -1687,6 +1697,9 @@ components:
           default: ""
           description: Limit search to files with this path prefix
           example: "src/"
+        ref:
+          type: string
+          description: Git ref to target (branch, tag, or commit). Useful when multiple versions are indexed.
         context_lines:
           type: integer
           minimum: 0
@@ -3653,6 +3666,12 @@ paths:
           schema:
             type: string
           description: Branch to read from (optional)
+        - name: ref
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Git ref to read from (branch, tag, or commit)
       responses:
         '200':
           description: File content retrieved successfully
@@ -5386,6 +5405,11 @@ paths:
                 summary: Subscribe to a GitHub repository
                 value:
                   url: "https://github.com/vercel/ai-sdk"
+              github_repo_ref:
+                summary: Subscribe to a GitHub repository ref
+                value:
+                  url: "https://github.com/vercel/ai-sdk"
+                  ref: "v1.2.3"
               documentation:
                 summary: Subscribe to documentation
                 value:
