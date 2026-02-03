@@ -581,6 +581,10 @@ components:
         output_format:
           type: string
           description: Optional structure hint for the output (e.g., 'comparison table', 'pros and cons list')
+        verbose:
+          type: boolean
+          default: false
+          description: Include verbose trace output
 
     DeepResearchResponse:
       type: object
@@ -603,6 +607,11 @@ components:
         status:
           type: string
           enum: [completed, failed]
+        trace:
+          type: array
+          description: Verbose trace events
+          items:
+            type: object
 
     UniversalSearchRequest:
       type: object
