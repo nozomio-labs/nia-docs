@@ -54,6 +54,7 @@
               "integrations/opencode",
               "integrations/openclaw",
               "integrations/claude-code-skill",
+              "integrations/skill",
               "example-workflows/agent-rules"
             ]
           },

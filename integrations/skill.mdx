@@ -1,0 +1,90 @@
+---
+title: 'Agent Skill'
+description: 'Use Nia without MCP server by having your agent call API endpoints directly through a skill.'
+---
+
+The Nia Agent Skill allows you to use Nia without running an MCP server. Instead, your agent calls the Nia API endpoints directly through the skill file, giving you a lightweight alternative to the full MCP setup.
+
+<Info>
+  **No Server Required**: The skill approach doesn't require running any background process—your agent reads the skill file and makes API calls directly.
+</Info>
+
+---
+
+## How It Works
+
+When you install the Nia skill, it provides your agent with:
+
+- **API endpoint definitions** for all Nia features
+- **Authentication instructions** for using your API key
+- **Usage examples** the agent can follow
+
+Your agent reads the skill file and uses it as a reference to make HTTP requests directly to the Nia API, bypassing the need for an MCP server.
+
+---
+
+## Installation
+
+Install the Nia skill using your preferred package manager:
+
+```bash
+npx skills add nozomio-labs/nia-skill        # npm
+pnpx skills add nozomio-labs/nia-skill       # pnpm
+bunx skills add nozomio-labs/nia-skill       # bun (fastest)
+yarn dlx skills add nozomio-labs/nia-skill   # yarn
+```
+
+---
+
+## Setup
+
+### 1. Get Your API Key
+
+Sign up at [trynia.ai](https://trynia.ai) to get your API key.
+
+### 2. Configure Your Agent
+
+The skill will instruct your agent how to authenticate. Typically, you'll set your API key in one of these ways:
+
+- Environment variable: `NIA_API_KEY`
+- Config file: `~/.config/nia/api_key`
+
+---
+
+## When to Use Skill vs MCP
+
+<CardGroup cols={2}>
+  <Card title="Use the Skill" icon="bolt">
+    - Minimal setup required
+    - No background processes
+    - Works with any agent that supports skills
+    - Lighter resource usage
+  </Card>
+
+  <Card title="Use MCP Server" icon="server">
+    - Richer tool integration
+    - Automatic context management
+    - Better for complex workflows
+    - Native IDE support
+  </Card>
+</CardGroup>
+
+---
+
+## Links
+
+<CardGroup cols={2}>
+  <Card title="GitHub" icon="github" href="https://github.com/nozomio-labs/nia-skill">
+    View skill source code
+  </Card>
+
+  <Card title="Get API Key" icon="key" href="https://app.trynia.ai">
+    Sign up for Nia API access
+  </Card>
+</CardGroup>
+
+---
+
+<Warning>
+**Need Help?** Join our [Discord community](https://discord.gg/BBSwUMrrfn) for support.
+</Warning>

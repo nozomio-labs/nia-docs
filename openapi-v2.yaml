@@ -1023,8 +1023,8 @@ components:
           example: ["markdown", "html"]
         only_main_content:
           type: boolean
-          default: true
-          description: Extract only main content (removes nav, ads, etc.)
+          default: false
+          description: Extract only main content (False recommended for JS-heavy/SPA sites)
         limit:
           type: integer
           default: 10000
