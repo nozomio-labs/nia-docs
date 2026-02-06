@@ -1072,6 +1072,14 @@ components:
             Natural language instructions for what section to index.
             Finds the matching section root URL and indexes all pages under it.
             Example: "Only API reference" indexes /docs/api-reference/* instead of entire site.
+        extract_branding:
+          type: boolean
+          default: false
+          description: Extract brand identity and design system (colors, logos, fonts) from the page
+        extract_images:
+          type: boolean
+          default: false
+          description: Extract all image URLs from the page
 
     DataSourceResponse:
       type: object
@@ -2183,9 +2191,10 @@ components:
           example: "markdown report with code examples"
         model:
           type: string
-          description: Optional model selection for Oracle (defaults to claude-opus-4-5-20251101)
+          description: Optional model selection for Oracle (defaults to claude-opus-4-6)
           enum:
-            - claude-opus-4-5-20251101
+            - claude-opus-4-6
+            - claude-opus-4-6-1m
             - claude-sonnet-4-5-20250929
             - claude-sonnet-4-5-1m
 
