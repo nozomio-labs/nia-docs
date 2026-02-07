@@ -1,6 +1,6 @@
 ---
 title: 'Agent Skill'
-description: 'Use Nia without MCP server by having your agent call API endpoints directly through a skill.'
+description: 'Use Nia without MCP server — your agent calls API endpoints directly through a skill.'
 ---
 
 The Nia Agent Skill allows you to use Nia without running an MCP server. Instead, your agent calls the Nia API endpoints directly through the skill file, giving you a lightweight alternative to the full MCP setup.
@@ -48,26 +48,6 @@ The skill will instruct your agent how to authenticate. Typically, you'll set yo
 
 - Environment variable: `NIA_API_KEY`
 - Config file: `~/.config/nia/api_key`
-
----
-
-## When to Use Skill vs MCP
-
-<CardGroup cols={2}>
-  <Card title="Use the Skill" icon="bolt">
-    - Minimal setup required
-    - No background processes
-    - Works with any agent that supports skills
-    - Lighter resource usage
-  </Card>
-
-  <Card title="Use MCP Server" icon="server">
-    - Richer tool integration
-    - Automatic context management
-    - Better for complex workflows
-    - Native IDE support
-  </Card>
-</CardGroup>
 
 ---
 

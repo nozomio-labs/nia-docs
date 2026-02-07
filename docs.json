@@ -28,7 +28,14 @@
             "group": "Getting Started",
             "pages": [
               "welcome",
-              "integrations/nia-mcp",
+              {
+                "group": "Installation",
+                "pages": [
+                  "integrations/installation/overview",
+                  "integrations/installation/mcp",
+                  "integrations/installation/skill"
+                ]
+              },
               "api-guide",
               "pricing",
               "troubleshooting"
@@ -52,7 +59,6 @@
           {
             "group": "Plugins and Rules",
             "pages": [
-              "integrations/skill",
               "integrations/opencode",
               "integrations/openclaw",
               "integrations/claude-code-skill",
