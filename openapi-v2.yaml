@@ -7655,6 +7655,308 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
+  # =========================================================================
+  # GitHub Live Search (Tracer)
+  # =========================================================================
+
+  /github/search:
+    post:
+      tags: [GitHub Search]
+      summary: Search code in a GitHub repository
+      description: |
+        Uses GitHub's Code Search API to find code matches. Rate limited to 10 requests/minute.
+        Works with public repos (no auth needed) and private repos (via user's GitHub App installation).
+      operationId: github_code_search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query, repository]
+              properties:
+                query:
+                  type: string
+                  description: Code search query
+                  example: "useEffect cleanup destroy"
+                repository:
+                  type: string
+                  description: Repository in owner/repo format
+                  example: "facebook/react"
+                per_page:
+                  type: integer
+                  default: 30
+                  minimum: 1
+                  maximum: 100
+                page:
+                  type: integer
+                  default: 1
+                  minimum: 1
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        path:
+                          type: string
+                        name:
+                          type: string
+                        text_matches:
+                          type: array
+                          items:
+                            type: string
+        '429':
+          description: Rate limit exceeded
+      security:
+        - BearerAuth: []
+
+  /github/tree/{owner}/{repo}:
+    get:
+      tags: [GitHub Search]
+      summary: Get file tree of a GitHub repository
+      operationId: github_tree
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: ref
+          in: query
+          schema:
+            type: string
+            default: HEAD
+        - name: path
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: File tree
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tree_text:
+                    type: string
+                  total_files:
+                    type: integer
+                  total_dirs:
+                    type: integer
+      security:
+        - BearerAuth: []
+
+  /github/read:
+    post:
+      tags: [GitHub Search]
+      summary: Read a file from a GitHub repository
+      operationId: github_read_file
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [repository, path]
+              properties:
+                repository:
+                  type: string
+                  example: "facebook/react"
+                path:
+                  type: string
+                  example: "packages/react/src/React.js"
+                ref:
+                  type: string
+                  default: HEAD
+                start_line:
+                  type: integer
+                  minimum: 1
+                end_line:
+                  type: integer
+                  minimum: 1
+      responses:
+        '200':
+          description: File content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: string
+                  total_lines:
+                    type: integer
+                  language:
+                    type: string
+      security:
+        - BearerAuth: []
+
+  /github/glob:
+    post:
+      tags: [GitHub Search]
+      summary: Find files matching a glob pattern
+      operationId: github_glob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [repository, pattern]
+              properties:
+                repository:
+                  type: string
+                  example: "facebook/react"
+                pattern:
+                  type: string
+                  example: "packages/react-reconciler/src/*.js"
+                ref:
+                  type: string
+                  default: HEAD
+      responses:
+        '200':
+          description: Matching files
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  matched_files:
+                    type: array
+                    items:
+                      type: string
+                  total_matches:
+                    type: integer
+      security:
+        - BearerAuth: []
+
+  /github/tracer:
+    post:
+      tags: [GitHub Search]
+      summary: Create a Tracer search job
+      description: |
+        Tracer is an autonomous AI agent (Claude Opus 4.6) that searches GitHub
+        repositories to answer your question. It autonomously uses search, tree, read,
+        and glob tools to explore code and produce a comprehensive answer.
+
+        Returns immediately with a job_id. Use /github/tracer/{job_id}/stream for real-time updates.
+      operationId: create_tracer_job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  description: Research question
+                  example: "How is React's useEffect cleanup function implemented?"
+                repositories:
+                  type: array
+                  items:
+                    type: string
+                  description: Repositories in owner/repo format
+                  example: ["facebook/react"]
+                context:
+                  type: string
+                  description: Additional context
+                model:
+                  type: string
+                  enum: [claude-opus-4-6, claude-opus-4-6-1m]
+                  default: claude-opus-4-6
+      responses:
+        '200':
+          description: Job created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                  session_id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [queued]
+      security:
+        - BearerAuth: []
+
+  /github/tracer/{job_id}:
+    get:
+      tags: [GitHub Search]
+      summary: Get Tracer job status and result
+      operationId: get_tracer_job
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                  session_id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [pending, queued, running, completed, failed]
+                  answer:
+                    type: string
+                  iterations:
+                    type: integer
+                  duration_ms:
+                    type: integer
+      security:
+        - BearerAuth: []
+
+  /github/tracer/{job_id}/stream:
+    get:
+      tags: [GitHub Search]
+      summary: Stream Tracer job updates
+      description: Server-Sent Events stream for real-time Tracer progress.
+      operationId: stream_tracer_job
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: SSE event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+      security:
+        - BearerAuth: []
+
 tags:
   - name: Sources
     description: Unified source management (repositories, documentation, research papers, datasets, local folders)
@@ -7689,6 +7991,11 @@ tags:
     description: Package manifest analysis and documentation subscription for dependencies
   - name: Advisor
     description: Context-aware code advisor that analyzes your codebase against indexed documentation
+  - name: GitHub Search
+    description: |
+      Live GitHub code search and Tracer agent. Search, read, and explore GitHub
+      repositories without pre-indexing. The Tracer agent uses Claude Opus 4.6 to
+      autonomously search and analyze code across repositories.
   - name: Local Folders
     description: |
       Private, user-scoped file storage and semantic search.
