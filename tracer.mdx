@@ -1,0 +1,160 @@
+---
+title: 'Tracer'
+description: 'Autonomous agent for searching GitHub repositories without indexing'
+---
+
+<Info>
+  **Pro Feature** - Tracer is available on Pro plans.
+</Info>
+
+## Overview
+
+Tracer is an autonomous sub-agent that searches code on GitHub without requiring you to index repositories first. Powered by Claude Opus 4.6 with 1M context window support, it explores codebases, reads files, and synthesizes findings into comprehensive reports.
+
+Use Tracer when you need to quickly search unfamiliar code, find implementation examples, or understand how libraries work internally.
+
+## How It Works
+
+You provide a question and repositories to search. Tracer handles the rest:
+
+<Steps>
+  <Step title="Explore">
+    Browse repository structure to understand the layout
+  </Step>
+  <Step title="Search">
+    Find relevant code using GitHub's Code Search API
+  </Step>
+  <Step title="Read">
+    Analyze specific files and line ranges in detail
+  </Step>
+  <Step title="Iterate">
+    Follow code paths as search results reveal new areas to explore
+  </Step>
+  <Step title="Synthesize">
+    Generate a comprehensive report with file paths and line citations
+  </Step>
+</Steps>
+
+## Available Tools
+
+Tracer autonomously uses four GitHub tools:
+
+| Tool | Purpose |
+|------|---------|
+| `github_search` | Code search with qualifiers (`language:`, `path:`) |
+| `github_list` | Browse file tree structure |
+| `github_read` | Read file contents with optional line ranges |
+| `github_glob` | Find files matching glob patterns |
+
+## API Usage
+
+### Create a Tracer Job
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/github/tracer \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "How does the streaming response work in generateText?",
+    "repositories": ["vercel/ai"],
+    "context": "Focus on the core streaming implementation, not the React hooks."
+  }'
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query` | string | Yes | Your research question |
+| `repositories` | string[] | No | Repositories to search (owner/repo format) |
+| `context` | string | No | Additional context to guide the agent's focus |
+
+**Response:**
+
+```json
+{
+  "job_id": "abc123",
+  "session_id": "def456",
+  "status": "queued"
+}
+```
+
+### Stream Results
+
+Subscribe to real-time updates as Tracer works:
+
+```bash
+curl -N https://apigcp.trynia.ai/v2/github/tracer/{job_id}/stream \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+**Event Types:**
+
+| Event | Description |
+|-------|-------------|
+| `started` | Job started with query and repositories |
+| `tool_start` | Tool execution beginning |
+| `tool_complete` | Tool finished with success/failure |
+| `complete` | Final report ready |
+| `error` | Error occurred |
+
+### Get Job Status
+
+```bash
+curl https://apigcp.trynia.ai/v2/github/tracer/{job_id} \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+### List Jobs
+
+```bash
+curl https://apigcp.trynia.ai/v2/github/tracer \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+## MCP Integration
+
+Tracer is available as an MCP tool. Once configured, use it in Claude Code, Cursor, or any MCP-compatible agent:
+
+```
+"Use Tracer to search the vercel/ai repository and explain how streaming works."
+```
+
+## Example Use Cases
+
+<Accordion title="Understanding Library Internals">
+  **Query:** "Explain why we're getting this error from Zod and show me the validation logic causing it."
+
+  Tracer searches the Zod repo for error messages, finds the validation functions, reads the implementation, and explains exactly what triggers the error.
+</Accordion>
+
+<Accordion title="Finding Implementation Examples">
+  **Query:** "Find examples of how to implement cursor-based pagination in GraphQL resolvers."
+
+  Tracer searches multiple repositories, finds pagination implementations, compares approaches, and synthesizes findings.
+</Accordion>
+
+<Accordion title="Learning Framework Patterns">
+  **Query:** "How does React's useEffect cleanup function work?"
+
+  Tracer navigates the React codebase, finds the hooks implementation, reads the relevant code, and explains the cleanup mechanism.
+</Accordion>
+
+## Tracer vs Index-Based Search
+
+| Aspect | Tracer | Nia Search |
+|--------|--------|------------|
+| **Speed** | Slower (live API calls) | Faster (pre-indexed) |
+| **Setup** | None | Requires indexing |
+| **Coverage** | All public GitHub | Only indexed sources |
+| **Best for** | Exploration, one-off queries | Repeated searches, production use |
+
+**Use Tracer when:**
+- Exploring unfamiliar code
+- Searching repos you haven't indexed
+- Researching across multiple repositories
+
+**Use Nia Search when:**
+- Working with familiar codebases
+- Need fast, repeated searches
+- Want precise control over search scope

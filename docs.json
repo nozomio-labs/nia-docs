@@ -38,6 +38,7 @@
             "group": "Features",
             "pages": [
               "tools-features",
+              "tracer",
               "local-sync",
               "pdf-indexing",
               "huggingface-datasets",
