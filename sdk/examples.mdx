@@ -1,93 +1,190 @@
 ---
 title: "Examples"
-description: "Complete code examples for the Nia AI SDK"
+description: "Complete code examples for the Nia AI SDKs"
+---
+
+All examples assume you have initialized the SDK:
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    import os
+    from nia_py.sdk import NiaSDK
+
+    sdk = NiaSDK(api_key=os.environ["NIA_API_KEY"])
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { NiaSDK } from "nia-ai-ts";
+
+    const sdk = new NiaSDK({ apiKey: process.env.NIA_API_KEY! });
+    ```
+  </Tab>
+</Tabs>
+
 ---
 
 ## Repository Operations
 
 ### Index a Repository
 
-```python
-from nia_ai_api_client import AuthenticatedClient
-from nia_ai_api_client.api.repositories import index_repository
-from nia_ai_api_client.models import RepositoryRequest
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py import AuthenticatedClient
+    from nia_py.api.v2_api import index_repository_v2_v2_repositories_post
+    from nia_py.models import RepositoryRequest
 
-client = AuthenticatedClient(
-    base_url="https://apigcp.trynia.ai/v2",
-    token="nia_your_api_key"
-)
+    client = AuthenticatedClient(
+        base_url="https://apigcp.trynia.ai/v2",
+        token=os.environ["NIA_API_KEY"],
+    )
 
-# Index a public repository
-request = RepositoryRequest(repository="vercel/ai")
-result = index_repository.sync(client=client, body=request)
-print(f"Indexing started: {result.data.repository} - {result.data.status}")
-```
+    result = index_repository_v2_v2_repositories_post.sync(
+        client=client,
+        body=RepositoryRequest(repository="vercel/ai", branch="main"),
+    )
+    print(f"Indexing started: {result}")
+    ```
+
+    Or with the high-level SDK:
+
+    ```python
+    sdk.sources.create({"url": "https://github.com/vercel/ai", "branch": "main"})
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { V2ApiRepositoriesService } from "nia-ai-ts";
+
+    const result = await V2ApiRepositoriesService.indexRepositoryV2V2RepositoriesPost({
+      repository: "vercel/ai",
+      branch: "main",
+    });
+    console.log("Indexing started:", result);
+    ```
+
+    Or with the high-level SDK:
+
+    ```typescript
+    await sdk.sources.create({ url: "https://github.com/vercel/ai", branch: "main" });
+    ```
+  </Tab>
+</Tabs>
 
 ### Check Repository Status
 
-```python
-from nia_ai_api_client.api.repositories import get_repository_status
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py.api.v2_api import get_repository_status_v2_v2_repositories_repository_id_get
 
-status = get_repository_status.sync(
-    client=client,
-    repository_id="vercel/ai"
-)
-
-print(f"Status: {status.status}")
-if status.progress:
-    print(f"Progress: {status.progress.percentage}%")
-```
+    status = get_repository_status_v2_v2_repositories_repository_id_get.sync(
+        client=client,
+        repository_id="vercel/ai",
+    )
+    print(f"Status: {status}")
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    const status = await V2ApiRepositoriesService.getRepositoryStatusV2V2RepositoriesRepositoryIdGet(
+      "vercel/ai"
+    );
+    console.log("Status:", status);
+    ```
+  </Tab>
+</Tabs>
 
 ### Browse Repository Tree
 
-```python
-from nia_ai_api_client.api.repositories import get_repository_tree
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py.api.v2_api import get_repository_tree_v2_v2_repositories_repository_id_tree_get
 
-tree = get_repository_tree.sync(
-    client=client,
-    repository_id="vercel/ai"
-)
-
-for item in tree.items:
-    print(f"{'📁' if item.type == 'directory' else '📄'} {item.path}")
-```
+    tree = get_repository_tree_v2_v2_repositories_repository_id_tree_get.sync(
+        client=client,
+        repository_id="vercel/ai",
+    )
+    print(tree)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    const tree = await V2ApiRepositoriesService.getRepositoryTreeV2V2RepositoriesRepositoryIdTreeGet(
+      "vercel/ai"
+    );
+    console.log(tree);
+    ```
+  </Tab>
+</Tabs>
 
 ### Read File Content
 
-```python
-from nia_ai_api_client.api.repositories import get_repository_content
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py.api.v2_api import get_repository_content_v2_v2_repositories_repository_id_content_get
 
-content = get_repository_content.sync(
-    client=client,
-    repository_id="vercel/ai",
-    path="packages/ai/src/index.ts"
-)
-
-print(content.content)
-```
+    content = get_repository_content_v2_v2_repositories_repository_id_content_get.sync(
+        client=client,
+        repository_id="vercel/ai",
+        path="packages/ai/src/index.ts",
+    )
+    print(content)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    const content = await V2ApiRepositoriesService.getRepositoryContentV2V2RepositoriesRepositoryIdContentGet(
+      "vercel/ai",
+      "packages/ai/src/index.ts"
+    );
+    console.log(content);
+    ```
+  </Tab>
+</Tabs>
 
 ### Grep Search in Repository
 
-```python
-from nia_ai_api_client.api.repositories import grep_repository
-from nia_ai_api_client.models import CodeGrepRequest
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py.api.v2_api import grep_repository_v2_v2_repositories_repository_id_grep_post
+    from nia_py.models import CodeGrepRequest
 
-request = CodeGrepRequest(
-    pattern="async function",
-    path="src/",  # optional path filter
-    context_lines=2
-)
+    results = grep_repository_v2_v2_repositories_repository_id_grep_post.sync(
+        client=client,
+        repository_id="vercel/ai",
+        body=CodeGrepRequest(
+            pattern="async function",
+            path="src/",
+            context_lines=2,
+            case_sensitive=False,
+        ),
+    )
+    print(results)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { V2ApiRepositoriesService } from "nia-ai-ts";
 
-results = grep_repository.sync(
-    client=client,
-    repository_id="vercel/ai",
-    body=request
-)
-
-for match in results.matches:
-    print(f"{match.file}:{match.line_number}")
-    print(f"  {match.content}")
-```
+    const results = await V2ApiRepositoriesService.grepRepositoryV2V2RepositoriesRepositoryIdGrepPost(
+      "vercel/ai",
+      {
+        pattern: "async function",
+        path: "src/",
+        context_lines: 2,
+        case_sensitive: false,
+      }
+    );
+    console.log(results);
+    ```
+  </Tab>
+</Tabs>
 
 ---
 
@@ -95,58 +192,99 @@ for match in results.matches:
 
 ### Semantic Code Search
 
-```python
-from nia_ai_api_client.api.search import search_query
-from nia_ai_api_client.models import QueryRequest, QueryRequestMessagesItem
+<Tabs>
+  <Tab title="Python">
+    ```python
+    result = sdk.search.query(
+        messages=[{"role": "user", "content": "How does streaming work in the AI SDK?"}],
+        repositories=["vercel/ai"],
+        include_sources=True,
+    )
+    print(result)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    const result = await sdk.search.query({
+      messages: [{ role: "user", content: "How does streaming work in the AI SDK?" }],
+      repositories: ["vercel/ai"],
+      include_sources: true,
+    });
+    console.log(result);
+    ```
+  </Tab>
+</Tabs>
 
-request = QueryRequest(
-    messages=[
-        QueryRequestMessagesItem(
-            role="user",
-            content="How does streaming work in the AI SDK?"
-        )
-    ],
-    repositories=[{"repository": "vercel/ai"}],
-    include_sources=True
-)
+### Universal Search
 
-result = search_query.sync(client=client, body=request)
+Searches across all your indexed repositories and documentation automatically.
 
-print("Answer:", result.content)
-print("\nSources:")
-for source in result.sources:
-    print(f"  - {source.path}")
-```
-
-### Universal Search (Auto-routes to indexed sources)
-
-```python
-from nia_ai_api_client.api.search import search_universal
-from nia_ai_api_client.models import UniversalSearchRequest
-
-request = UniversalSearchRequest(
-    query="How to implement tool calling?"
-)
-
-result = search_universal.sync(client=client, body=request)
-print(result.content)
-```
+<Tabs>
+  <Tab title="Python">
+    ```python
+    result = sdk.search.universal(
+        query="How to implement tool calling?",
+        top_k=10,
+        include_repos=True,
+        include_docs=True,
+    )
+    print(result)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    const result = await sdk.search.universal({
+      query: "How to implement tool calling?",
+      top_k: 10,
+      include_repos: true,
+      include_docs: true,
+    });
+    console.log(result);
+    ```
+  </Tab>
+</Tabs>
 
 ### Web Search
 
-```python
-from nia_ai_api_client.api.search import search_web
-from nia_ai_api_client.models import WebSearchRequest
+<Tabs>
+  <Tab title="Python">
+    ```python
+    result = sdk.search.web(query="latest LLM developments 2025")
+    print(result)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    const result = await sdk.search.web({ query: "latest LLM developments 2025" });
+    console.log(result);
+    ```
+  </Tab>
+</Tabs>
 
-request = WebSearchRequest(
-    query="latest LLM developments 2024",
-    num_results=5
-)
+### Deep Research
 
-results = search_web.sync(client=client, body=request)
-for item in results.results:
-    print(f"{item.title}: {item.url}")
-```
+Multi-step research with AI analysis and citations.
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    result = sdk.search.deep(
+        query="Compare React Server Components vs traditional SSR approaches",
+        output_format="comparison table",
+    )
+    print(result)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    const result = await sdk.search.deep({
+      query: "Compare React Server Components vs traditional SSR approaches",
+      output_format: "comparison table",
+    });
+    console.log(result);
+    ```
+  </Tab>
+</Tabs>
 
 ---
 
@@ -154,149 +292,391 @@ for item in results.results:
 
 ### Index Documentation
 
-```python
-from nia_ai_api_client.api.data_sources import create_data_source
-from nia_ai_api_client.models import DataSourceRequest
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py.api.v2_api import create_data_source_v2_v2_data_sources_post
+    from nia_py.models import DataSourceRequest
 
-request = DataSourceRequest(
-    url="https://docs.anthropic.com",
-    display_name="Anthropic Docs"
-)
+    result = create_data_source_v2_v2_data_sources_post.sync(
+        client=client,
+        body=DataSourceRequest(
+            url="https://docs.anthropic.com",
+            display_name="Anthropic Docs",
+            crawl_entire_domain=True,
+        ),
+    )
+    print(f"Indexing started: {result}")
+    ```
 
-result = create_data_source.sync(client=client, body=request)
-print(f"Indexing: {result.source_id}")
-```
+    Or with the high-level SDK:
 
-### List Data Sources
+    ```python
+    sdk.sources.create({
+        "url": "https://docs.anthropic.com",
+        "display_name": "Anthropic Docs",
+    })
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { V2ApiDataSourcesService } from "nia-ai-ts";
 
-```python
-from nia_ai_api_client.api.data_sources import list_data_sources
+    const result = await V2ApiDataSourcesService.createDataSourceV2V2DataSourcesPost({
+      url: "https://docs.anthropic.com",
+      display_name: "Anthropic Docs",
+      crawl_entire_domain: true,
+    });
+    console.log("Indexing started:", result);
+    ```
 
-sources = list_data_sources.sync(client=client)
+    Or with the high-level SDK:
 
-for source in sources.sources:
-    print(f"{source.display_name} ({source.status})")
-```
+    ```typescript
+    await sdk.sources.create({
+      url: "https://docs.anthropic.com",
+      display_name: "Anthropic Docs",
+    });
+    ```
+  </Tab>
+</Tabs>
+
+### List Sources
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    # List all sources
+    all_sources = sdk.sources.list()
+
+    # Filter by type
+    repos = sdk.sources.list(type="repository")
+    docs = sdk.sources.list(type="documentation")
+
+    # Search by name
+    results = sdk.sources.list(query="anthropic")
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    // List all sources
+    const allSources = await sdk.sources.list({});
+
+    // Filter by type
+    const repos = await sdk.sources.list({ type: "repository" });
+    const docs = await sdk.sources.list({ type: "documentation" });
+
+    // Search by name
+    const results = await sdk.sources.list({ query: "anthropic" });
+    ```
+  </Tab>
+</Tabs>
 
 ### Search Documentation
 
-```python
-from nia_ai_api_client.api.search import search_query
-from nia_ai_api_client.models import QueryRequest, QueryRequestMessagesItem
-
-request = QueryRequest(
-    messages=[
-        QueryRequestMessagesItem(
-            role="user",
-            content="How to use Claude's tool use feature?"
-        )
-    ],
-    data_sources=["Anthropic Docs"],  # by display name
-    search_mode="sources"
-)
-
-result = search_query.sync(client=client, body=request)
-print(result.content)
-```
+<Tabs>
+  <Tab title="Python">
+    ```python
+    result = sdk.search.query(
+        messages=[{"role": "user", "content": "How to use Claude's tool use feature?"}],
+        data_sources=["Anthropic Docs"],
+        search_mode="sources",
+    )
+    print(result)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    const result = await sdk.search.query({
+      messages: [{ role: "user", content: "How to use Claude's tool use feature?" }],
+      data_sources: ["Anthropic Docs"],
+      search_mode: "sources",
+    });
+    console.log(result);
+    ```
+  </Tab>
+</Tabs>
 
 ---
 
 ## Research Papers
 
-### Index arXiv Paper
+### Index an arXiv Paper
 
-```python
-from nia_ai_api_client.api.research_papers import index_research_paper
-from nia_ai_api_client.models import ResearchPaperRequest
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py.api.v2_api import index_research_paper_v2_v2_research_papers_post
+    from nia_py.models import ResearchPaperRequest
 
-request = ResearchPaperRequest(
-    url="https://arxiv.org/abs/2303.08774"  # GPT-4 paper
-)
+    result = index_research_paper_v2_v2_research_papers_post.sync(
+        client=client,
+        body=ResearchPaperRequest(url="https://arxiv.org/abs/2303.08774"),
+    )
+    print(result)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { V2ApiDataSourcesService } from "nia-ai-ts";
 
-result = index_research_paper.sync(client=client, body=request)
-print(f"Paper: {result.title}")
-print(f"Authors: {', '.join(result.authors)}")
-```
+    const result = await V2ApiDataSourcesService.indexResearchPaperV2V2ResearchPapersPost({
+      url: "https://arxiv.org/abs/2303.08774",
+    });
+    console.log(result);
+    ```
+  </Tab>
+</Tabs>
 
 ---
 
 ## Package Search
 
-Search code in public packages without indexing:
+Search source code of public packages on npm and PyPI without indexing.
 
-```python
-from nia_ai_api_client.api.package_search import package_search_hybrid
-from nia_ai_api_client.models import PackageSearchHybridRequest
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py.api.v2_api import package_search_hybrid_v2_v2_package_search_hybrid_post
+    from nia_py.models import PackageSearchHybridRequest
 
-request = PackageSearchHybridRequest(
-    registry="py_pi",
-    package_name="openai",
-    semantic_queries=["How does streaming work?"]
-)
+    result = package_search_hybrid_v2_v2_package_search_hybrid_post.sync(
+        client=client,
+        body=PackageSearchHybridRequest(
+            registry="py_pi",
+            package_name="openai",
+            semantic_queries=["How does streaming work?"],
+        ),
+    )
+    print(result)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { V2ApiPackageSearchService } from "nia-ai-ts";
 
-results = package_search_hybrid.sync(client=client, body=request)
-for result in results.results:
-    print(f"{result.file}: {result.snippet}")
-```
+    const result = await V2ApiPackageSearchService.packageSearchHybridV2V2PackageSearchHybridPost({
+      registry: "py_pi",
+      package_name: "openai",
+      semantic_queries: ["How does streaming work?"],
+    });
+    console.log(result);
+    ```
+  </Tab>
+</Tabs>
 
 ---
 
-## Oracle (Deep Research)
+## Oracle Research
 
-### Start Research Job
+### Create and Poll a Research Job
 
-```python
-from nia_ai_api_client.api.oracle_research import create_oracle_job
-from nia_ai_api_client.models import OracleResearchRequest
+<Tabs>
+  <Tab title="Python">
+    ```python
+    # Start a research job
+    job = sdk.oracle.create_job(
+        query="Compare React Server Components vs traditional SSR",
+        repositories=["vercel/next.js"],
+        output_format="comparison table",
+        model="claude-sonnet-4-5-20250929",
+    )
+    print(f"Job ID: {job['id']}, Status: {job['status']}")
 
-request = OracleResearchRequest(
-    query="Compare React Server Components vs traditional SSR",
-    repositories=["vercel/next.js"],
-    output_format="comparison table"
-)
+    # Poll until complete (default 10min timeout)
+    result = sdk.oracle.wait_for_job(
+        job_id=job["id"],
+        timeout_seconds=300.0,
+        poll_interval_seconds=3.0,
+    )
+    print(result)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    // Start a research job
+    const job = await sdk.oracle.createJob({
+      query: "Compare React Server Components vs traditional SSR",
+      repositories: ["vercel/next.js"],
+      output_format: "comparison table",
+      model: "claude-sonnet-4-5-20250929",
+    });
+    console.log(`Job ID: ${job.id}, Status: ${job.status}`);
 
-job = create_oracle_job.sync(client=client, body=request)
-print(f"Job ID: {job.job_id}")
-```
+    // Poll until complete (default 10min timeout)
+    const result = await sdk.oracle.waitForJob(job.id, 300_000, 3_000);
+    console.log(result);
+    ```
+  </Tab>
+</Tabs>
 
-### Check Job Status
+### Stream Research Events
 
-```python
-from nia_ai_api_client.api.oracle_research import get_oracle_job
+<Tabs>
+  <Tab title="Python">
+    ```python
+    job = sdk.oracle.create_job(query="Analyze the caching strategy in Next.js App Router")
 
-job = get_oracle_job.sync(client=client, job_id="job_123")
+    for event in sdk.oracle.stream_job_events(job_id=job["id"]):
+        # Each event is a parsed JSON dict from the SSE stream
+        event_type = event.get("type", "unknown")
+        print(f"[{event_type}] {event}")
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    const job = await sdk.oracle.createJob({
+      query: "Analyze the caching strategy in Next.js App Router",
+    });
 
-print(f"Status: {job.status}")
-if job.status == "completed":
-    print(f"Result: {job.result}")
-```
+    for await (const event of sdk.oracle.streamJob(job.id)) {
+      // Each event is a parsed JSON object from the SSE stream
+      console.log(`[${event.type}]`, event);
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### List and Manage Jobs
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    # List recent jobs
+    jobs = sdk.oracle.list_jobs(limit=10)
+
+    # Filter by status
+    completed = sdk.oracle.list_jobs(status="completed")
+
+    # Get a specific job
+    job = sdk.oracle.get_job(job_id="job-uuid")
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { DefaultService } from "nia-ai-ts";
+
+    // List recent jobs
+    const jobs = await DefaultService.listOracleJobsV2OracleJobsGet(undefined, 10);
+
+    // Get a specific job
+    const job = await DefaultService.getOracleJobV2OracleJobsJobIdGet("job-uuid");
+    ```
+  </Tab>
+</Tabs>
 
 ---
 
 ## Context Sharing
 
-Save and retrieve context across sessions:
+Save and retrieve context across sessions.
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py.api.v2_api import (
+        save_context_v2_v2_contexts_post,
+        semantic_search_contexts_v2_v2_contexts_semantic_search_get,
+    )
+    from nia_py.models import ContextSaveRequest
+
+    # Save context
+    save_context_v2_v2_contexts_post.sync(
+        client=client,
+        body=ContextSaveRequest(
+            title="Auth implementation notes",
+            summary="Implemented OAuth2 flow with refresh tokens",
+            content="Detailed implementation notes...",
+            tags=["auth", "oauth"],
+        ),
+    )
+
+    # Search contexts by semantic similarity
+    results = semantic_search_contexts_v2_v2_contexts_semantic_search_get.sync(
+        client=client,
+        query="authentication",
+    )
+    print(results)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { V2ApiContextsService } from "nia-ai-ts";
+
+    // Save context
+    await V2ApiContextsService.saveContextV2V2ContextsPost({
+      title: "Auth implementation notes",
+      summary: "Implemented OAuth2 flow with refresh tokens",
+      content: "Detailed implementation notes...",
+      tags: ["auth", "oauth"],
+    });
+
+    // Search contexts by semantic similarity
+    const results = await V2ApiContextsService.semanticSearchContextsV2V2ContextsSemanticSearchGet(
+      "authentication"
+    );
+    console.log(results);
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## GitHub Tracer
+
+Live code search across GitHub repositories without indexing.
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py.api.v2_api import create_tracer_job_v2_github_tracer_post
+    from nia_py.models import TracerRequest
+
+    job = create_tracer_job_v2_github_tracer_post.sync(
+        client=client,
+        body=TracerRequest(
+            query="How does the streaming API work?",
+            repositories=["vercel/ai"],
+        ),
+    )
+    print(f"Tracer job: {job}")
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { GithubSearchService } from "nia-ai-ts";
+
+    const job = await GithubSearchService.createTracerJobV2GithubTracerPost({
+      query: "How does the streaming API work?",
+      repositories: ["vercel/ai"],
+    });
+    console.log("Tracer job:", job);
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Async Support (Python)
+
+Every low-level API function has four variants:
 
 ```python
-from nia_ai_api_client.api.context_sharing import save_context, search_contexts
-from nia_ai_api_client.models import ContextShareRequest, ContextSearchRequest
+from nia_py.api.v2_api import search_universal_v2_v2_search_universal_post
+from nia_py.models import UniversalSearchRequest
+from nia_py.types import Response
 
-# Save context
-request = ContextShareRequest(
-    title="Auth implementation notes",
-    summary="Implemented OAuth2 flow with refresh tokens",
-    content="Detailed implementation notes...",
-    tags=["auth", "oauth"]
-)
+body = UniversalSearchRequest(query="test")
 
-context = save_context.sync(client=client, body=request)
-print(f"Saved: {context.id}")
+# Sync — returns parsed data or None
+result = search_universal_v2_v2_search_universal_post.sync(client=client, body=body)
 
-# Search contexts
-search_request = ContextSearchRequest(query="authentication")
-results = search_contexts.sync(client=client, body=search_request)
+# Sync detailed — returns Response with status_code, headers, parsed
+response: Response = search_universal_v2_v2_search_universal_post.sync_detailed(client=client, body=body)
 
-for ctx in results:
-    print(f"{ctx.title}: {ctx.summary}")
+# Async — returns parsed data or None
+result = await search_universal_v2_v2_search_universal_post.asyncio(client=client, body=body)
+
+# Async detailed — returns Response
+response = await search_universal_v2_v2_search_universal_post.asyncio_detailed(client=client, body=body)
 ```
-

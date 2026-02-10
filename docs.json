@@ -92,10 +92,10 @@
         "openapi": "/openapi-v2.yaml"
       },
       {
-        "tab": "Python SDK",
+        "tab": "SDKs",
         "groups": [
           {
-            "group": "SDK",
+            "group": "SDKs",
             "pages": [
               "sdk/quickstart",
               "sdk/authentication",

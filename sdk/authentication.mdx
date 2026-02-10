@@ -1,110 +1,292 @@
 ---
 title: "Authentication"
-description: "Configure API keys and client authentication"
+description: "Configure API keys and client authentication for the Nia SDKs"
 ---
 
 ## Getting Your API Key
 
-1. Go to [app.trynia.ai](https://app.trynia.ai)
-2. Sign in or create an account
-3. Navigate to Settings → API Keys
-4. Create a new API key
+<Steps>
+  <Step title="Create an account">
+    Go to [app.trynia.ai](https://app.trynia.ai) and sign in or create a new account.
+  </Step>
+  <Step title="Navigate to API Keys">
+    Open **Settings → API Keys** from the sidebar.
+  </Step>
+  <Step title="Generate a key">
+    Click **Create new API key**, give it a name, and copy the key. You won't be able to see it again.
+  </Step>
+</Steps>
 
 <Warning>
 Keep your API key secure. Never commit it to version control or expose it in client-side code.
 </Warning>
 
-## Client Configuration
+## Client Setup
 
-### Basic Setup
+### High-Level SDK (Recommended)
 
-```python
-from nia_ai_api_client import AuthenticatedClient
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py.sdk import NiaSDK
 
-client = AuthenticatedClient(
-    base_url="https://apigcp.trynia.ai/v2",
-    token="nia_your_api_key"
-)
-```
+    sdk = NiaSDK(api_key="nia_your_api_key")
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { NiaSDK } from "nia-ai-ts";
 
-### Environment Variables
+    const sdk = new NiaSDK({ apiKey: "nia_your_api_key" });
+    ```
+  </Tab>
+</Tabs>
 
-We recommend storing your API key in environment variables:
+### Low-Level Client
 
-```python
-import os
-from nia_ai_api_client import AuthenticatedClient
+For full control over individual API calls, use the underlying authenticated client directly.
 
-client = AuthenticatedClient(
-    base_url="https://apigcp.trynia.ai/v2",
-    token=os.environ["NIA_API_KEY"]
-)
-```
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py import AuthenticatedClient
+
+    client = AuthenticatedClient(
+        base_url="https://apigcp.trynia.ai/v2",
+        token="nia_your_api_key",
+    )
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { OpenAPI, V2ApiRepositoriesService } from "nia-ai-ts";
+
+    OpenAPI.BASE = "https://apigcp.trynia.ai/v2";
+    OpenAPI.TOKEN = "nia_your_api_key";
+
+    const repos = await V2ApiRepositoriesService.listRepositoriesV2V2RepositoriesGet();
+    ```
+  </Tab>
+</Tabs>
+
+## Environment Variables
+
+Store your API key in an environment variable instead of hardcoding it:
 
 ```bash
 export NIA_API_KEY="nia_your_api_key"
 ```
 
-### Custom HTTP Client
+<Tabs>
+  <Tab title="Python">
+    ```python
+    import os
+    from nia_py.sdk import NiaSDK
 
-For advanced use cases, you can customize the underlying HTTP client:
+    sdk = NiaSDK(api_key=os.environ["NIA_API_KEY"])
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { NiaSDK } from "nia-ai-ts";
+
+    const sdk = new NiaSDK({ apiKey: process.env.NIA_API_KEY! });
+    ```
+  </Tab>
+</Tabs>
+
+## Advanced Configuration
+
+### Request Timeout
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    sdk = NiaSDK(
+        api_key=os.environ["NIA_API_KEY"],
+        timeout_seconds=120.0,  # default: 60s
+    )
+    ```
+
+    For the low-level client, pass an `httpx.Timeout`:
+
+    ```python
+    import httpx
+    from nia_py import AuthenticatedClient
+
+    client = AuthenticatedClient(
+        base_url="https://apigcp.trynia.ai/v2",
+        token="nia_your_api_key",
+        timeout=httpx.Timeout(120.0),
+    )
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    // Timeout is controlled at the fetch level.
+    // The SDK defaults to the platform's fetch timeout.
+    const sdk = new NiaSDK({
+      apiKey: process.env.NIA_API_KEY!,
+    });
+    ```
+  </Tab>
+</Tabs>
+
+### Retry Configuration
+
+Both SDKs include automatic retries with exponential backoff for server errors (5xx) and network failures.
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    sdk = NiaSDK(
+        api_key="nia_your_api_key",
+        max_retries=3,                   # default: 2
+        initial_backoff_seconds=1.0,     # default: 0.5
+    )
+    # Backoff: 1s → 2s → 4s
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    const sdk = new NiaSDK({
+      apiKey: "nia_your_api_key",
+      maxRetries: 3,            // default: 2
+      initialBackoffMs: 1000,   // default: 500
+    });
+    // Backoff: 1000ms → 2000ms → 4000ms
+    ```
+  </Tab>
+</Tabs>
+
+### Context Manager (Python)
+
+The Python low-level client supports context managers for automatic resource cleanup:
 
 ```python
-import httpx
-from nia_ai_api_client import AuthenticatedClient
-
-# Custom timeout
-client = AuthenticatedClient(
-    base_url="https://apigcp.trynia.ai/v2",
-    token="nia_your_api_key",
-    timeout=60.0
-)
-```
-
-### Context Manager
-
-Use the client as a context manager for automatic cleanup:
-
-```python
-from nia_ai_api_client import AuthenticatedClient
-from nia_ai_api_client.api.repositories import list_repositories
+from nia_py import AuthenticatedClient
+from nia_py.api.v2_api import list_repositories_v2_v2_repositories_get
 
 with AuthenticatedClient(
     base_url="https://apigcp.trynia.ai/v2",
-    token="nia_your_api_key"
+    token="nia_your_api_key",
 ) as client:
-    repos = list_repositories.sync(client=client)
+    repos = list_repositories_v2_v2_repositories_get.sync(client=client)
+```
+
+Or async:
+
+```python
+async with AuthenticatedClient(
+    base_url="https://apigcp.trynia.ai/v2",
+    token="nia_your_api_key",
+) as client:
+    repos = await list_repositories_v2_v2_repositories_get.asyncio(client=client)
 ```
 
 ## Rate Limits
 
 API rate limits depend on your plan:
 
-| Plan | Requests/min | Indexed Repos |
-|------|--------------|---------------|
+| Plan | Requests/min | Indexed Sources |
+|------|--------------|-----------------|
 | Free | 10 | 3 |
 | Pro | 60 | Unlimited |
 | Enterprise | Custom | Unlimited |
 
 <Info>
-Rate limit headers are included in all responses:
-- `X-RateLimit-Limit`
-- `X-RateLimit-Remaining`
-- `X-RateLimit-Reset`
+Rate limit headers are included in every response:
+- `X-RateLimit-Limit` — maximum requests allowed
+- `X-RateLimit-Remaining` — requests remaining in window
+- `X-RateLimit-Reset` — seconds until window resets
 </Info>
 
 ## Error Handling
 
+<Tabs>
+  <Tab title="Python">
+    **High-level SDK** raises typed exceptions:
+
+    ```python
+    from nia_py.sdk import NiaSDK
+    from nia_py.sdk.errors import NiaAPIError, NiaTimeoutError
+
+    sdk = NiaSDK(api_key="nia_your_api_key")
+
+    try:
+        result = sdk.search.universal(query="test")
+    except NiaAPIError as e:
+        print(f"API error {e.status_code}: {e}")
+    except NiaTimeoutError as e:
+        print(f"Operation timed out: {e}")
+    ```
+
+    **Low-level client** returns `Response` objects with status codes:
+
+    ```python
+    from nia_py.api.v2_api import list_repositories_v2_v2_repositories_get
+
+    response = list_repositories_v2_v2_repositories_get.sync_detailed(client=client)
+
+    if response.status_code == 200:
+        print(response.parsed)
+    elif response.status_code == 401:
+        print("Invalid API key")
+    elif response.status_code == 429:
+        print("Rate limited — retry after:", response.headers.get("Retry-After"))
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    **High-level SDK** throws typed errors:
+
+    ```typescript
+    import { NiaSDK, NiaTimeoutError, NiaSDKError } from "nia-ai-ts";
+
+    const sdk = new NiaSDK({ apiKey: "nia_your_api_key" });
+
+    try {
+      const result = await sdk.search.universal({ query: "test" });
+    } catch (error) {
+      if (error instanceof NiaTimeoutError) {
+        console.error("Operation timed out:", error.message);
+      } else if (error instanceof NiaSDKError) {
+        console.error("SDK error:", error.message);
+      }
+    }
+    ```
+
+    **Low-level services** throw `ApiError` with status info:
+
+    ```typescript
+    import { ApiError, V2ApiRepositoriesService } from "nia-ai-ts";
+
+    try {
+      const repos = await V2ApiRepositoriesService.listRepositoriesV2V2RepositoriesGet();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        console.error(`API error ${error.status}: ${error.body}`);
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Authentication Methods
+
+The API accepts your key via either header:
+
+| Header | Format |
+|--------|--------|
+| `Authorization` | `Bearer nia_your_api_key` |
+| `X-API-Key` | `nia_your_api_key` |
+
+Both SDKs use the `Authorization: Bearer` format by default. The Python low-level client allows customizing the header:
+
 ```python
-from nia_ai_api_client.api.repositories import list_repositories
-from nia_ai_api_client.types import Response
-
-response: Response = list_repositories.sync_detailed(client=client)
-
-if response.status_code == 200:
-    print(response.parsed)
-elif response.status_code == 401:
-    print("Invalid API key")
-elif response.status_code == 429:
-    print("Rate limited - retry after:", response.headers.get("Retry-After"))
+client = AuthenticatedClient(
+    base_url="https://apigcp.trynia.ai/v2",
+    token="nia_your_api_key",
+    prefix="Bearer",                  # default
+    auth_header_name="Authorization", # default
+)
 ```

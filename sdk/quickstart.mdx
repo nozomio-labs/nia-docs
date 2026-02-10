@@ -1,103 +1,255 @@
 ---
-title: "Python SDK"
-description: "Get started with the Nia AI Python SDK"
+title: "Quickstart"
+description: "Get started with the Nia AI SDKs for Python and TypeScript"
 ---
+
+Nia provides official SDKs for **Python** and **TypeScript** with a high-level client that wraps the REST API into an ergonomic interface with built-in retries, streaming, and type safety.
 
 ## Installation
 
-```bash
-pip install nia-ai-sdk
-```
+<Tabs>
+  <Tab title="Python">
+    ```bash
+    pip install nia-ai-py
+    ```
 
-Or with uv:
+    Or with uv:
 
-```bash
-uv add nia-ai-sdk
-```
+    ```bash
+    uv add nia-ai-py
+    ```
+
+    Requires Python 3.10+.
+  </Tab>
+  <Tab title="TypeScript">
+    ```bash
+    npm install nia-ai-ts
+    ```
+
+    Or with other package managers:
+
+    ```bash
+    yarn add nia-ai-ts
+    # or
+    pnpm add nia-ai-ts
+    # or
+    bun add nia-ai-ts
+    ```
+  </Tab>
+</Tabs>
 
 ## Quick Start
 
-```python
-from nia_ai_api_client import AuthenticatedClient
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py.sdk import NiaSDK
 
-# Initialize the client
-client = AuthenticatedClient(
-    base_url="https://apigcp.trynia.ai/v2",
-    token="nia_your_api_key"
-)
-```
+    sdk = NiaSDK(api_key="nia_your_api_key")
 
-## Basic Operations
+    # Semantic search across your indexed sources
+    results = sdk.search.universal(query="How does authentication work?")
+    print(results)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { NiaSDK } from "nia-ai-ts";
 
-### List Your Repositories
+    const sdk = new NiaSDK({ apiKey: "nia_your_api_key" });
 
-```python
-from nia_ai_api_client.api.repositories import list_repositories
+    // Semantic search across your indexed sources
+    const results = await sdk.search.universal({ query: "How does authentication work?" });
+    console.log(results);
+    ```
+  </Tab>
+</Tabs>
 
-repos = list_repositories.sync(client=client)
+<Warning>
+Get your API key at [app.trynia.ai](https://app.trynia.ai) under **Settings → API Keys**. Never commit API keys to version control.
+</Warning>
 
-for repo in repos:
-    print(f"{repo.repository} - {repo.status}")
-```
+## Core Concepts
 
-### Index a Repository
+The SDK is organized into three clients accessible from the main `NiaSDK` instance:
 
-```python
-from nia_ai_api_client.api.repositories import index_repository
-from nia_ai_api_client.models import RepositoryRequest
+| Client | Description |
+|--------|-------------|
+| `sdk.search` | Semantic search, web search, deep research, and query-based code search |
+| `sdk.sources` | Create, list, resolve, and delete indexed sources (repos, docs, papers) |
+| `sdk.oracle` | Launch autonomous research jobs with streaming and polling |
 
-request = RepositoryRequest(
-    repository="owner/repo",
-    branch="main"  # optional
-)
+## Search
 
-result = index_repository.sync(client=client, body=request)
-print(f"Status: {result.data.status}")
-```
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from nia_py.sdk import NiaSDK
 
-### Search Code
+    sdk = NiaSDK(api_key="nia_your_api_key")
 
-```python
-from nia_ai_api_client.api.search import search_query
-from nia_ai_api_client.models import QueryRequest, QueryRequestMessagesItem
+    # Universal search across all indexed sources
+    results = sdk.search.universal(query="implement retry logic", top_k=10)
 
-request = QueryRequest(
-    messages=[
-        QueryRequestMessagesItem(
-            role="user",
-            content="How does authentication work?"
-        )
-    ],
-    repositories=[{"repository": "owner/repo"}]
-)
+    # Query search with specific repos and conversation context
+    results = sdk.search.query(
+        messages=[{"role": "user", "content": "How does streaming work?"}],
+        repositories=["vercel/ai"],
+    )
 
-result = search_query.sync(client=client, body=request)
-print(result.content)
-```
+    # Web search
+    results = sdk.search.web(query="latest LLM developments")
 
-## Async Support
+    # Deep research (multi-step with citations)
+    results = sdk.search.deep(query="Compare RSC vs traditional SSR")
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    import { NiaSDK } from "nia-ai-ts";
 
-All methods have async variants:
+    const sdk = new NiaSDK({ apiKey: "nia_your_api_key" });
 
-```python
-import asyncio
-from nia_ai_api_client.api.repositories import list_repositories
+    // Universal search across all indexed sources
+    const results = await sdk.search.universal({ query: "implement retry logic", top_k: 10 });
 
-async def main():
-    repos = await list_repositories.asyncio(client=client)
-    for repo in repos:
-        print(repo.repository)
+    // Query search with specific repos and conversation context
+    const queryResults = await sdk.search.query({
+      messages: [{ role: "user", content: "How does streaming work?" }],
+      repositories: ["vercel/ai"],
+    });
 
-asyncio.run(main())
-```
+    // Web search
+    const webResults = await sdk.search.web({ query: "latest LLM developments" });
+
+    // Deep research (multi-step with citations)
+    const deepResults = await sdk.search.deep({ query: "Compare RSC vs traditional SSR" });
+    ```
+  </Tab>
+</Tabs>
+
+## Source Management
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    # Create a source (auto-detects type from URL)
+    sdk.sources.create({"url": "https://github.com/vercel/ai"})
+    sdk.sources.create({"url": "https://docs.anthropic.com"})
+
+    # List sources with filters
+    repos = sdk.sources.list(type="repository", limit=20)
+
+    # Resolve a source by name
+    source = sdk.sources.resolve(identifier="vercel/ai")
+
+    # Delete a source
+    sdk.sources.delete(source_id="source-uuid")
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    // Create a source (auto-detects type from URL)
+    await sdk.sources.create({ url: "https://github.com/vercel/ai" });
+    await sdk.sources.create({ url: "https://docs.anthropic.com" });
+
+    // List sources with filters
+    const repos = await sdk.sources.list({ type: "repository", limit: 20 });
+
+    // Resolve a source by name
+    const source = await sdk.sources.resolve({ identifier: "vercel/ai" });
+
+    // Delete a source
+    await sdk.sources.delete({ sourceId: "source-uuid" });
+    ```
+  </Tab>
+</Tabs>
+
+## Oracle Research
+
+Oracle is Nia's autonomous research agent. It runs multi-step research jobs that can take minutes to complete.
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    # Start a research job
+    job = sdk.oracle.create_job(
+        query="How does Next.js handle caching in the App Router?",
+        repositories=["vercel/next.js"],
+    )
+    print(f"Job started: {job['id']}")
+
+    # Wait for completion (polls every 2s, 10min timeout)
+    result = sdk.oracle.wait_for_job(job_id=job["id"])
+    print(result)
+
+    # Or stream events in real-time
+    for event in sdk.oracle.stream_job_events(job_id=job["id"]):
+        print(event)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    // Start a research job
+    const job = await sdk.oracle.createJob({
+      query: "How does Next.js handle caching in the App Router?",
+      repositories: ["vercel/next.js"],
+    });
+    console.log(`Job started: ${job.id}`);
+
+    // Wait for completion (polls every 2s, 10min timeout)
+    const result = await sdk.oracle.waitForJob(job.id);
+    console.log(result);
+
+    // Or stream events in real-time
+    for await (const event of sdk.oracle.streamJob(job.id)) {
+      console.log(event);
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Configuration
+
+Both SDKs accept the same configuration options:
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    sdk = NiaSDK(
+        api_key="nia_your_api_key",
+        base_url="https://apigcp.trynia.ai/v2",  # default
+        timeout_seconds=60.0,                      # request timeout
+        max_retries=2,                             # retry on 5xx / transport errors
+        initial_backoff_seconds=0.5,               # exponential backoff base
+    )
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    const sdk = new NiaSDK({
+      apiKey: "nia_your_api_key",
+      baseUrl: "https://apigcp.trynia.ai/v2",  // default
+      maxRetries: 2,                             // retry on failures
+      initialBackoffMs: 500,                     // exponential backoff base
+    });
+    ```
+  </Tab>
+</Tabs>
 
 ## Next Steps
 
 <CardGroup cols={2}>
   <Card title="Authentication" icon="key" href="/sdk/authentication">
-    Configure API keys and authentication
+    API key setup, environment variables, and advanced client configuration
   </Card>
   <Card title="Examples" icon="code" href="/sdk/examples">
-    Complete code examples for all operations
+    Complete code examples for all SDK operations
+  </Card>
+  <Card title="REST API Reference" icon="server" href="/api-guide">
+    Full REST API documentation with all endpoints
+  </Card>
+  <Card title="Get API Key" icon="arrow-up-right-from-square" href="https://app.trynia.ai">
+    Create your free Nia account and generate an API key
   </Card>
 </CardGroup>
