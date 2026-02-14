@@ -1,18 +1,56 @@
 openapi: 3.1.0
 info:
-  title: Nia AI API (Docs)
-  version: 1.0.0
-  description: Documentation-focused OpenAPI spec derived from backend/openapi-v2.yaml.
-    Deprecated operations are excluded for cleaner navigation.
+  title: Nia AI API
+  version: 2.3.0
+  description: |
+    Nia AI API provides a single, consistent `sources` resource for all indexed content.
+
+    ## Core Resources
+
+    **Sources** (`/sources`)
+    - `repository`
+    - `documentation`
+    - `research_paper`
+    - `huggingface_dataset`
+    - `local_folder`
+
+    **Search** (`/search`)
+    - `mode`: query | web | deep | universal
+servers:
+  - url: https://apigcp.trynia.ai/v2
+    description: Production API
+  - url: http://localhost:8000/v2
+    description: Local development
+security:
+  - ApiKeyAuth: []
+tags:
+- name: Sources
+  description: Unified source management — index, list, read, search, and manage all source types
+- name: Search
+  description: Unified search across indexed sources
+- name: Contexts
+  description: Cross-agent context sharing and memory
+- name: Categories
+  description: Organize sources into categories
+- name: Packages
+  description: Search and read published package source code
+- name: GitHub & Tracer
+  description: Live GitHub code search and autonomous Tracer agent
+- name: Oracle
+  description: AI-powered autonomous research
+- name: Dependencies
+  description: Analyze and subscribe to documentation for project dependencies
+- name: Advisor
+  description: Context-aware code analysis and recommendations
+- name: Usage
+  description: API usage statistics
 paths:
   /advisor:
     post:
       tags:
-      - v2-api
-      - advisor
+      - Advisor
       summary: Context-aware code advisor
-      description: Analyze codebase context against Nia's indexed documentation to
-        get tailored recommendations.
+      description: Analyze codebase context against Nia's indexed documentation to get tailored recommendations.
       operationId: analyze_codebase_v2_advisor_post
       requestBody:
         content:
@@ -36,11 +74,10 @@ paths:
   /bulk-delete:
     post:
       tags:
-      - v2-api
-      - v2-api
+      - Sources
       summary: Bulk delete resources
-      description: Delete multiple resources in a single request. Supports repositories,
-        documentation, research papers, contexts, and local folders.
+      description: Delete multiple resources in a single request. Supports repositories, documentation, research papers, contexts,
+        and local folders.
       operationId: bulk_delete_resources_v2_bulk_delete_post
       requestBody:
         content:
@@ -64,8 +101,7 @@ paths:
   /categories:
     get:
       tags:
-      - v2-api
-      - v2-api-categories
+      - Categories
       summary: List categories
       description: List categories for the authenticated user/organization.
       operationId: list_categories_v2_categories_get
@@ -106,8 +142,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     post:
       tags:
-      - v2-api
-      - v2-api-categories
+      - Categories
       summary: Create category
       description: Create a new category for organizing data sources.
       operationId: create_category_v2_categories_post
@@ -133,8 +168,7 @@ paths:
   /categories/{category_id}:
     patch:
       tags:
-      - v2-api
-      - v2-api-categories
+      - Categories
       summary: Update category
       description: Update an existing category.
       operationId: update_category_v2_categories__category_id__patch
@@ -166,11 +200,9 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     delete:
       tags:
-      - v2-api
-      - v2-api-categories
+      - Categories
       summary: Delete category
-      description: Delete a category. Data sources with this category will become
-        uncategorized.
+      description: Delete a category. Data sources with this category will become uncategorized.
       operationId: delete_category_v2_categories__category_id__delete
       parameters:
       - name: category_id
@@ -194,11 +226,9 @@ paths:
   /contexts:
     post:
       tags:
-      - v2-api
-      - v2-api-contexts
+      - Contexts
       summary: Save context
-      description: Save conversation context for cross-agent sharing. Indexed in vector
-        store for semantic search.
+      description: Save conversation context for cross-agent sharing. Indexed in vector store for semantic search.
       operationId: save_context_v2_v2_contexts_post
       requestBody:
         required: true
@@ -221,11 +251,9 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     get:
       tags:
-      - v2-api
-      - v2-api-contexts
+      - Contexts
       summary: List contexts
-      description: List conversation contexts with pagination. Filter by tags, agent
-        source, or memory type.
+      description: List conversation contexts with pagination. Filter by tags, agent source, or memory type.
       operationId: list_contexts_v2_v2_contexts_get
       parameters:
       - name: limit
@@ -295,11 +323,9 @@ paths:
   /contexts/search:
     get:
       tags:
-      - v2-api
-      - v2-api-contexts
+      - Contexts
       summary: Text search contexts
-      description: Search contexts by content, title, summary, or tags using MongoDB
-        text search.
+      description: Search contexts by content, title, summary, or tags using MongoDB text search.
       operationId: search_contexts_v2_v2_contexts_search_get
       parameters:
       - name: q
@@ -358,11 +384,9 @@ paths:
   /contexts/semantic-search:
     get:
       tags:
-      - v2-api
-      - v2-api-contexts
+      - Contexts
       summary: Semantic search contexts
-      description: Vector + BM25 hybrid search over contexts. Returns relevance scores
-        and highlights.
+      description: Vector + BM25 hybrid search over contexts. Returns relevance scores and highlights.
       operationId: semantic_search_contexts_v2_v2_contexts_semantic_search_get
       parameters:
       - name: q
@@ -420,8 +444,7 @@ paths:
   /contexts/{context_id}:
     get:
       tags:
-      - v2-api
-      - v2-api-contexts
+      - Contexts
       summary: Get context
       description: Retrieve a specific context by ID.
       operationId: get_context_v2_v2_contexts__context_id__get
@@ -447,11 +470,9 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     put:
       tags:
-      - v2-api
-      - v2-api-contexts
+      - Contexts
       summary: Update context
-      description: Update an existing context. Re-indexes in vector store if content
-        changes.
+      description: Update an existing context. Re-indexes in vector store if content changes.
       operationId: update_context_v2_v2_contexts__context_id__put
       parameters:
       - name: context_id
@@ -481,8 +502,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     delete:
       tags:
-      - v2-api
-      - v2-api-contexts
+      - Contexts
       summary: Delete context
       description: Soft delete a context (marks inactive).
       operationId: delete_context_v2_v2_contexts__context_id__delete
@@ -509,11 +529,10 @@ paths:
   /dependencies/analyze:
     post:
       tags:
-      - v2-api
-      - v2-api
+      - Dependencies
       summary: Analyze package manifest
-      description: Parse a package manifest and return dependency information with
-        documentation URL mappings. This is a preview - no subscriptions are created.
+      description: Parse a package manifest and return dependency information with documentation URL mappings. This is a preview
+        - no subscriptions are created.
       operationId: analyze_dependencies_v2_dependencies_analyze_post
       requestBody:
         content:
@@ -537,11 +556,9 @@ paths:
   /dependencies/subscribe:
     post:
       tags:
-      - v2-api
-      - v2-api
+      - Dependencies
       summary: Subscribe to documentation for manifest dependencies
-      description: Parse a package manifest and automatically subscribe to documentation
-        for all dependencies.
+      description: Parse a package manifest and automatically subscribe to documentation for all dependencies.
       operationId: subscribe_to_dependencies_v2_dependencies_subscribe_post
       requestBody:
         content:
@@ -565,11 +582,9 @@ paths:
   /dependencies/upload:
     post:
       tags:
-      - v2-api
-      - v2-api
+      - Dependencies
       summary: Upload manifest file and subscribe to dependencies
-      description: Upload a package manifest file and subscribe to documentation for
-        all dependencies.
+      description: Upload a package manifest file and subscribe to documentation for all dependencies.
       operationId: upload_and_subscribe_v2_dependencies_upload_post
       requestBody:
         content:
@@ -593,8 +608,7 @@ paths:
   /github/glob:
     post:
       tags:
-      - v2-api
-      - github-search
+      - GitHub & Tracer
       summary: Github Glob
       description: Find files matching a glob pattern in a GitHub repository.
       operationId: github_glob_v2_github_glob_post
@@ -619,8 +633,7 @@ paths:
   /github/read:
     post:
       tags:
-      - v2-api
-      - github-search
+      - GitHub & Tracer
       summary: Github Read
       description: Read a file from a GitHub repository with optional line range.
       operationId: github_read_v2_github_read_post
@@ -645,11 +658,9 @@ paths:
   /github/search:
     post:
       tags:
-      - v2-api
-      - github-search
+      - GitHub & Tracer
       summary: Github Code Search
-      description: 'Search code in a GitHub repository using GitHub''s Code Search
-        API.
+      description: 'Search code in a GitHub repository using GitHub''s Code Search API.
 
 
         Rate limited to 10 requests/minute by GitHub. Requires authentication
@@ -677,8 +688,7 @@ paths:
   /github/tracer:
     post:
       tags:
-      - v2-api
-      - github-search
+      - GitHub & Tracer
       summary: Create Tracer Job
       description: 'Create a Tracer search job.
 
@@ -709,8 +719,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     get:
       tags:
-      - v2-api
-      - github-search
+      - GitHub & Tracer
       summary: List Tracer Jobs
       description: List Tracer jobs for the authenticated user.
       operationId: list_tracer_jobs_v2_github_tracer_get
@@ -761,8 +770,7 @@ paths:
   /github/tracer/{job_id}:
     delete:
       tags:
-      - v2-api
-      - github-search
+      - GitHub & Tracer
       summary: Delete Tracer Job
       description: Delete a Tracer job by session_id or workflow_run_id.
       operationId: delete_tracer_job_v2_github_tracer__job_id__delete
@@ -787,8 +795,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     get:
       tags:
-      - v2-api
-      - github-search
+      - GitHub & Tracer
       summary: Get Tracer Job
       description: Get the status and result of a Tracer search job.
       operationId: get_tracer_job_v2_github_tracer__job_id__get
@@ -814,8 +821,7 @@ paths:
   /github/tracer/{job_id}/stream:
     get:
       tags:
-      - v2-api
-      - github-search
+      - GitHub & Tracer
       summary: Stream Tracer Job
       description: 'Stream real-time updates from a Tracer search job.
 
@@ -846,8 +852,7 @@ paths:
   /github/tree/{owner}/{repo}:
     get:
       tags:
-      - v2-api
-      - github-search
+      - GitHub & Tracer
       summary: Github Tree
       description: Get the file tree of a GitHub repository or subdirectory.
       operationId: github_tree_v2_github_tree__owner___repo__get
@@ -918,6 +923,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
   /oracle/jobs:
     post:
       summary: Create Oracle Job
@@ -955,6 +962,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
     get:
       summary: List Oracle Jobs
       description: 'List Oracle research jobs for the authenticated user.
@@ -1002,6 +1011,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
   /oracle/jobs/{job_id}:
     get:
       summary: Get Oracle Job
@@ -1031,6 +1042,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
     delete:
       summary: Cancel Oracle Job
       description: 'Cancel a running or queued Oracle research job.
@@ -1059,6 +1072,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
   /oracle/jobs/{job_id}/stream:
     get:
       summary: Stream Oracle Job
@@ -1088,6 +1103,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
   /oracle/sessions:
     get:
       summary: List Oracle Sessions
@@ -1129,6 +1146,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
   /oracle/sessions/{session_id}:
     get:
       summary: Get Oracle Session Detail
@@ -1158,6 +1177,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
     delete:
       summary: Delete Oracle Session
       description: Delete an Oracle research session and its associated chat messages.
@@ -1181,6 +1202,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
   /oracle/sessions/{session_id}/chat/stream:
     post:
       summary: Stream Oracle Session Chat
@@ -1223,6 +1246,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
   /oracle/sessions/{session_id}/messages:
     get:
       summary: Get Oracle Session Messages
@@ -1261,14 +1286,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
   /packages/grep:
     post:
       tags:
-      - v2-api
-      - v2-api-package-search
+      - Packages
       summary: Grep package source
-      description: Regex search over public package source code (npm, PyPI, crates.io,
-        Go modules).
+      description: Regex search over public package source code (npm, PyPI, crates.io, Go modules).
       operationId: package_search_grep_v2_v2_packages_grep_post
       requestBody:
         content:
@@ -1291,11 +1316,9 @@ paths:
   /packages/read:
     post:
       tags:
-      - v2-api
-      - v2-api-package-search
+      - Packages
       summary: Read package file
-      description: Read specific lines from a package source file. Max 200 lines per
-        request.
+      description: Read specific lines from a package source file. Max 200 lines per request.
       operationId: package_search_read_file_v2_v2_packages_read_post
       requestBody:
         content:
@@ -1318,11 +1341,9 @@ paths:
   /packages/search:
     post:
       tags:
-      - v2-api
-      - v2-api-package-search
+      - Packages
       summary: Semantic package search
-      description: Hybrid semantic + keyword search over package source. 1-5 natural
-        language queries.
+      description: Hybrid semantic + keyword search over package source. 1-5 natural language queries.
       operationId: package_search_hybrid_v2_v2_packages_search_post
       requestBody:
         content:
@@ -1345,8 +1366,7 @@ paths:
   /search:
     post:
       tags:
-      - v2-api
-      - v2-api-search
+      - Search
       summary: Unified search
       description: Single search endpoint with a mode discriminator.
       operationId: unified_search_v2_v2_search_post
@@ -1383,8 +1403,7 @@ paths:
   /sources:
     get:
       tags:
-      - v2-api
-      - v2-api-sources
+      - Sources
       summary: List Sources
       operationId: list_sources_v2_sources_get
       parameters:
@@ -1466,8 +1485,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     post:
       tags:
-      - v2-api
-      - v2-api-sources
+      - Sources
       summary: Create Source
       operationId: create_source_v2_sources_post
       requestBody:
@@ -1492,8 +1510,7 @@ paths:
   /sources/resolve:
     get:
       tags:
-      - v2-api
-      - v2-api-sources
+      - Sources
       summary: Resolve Source
       operationId: resolve_source_v2_sources_resolve_get
       parameters:
@@ -1537,11 +1554,10 @@ paths:
   /sources/subscribe:
     post:
       tags:
-      - v2-api
-      - v2-api-sources
+      - Sources
       summary: Subscribe to a global source
-      description: Subscribe to an existing globally indexed public source. Creates
-        a local reference for instant access without re-indexing.
+      description: Subscribe to an existing globally indexed public source. Creates a local reference for instant access without
+        re-indexing.
       operationId: subscribe_source_v2_sources_subscribe_post
       requestBody:
         content:
@@ -1565,8 +1581,7 @@ paths:
   /sources/{source_id}:
     get:
       tags:
-      - v2-api
-      - v2-api-sources
+      - Sources
       summary: Get Source
       operationId: get_source_v2_sources__source_id__get
       parameters:
@@ -1607,8 +1622,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     patch:
       tags:
-      - v2-api
-      - v2-api-sources
+      - Sources
       summary: Update Source
       operationId: update_source_v2_sources__source_id__patch
       parameters:
@@ -1655,8 +1669,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     delete:
       tags:
-      - v2-api
-      - v2-api-sources
+      - Sources
       summary: Delete Source
       operationId: delete_source_v2_sources__source_id__delete
       parameters:
@@ -1698,8 +1711,7 @@ paths:
   /sources/{source_id}/classification:
     get:
       tags:
-      - v2-api
-      - v2-api-sources
+      - Sources
       summary: Get Source Classification
       operationId: get_source_classification_v2_sources__source_id__classification_get
       parameters:
@@ -1739,8 +1751,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     patch:
       tags:
-      - v2-api
-      - v2-api-sources
+      - Sources
       summary: Update Source Classification
       operationId: update_source_classification_v2_sources__source_id__classification_patch
       parameters:
@@ -1787,8 +1798,7 @@ paths:
   /sources/{source_id}/content:
     get:
       tags:
-      - v2-api
-      - v2-api-sources
+      - Sources
       summary: Get Source Content
       operationId: get_source_content_v2_sources__source_id__content_get
       parameters:
@@ -1859,8 +1869,7 @@ paths:
   /sources/{source_id}/grep:
     post:
       tags:
-      - v2-api
-      - v2-api-sources
+      - Sources
       summary: Grep Source
       operationId: grep_source_v2_sources__source_id__grep_post
       parameters:
@@ -1909,8 +1918,7 @@ paths:
   /sources/{source_id}/sync:
     post:
       tags:
-      - v2-api
-      - v2-api-sources
+      - Sources
       summary: Sync Source
       operationId: sync_source_v2_sources__source_id__sync_post
       parameters:
@@ -1959,8 +1967,7 @@ paths:
   /sources/{source_id}/tree:
     get:
       tags:
-      - v2-api
-      - v2-api-sources
+      - Sources
       summary: Get Source Tree
       operationId: get_source_tree_v2_sources__source_id__tree_get
       parameters:
@@ -2020,11 +2027,9 @@ paths:
   /usage:
     get:
       tags:
-      - v2-api
-      - v2-api
+      - Usage
       summary: Get usage summary
-      description: Get usage counts and limits for current billing period (queries,
-        indexing, oracle, etc.).
+      description: Get usage counts and limits for current billing period (queries, indexing, oracle, etc.).
       operationId: get_usage_summary_v2_v2_usage_get
       responses:
         '200':
@@ -2535,8 +2540,7 @@ components:
           - fact
           - procedural
           title: Memory Type
-          description: 'Memory type: scratchpad (1hr), episodic (7d), fact (permanent),
-            procedural (permanent)'
+          description: 'Memory type: scratchpad (1hr), episodic (7d), fact (permanent), procedural (permanent)'
           default: episodic
         ttl_seconds:
           anyOf:
@@ -3012,8 +3016,7 @@ components:
         url:
           type: string
           title: Url
-          description: URL of the source (GitHub repo, docs URL, arXiv URL/ID, or
-            HuggingFace dataset URL)
+          description: URL of the source (GitHub repo, docs URL, arXiv URL/ID, or HuggingFace dataset URL)
         source_type:
           anyOf:
           - type: string
@@ -3041,8 +3044,7 @@ components:
         action:
           type: string
           title: Action
-          description: 'Action taken: instant_access | wait_for_indexing | not_indexed
-            | use_private | indexing_started'
+          description: 'Action taken: instant_access | wait_for_indexing | not_indexed | use_private | indexing_started'
         message:
           type: string
           title: Message
@@ -3258,8 +3260,7 @@ components:
           description: Only return results with timestamp before this ISO datetime
       type: object
       title: LocalSourceFilters
-      description: Filters for local/personal source retrieval (messages, contacts,
-        etc.).
+      description: Filters for local/personal source retrieval (messages, contacts, etc.).
     MappingItem:
       properties:
         name:
@@ -3340,8 +3341,7 @@ components:
           - type: string
           - type: 'null'
           title: Model
-          description: 'Model to use: claude-opus-4-6, claude-opus-4-6-1m, claude-sonnet-4-5-20250929,
-            or claude-sonnet-4-5-1m'
+          description: 'Model to use: claude-opus-4-6, claude-opus-4-6-1m, claude-sonnet-4-5-20250929, or claude-sonnet-4-5-1m'
       type: object
       required:
       - query
@@ -3555,8 +3555,7 @@ components:
               type: object
           type: array
           title: Repositories
-          description: List of repositories to query. Can be strings (slug, display
-            name) or dicts with a 'repository' field.
+          description: List of repositories to query. Can be strings (slug, display name) or dicts with a 'repository' field.
         data_sources:
           items:
             anyOf:
@@ -3565,8 +3564,8 @@ components:
               type: object
           type: array
           title: Data Sources
-          description: List of data sources to query. Can be strings (display_name,
-            URL, or source_id) or dicts with 'source_id' or 'identifier' fields
+          description: List of data sources to query. Can be strings (display_name, URL, or source_id) or dicts with 'source_id'
+            or 'identifier' fields
         local_folders:
           items:
             anyOf:
@@ -3575,16 +3574,14 @@ components:
               type: object
           type: array
           title: Local Folders
-          description: List of local folders to query. Can be strings (display_name
-            or local_folder_id) or dicts with 'local_folder_id' or 'identifier' fields.
-            Local folders are private and user-scoped.
+          description: List of local folders to query. Can be strings (display_name or local_folder_id) or dicts with 'local_folder_id'
+            or 'identifier' fields. Local folders are private and user-scoped.
         category:
           anyOf:
           - type: string
           - type: 'null'
           title: Category
-          description: Filter local folder results by classification category (e.g.,
-            'Work', 'Personal')
+          description: Filter local folder results by classification category (e.g., 'Work', 'Personal')
         local_source_filters:
           anyOf:
           - $ref: '#/components/schemas/LocalSourceFilters'
@@ -3608,20 +3605,18 @@ components:
         fast_mode:
           type: boolean
           title: Fast Mode
-          description: Skip LLM processing for faster results (100-500ms vs 2-8s).
-            Set to false for deeper analysis.
+          description: Skip LLM processing for faster results (100-500ms vs 2-8s). Set to false for deeper analysis.
           default: true
         skip_llm:
           type: boolean
           title: Skip Llm
-          description: Return raw search results without any LLM processing. Returns
-            only sources with scores.
+          description: Return raw search results without any LLM processing. Returns only sources with scores.
           default: false
         reasoning_strategy:
           type: string
           title: Reasoning Strategy
-          description: 'Retrieval strategy: ''vector'' (default similarity search),
-            ''tree'' (LLM-guided tree navigation for PDFs), or ''hybrid'' (both combined)'
+          description: 'Retrieval strategy: ''vector'' (default similarity search), ''tree'' (LLM-guided tree navigation for
+            PDFs), or ''hybrid'' (both combined)'
           default: vector
         max_tokens:
           anyOf:
@@ -3636,8 +3631,7 @@ components:
           - type: string
           - type: 'null'
           title: Model
-          description: 'Synthesis model override. Allowed: claude-sonnet-4-5, gpt-5.2-2025-12-11,
-            claude-haiku-4-5-20251001'
+          description: 'Synthesis model override. Allowed: claude-sonnet-4-5, gpt-5.2-2025-12-11, claude-haiku-4-5-20251001'
         semantic_cache_threshold:
           type: number
           maximum: 1.0
@@ -3653,8 +3647,7 @@ components:
         include_follow_ups:
           type: boolean
           title: Include Follow Ups
-          description: Generate follow-up questions (adds ~500-1000ms LLM latency).
-            Disabled by default for speed.
+          description: Generate follow-up questions (adds ~500-1000ms LLM latency). Disabled by default for speed.
           default: false
         mode:
           type: string
@@ -4205,8 +4198,7 @@ components:
         include_huggingface_datasets:
           type: boolean
           title: Include Huggingface Datasets
-          description: Include HuggingFace dataset sources (excluded by default to
-            prevent search pollution)
+          description: Include HuggingFace dataset sources (excluded by default to prevent search pollution)
           default: false
         alpha:
           type: number
@@ -4293,8 +4285,7 @@ components:
         expand_symbols:
           type: boolean
           title: Expand Symbols
-          description: Extract function/class names from results and search for usages
-            (cAST-inspired)
+          description: Extract function/class names from results and search for usages (cAST-inspired)
           default: false
         mode:
           type: string
@@ -4405,8 +4396,7 @@ components:
           - type: string
           - type: 'null'
           title: Category
-          description: 'Filter by category: github, company, research, news, tweet,
-            pdf, blog'
+          description: 'Filter by category: github, company, research, news, tweet, pdf, blog'
         days_back:
           anyOf:
           - type: integer
@@ -4610,4 +4600,3 @@ components:
       - summary
       title: SubscribeResponse
   securitySchemes: {}
-tags: []
