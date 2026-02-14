@@ -45,32 +45,6 @@ tags:
 - name: Usage
   description: API usage statistics
 paths:
-  /advisor:
-    post:
-      tags:
-      - Advisor
-      summary: Context-aware code advisor
-      description: Analyze codebase context against Nia's indexed documentation to get tailored recommendations.
-      operationId: analyze_codebase_v2_advisor_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdvisorRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdvisorResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
   /bulk-delete:
     post:
       tags:
@@ -92,6 +66,693 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BulkDeleteResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources:
+    get:
+      tags:
+      - Sources
+      summary: List Sources
+      operationId: list_sources_v2_sources_get
+      parameters:
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Filter by source type
+          title: Type
+        description: Filter by source type
+      - name: query
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Search by name or identifier
+          title: Query
+        description: Search by name or identifier
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by status
+          title: Status
+        description: Filter by status
+      - name: category_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by category
+          title: Category Id
+        description: Filter by category
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceListResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - Sources
+      summary: Index Source
+      operationId: create_source_v2_sources_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceCreateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/resolve:
+    get:
+      tags:
+      - Sources
+      summary: Resolve Source
+      operationId: resolve_source_v2_sources_resolve_get
+      parameters:
+      - name: identifier
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Display name, URL, or slug
+          title: Identifier
+        description: Display name, URL, or slug
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceResolveResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/subscribe:
+    post:
+      tags:
+      - Sources
+      summary: Subscribe to a global source
+      description: Subscribe to an existing globally indexed public source. Creates a local reference for instant access without
+        re-indexing.
+      operationId: subscribe_source_v2_sources_subscribe_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlobalSourceSubscribeRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalSourceSubscribeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}:
+    get:
+      tags:
+      - Sources
+      summary: Get Source
+      operationId: get_source_v2_sources__source_id__get
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    patch:
+      tags:
+      - Sources
+      summary: Update Source
+      operationId: update_source_v2_sources__source_id__patch
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Sources
+      summary: Delete Source
+      operationId: delete_source_v2_sources__source_id__delete
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceDeleteResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}/classification:
+    get:
+      tags:
+      - Sources
+      summary: Get Source Classification
+      operationId: get_source_classification_v2_sources__source_id__classification_get
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    patch:
+      tags:
+      - Sources
+      summary: Update Source Classification
+      operationId: update_source_classification_v2_sources__source_id__classification_patch
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassifyLocalFolderRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}/content:
+    get:
+      tags:
+      - Sources
+      summary: Get Source Content
+      operationId: get_source_content_v2_sources__source_id__content_get
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      - name: path
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Path or virtual path
+          title: Path
+        description: Path or virtual path
+      - name: url
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Direct URL (documentation)
+          title: Url
+        description: Direct URL (documentation)
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Repository branch
+          title: Branch
+        description: Repository branch
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}/grep:
+    post:
+      tags:
+      - Sources
+      summary: Grep Source
+      operationId: grep_source_v2_sources__source_id__grep_post
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}/sync:
+    post:
+      tags:
+      - Sources
+      summary: Sync Source
+      operationId: sync_source_v2_sources__source_id__sync_post
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}/tree:
+    get:
+      tags:
+      - Sources
+      summary: Get Source Tree
+      operationId: get_source_tree_v2_sources__source_id__tree_get
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Repository branch
+          title: Branch
+        description: Repository branch
+      - name: max_depth
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 20
+          minimum: 1
+          default: 10
+          title: Max Depth
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /search:
+    post:
+      tags:
+      - Search
+      summary: Unified search
+      description: Single search endpoint with a mode discriminator.
+      operationId: unified_search_v2_v2_search_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - $ref: '#/components/schemas/QuerySearchRequest'
+              - $ref: '#/components/schemas/WebSearchRequestWithMode'
+              - $ref: '#/components/schemas/DeepResearchRequestWithMode'
+              - $ref: '#/components/schemas/UniversalSearchRequestWithMode'
+              title: Body
+              discriminator:
+                propertyName: mode
+                mapping:
+                  query: '#/components/schemas/QuerySearchRequest'
+                  web: '#/components/schemas/WebSearchRequestWithMode'
+                  deep: '#/components/schemas/DeepResearchRequestWithMode'
+                  universal: '#/components/schemas/UniversalSearchRequestWithMode'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /advisor:
+    post:
+      tags:
+      - Advisor
+      summary: Context-aware code advisor
+      description: Analyze codebase context against Nia's indexed documentation to get tailored recommendations.
+      operationId: analyze_codebase_v2_advisor_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdvisorRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvisorResponse'
         '422':
           description: Validation Error
           content:
@@ -1351,667 +2012,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PackageSearchHybridRequest'
         required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /search:
-    post:
-      tags:
-      - Search
-      summary: Unified search
-      description: Single search endpoint with a mode discriminator.
-      operationId: unified_search_v2_v2_search_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              oneOf:
-              - $ref: '#/components/schemas/QuerySearchRequest'
-              - $ref: '#/components/schemas/WebSearchRequestWithMode'
-              - $ref: '#/components/schemas/DeepResearchRequestWithMode'
-              - $ref: '#/components/schemas/UniversalSearchRequestWithMode'
-              title: Body
-              discriminator:
-                propertyName: mode
-                mapping:
-                  query: '#/components/schemas/QuerySearchRequest'
-                  web: '#/components/schemas/WebSearchRequestWithMode'
-                  deep: '#/components/schemas/DeepResearchRequestWithMode'
-                  universal: '#/components/schemas/UniversalSearchRequestWithMode'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /sources:
-    get:
-      tags:
-      - Sources
-      summary: List Sources
-      operationId: list_sources_v2_sources_get
-      parameters:
-      - name: type
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - enum:
-            - repository
-            - documentation
-            - research_paper
-            - huggingface_dataset
-            - local_folder
-            type: string
-          - type: 'null'
-          description: Filter by source type
-          title: Type
-        description: Filter by source type
-      - name: query
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Search by name or identifier
-          title: Query
-        description: Search by name or identifier
-      - name: status
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Filter by status
-          title: Status
-        description: Filter by status
-      - name: category_id
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Filter by category
-          title: Category Id
-        description: Filter by category
-      - name: limit
-        in: query
-        required: false
-        schema:
-          type: integer
-          maximum: 100
-          minimum: 1
-          default: 20
-          title: Limit
-      - name: offset
-        in: query
-        required: false
-        schema:
-          type: integer
-          minimum: 0
-          default: 0
-          title: Offset
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SourceListResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    post:
-      tags:
-      - Sources
-      summary: Create Source
-      operationId: create_source_v2_sources_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SourceCreateRequest'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Source'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /sources/resolve:
-    get:
-      tags:
-      - Sources
-      summary: Resolve Source
-      operationId: resolve_source_v2_sources_resolve_get
-      parameters:
-      - name: identifier
-        in: query
-        required: true
-        schema:
-          type: string
-          description: Display name, URL, or slug
-          title: Identifier
-        description: Display name, URL, or slug
-      - name: type
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - enum:
-            - repository
-            - documentation
-            - research_paper
-            - huggingface_dataset
-            - local_folder
-            type: string
-          - type: 'null'
-          description: Source type hint
-          title: Type
-        description: Source type hint
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SourceResolveResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /sources/subscribe:
-    post:
-      tags:
-      - Sources
-      summary: Subscribe to a global source
-      description: Subscribe to an existing globally indexed public source. Creates a local reference for instant access without
-        re-indexing.
-      operationId: subscribe_source_v2_sources_subscribe_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GlobalSourceSubscribeRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GlobalSourceSubscribeResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /sources/{source_id}:
-    get:
-      tags:
-      - Sources
-      summary: Get Source
-      operationId: get_source_v2_sources__source_id__get
-      parameters:
-      - name: source_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Source Id
-      - name: type
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - enum:
-            - repository
-            - documentation
-            - research_paper
-            - huggingface_dataset
-            - local_folder
-            type: string
-          - type: 'null'
-          description: Source type hint
-          title: Type
-        description: Source type hint
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Source'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    patch:
-      tags:
-      - Sources
-      summary: Update Source
-      operationId: update_source_v2_sources__source_id__patch
-      parameters:
-      - name: source_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Source Id
-      - name: type
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - enum:
-            - repository
-            - documentation
-            - research_paper
-            - huggingface_dataset
-            - local_folder
-            type: string
-          - type: 'null'
-          description: Source type hint
-          title: Type
-        description: Source type hint
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SourceUpdateRequest'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Source'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    delete:
-      tags:
-      - Sources
-      summary: Delete Source
-      operationId: delete_source_v2_sources__source_id__delete
-      parameters:
-      - name: source_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Source Id
-      - name: type
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - enum:
-            - repository
-            - documentation
-            - research_paper
-            - huggingface_dataset
-            - local_folder
-            type: string
-          - type: 'null'
-          description: Source type hint
-          title: Type
-        description: Source type hint
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SourceDeleteResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /sources/{source_id}/classification:
-    get:
-      tags:
-      - Sources
-      summary: Get Source Classification
-      operationId: get_source_classification_v2_sources__source_id__classification_get
-      parameters:
-      - name: source_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Source Id
-      - name: type
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - enum:
-            - repository
-            - documentation
-            - research_paper
-            - huggingface_dataset
-            - local_folder
-            type: string
-          - type: 'null'
-          description: Source type hint
-          title: Type
-        description: Source type hint
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    patch:
-      tags:
-      - Sources
-      summary: Update Source Classification
-      operationId: update_source_classification_v2_sources__source_id__classification_patch
-      parameters:
-      - name: source_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Source Id
-      - name: type
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - enum:
-            - repository
-            - documentation
-            - research_paper
-            - huggingface_dataset
-            - local_folder
-            type: string
-          - type: 'null'
-          description: Source type hint
-          title: Type
-        description: Source type hint
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ClassifyLocalFolderRequest'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /sources/{source_id}/content:
-    get:
-      tags:
-      - Sources
-      summary: Get Source Content
-      operationId: get_source_content_v2_sources__source_id__content_get
-      parameters:
-      - name: source_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Source Id
-      - name: type
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - enum:
-            - repository
-            - documentation
-            - research_paper
-            - huggingface_dataset
-            - local_folder
-            type: string
-          - type: 'null'
-          description: Source type hint
-          title: Type
-        description: Source type hint
-      - name: path
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Path or virtual path
-          title: Path
-        description: Path or virtual path
-      - name: url
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Direct URL (documentation)
-          title: Url
-        description: Direct URL (documentation)
-      - name: branch
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Repository branch
-          title: Branch
-        description: Repository branch
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /sources/{source_id}/grep:
-    post:
-      tags:
-      - Sources
-      summary: Grep Source
-      operationId: grep_source_v2_sources__source_id__grep_post
-      parameters:
-      - name: source_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Source Id
-      - name: type
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - enum:
-            - repository
-            - documentation
-            - research_paper
-            - huggingface_dataset
-            - local_folder
-            type: string
-          - type: 'null'
-          description: Source type hint
-          title: Type
-        description: Source type hint
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: true
-              title: Body
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /sources/{source_id}/sync:
-    post:
-      tags:
-      - Sources
-      summary: Sync Source
-      operationId: sync_source_v2_sources__source_id__sync_post
-      parameters:
-      - name: source_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Source Id
-      - name: type
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - enum:
-            - repository
-            - documentation
-            - research_paper
-            - huggingface_dataset
-            - local_folder
-            type: string
-          - type: 'null'
-          description: Source type hint
-          title: Type
-        description: Source type hint
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: true
-              title: Body
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /sources/{source_id}/tree:
-    get:
-      tags:
-      - Sources
-      summary: Get Source Tree
-      operationId: get_source_tree_v2_sources__source_id__tree_get
-      parameters:
-      - name: source_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Source Id
-      - name: type
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - enum:
-            - repository
-            - documentation
-            - research_paper
-            - huggingface_dataset
-            - local_folder
-            type: string
-          - type: 'null'
-          description: Source type hint
-          title: Type
-        description: Source type hint
-      - name: branch
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Repository branch
-          title: Branch
-        description: Repository branch
-      - name: max_depth
-        in: query
-        required: false
-        schema:
-          type: integer
-          maximum: 20
-          minimum: 1
-          default: 10
-          title: Max Depth
       responses:
         '200':
           description: Successful Response
