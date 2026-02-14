@@ -89,7 +89,7 @@
       },
       {
         "tab": "API Reference",
-        "openapi": "/openapi-v2.yaml"
+        "openapi": "/openapi-docs.yaml"
       },
       {
         "tab": "SDKs",

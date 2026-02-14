@@ -1,0 +1,4613 @@
+openapi: 3.1.0
+info:
+  title: Nia AI API (Docs)
+  version: 1.0.0
+  description: Documentation-focused OpenAPI spec derived from backend/openapi-v2.yaml.
+    Deprecated operations are excluded for cleaner navigation.
+paths:
+  /advisor:
+    post:
+      tags:
+      - v2-api
+      - advisor
+      summary: Context-aware code advisor
+      description: Analyze codebase context against Nia's indexed documentation to
+        get tailored recommendations.
+      operationId: analyze_codebase_v2_advisor_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdvisorRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvisorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /bulk-delete:
+    post:
+      tags:
+      - v2-api
+      - v2-api
+      summary: Bulk delete resources
+      description: Delete multiple resources in a single request. Supports repositories,
+        documentation, research papers, contexts, and local folders.
+      operationId: bulk_delete_resources_v2_bulk_delete_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDeleteRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkDeleteResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /categories:
+    get:
+      tags:
+      - v2-api
+      - v2-api-categories
+      summary: List categories
+      description: List categories for the authenticated user/organization.
+      operationId: list_categories_v2_categories_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Number of categories to return
+          default: 50
+          title: Limit
+        description: Number of categories to return
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of categories to skip
+          default: 0
+          title: Offset
+        description: Number of categories to skip
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryListCompatResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - v2-api
+      - v2-api-categories
+      summary: Create category
+      description: Create a new category for organizing data sources.
+      operationId: create_category_v2_categories_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/routes__v2__categories__CategoryCreate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /categories/{category_id}:
+    patch:
+      tags:
+      - v2-api
+      - v2-api-categories
+      summary: Update category
+      description: Update an existing category.
+      operationId: update_category_v2_categories__category_id__patch
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Category Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/routes__v2__categories__CategoryUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - v2-api
+      - v2-api-categories
+      summary: Delete category
+      description: Delete a category. Data sources with this category will become
+        uncategorized.
+      operationId: delete_category_v2_categories__category_id__delete
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Category Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /contexts:
+    post:
+      tags:
+      - v2-api
+      - v2-api-contexts
+      summary: Save context
+      description: Save conversation context for cross-agent sharing. Indexed in vector
+        store for semantic search.
+      operationId: save_context_v2_v2_contexts_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContextShareRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextShareResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - v2-api
+      - v2-api-contexts
+      summary: List contexts
+      description: List conversation contexts with pagination. Filter by tags, agent
+        source, or memory type.
+      operationId: list_contexts_v2_v2_contexts_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Number of contexts to return
+          default: 20
+          title: Limit
+        description: Number of contexts to return
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of contexts to skip
+          default: 0
+          title: Offset
+        description: Number of contexts to skip
+      - name: tags
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated tags to filter by
+          title: Tags
+        description: Comma-separated tags to filter by
+      - name: agent_source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by agent source
+          title: Agent Source
+        description: Filter by agent source
+      - name: memory_type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Filter by memory type: scratchpad, episodic, fact, procedural'
+          title: Memory Type
+        description: 'Filter by memory type: scratchpad, episodic, fact, procedural'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextListCompatResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /contexts/search:
+    get:
+      tags:
+      - v2-api
+      - v2-api-contexts
+      summary: Text search contexts
+      description: Search contexts by content, title, summary, or tags using MongoDB
+        text search.
+      operationId: search_contexts_v2_v2_contexts_search_get
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          description: Search query
+          title: Q
+        description: Search query
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Number of contexts to return
+          default: 20
+          title: Limit
+        description: Number of contexts to return
+      - name: tags
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated tags to filter by
+          title: Tags
+        description: Comma-separated tags to filter by
+      - name: agent_source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by agent source
+          title: Agent Source
+        description: Filter by agent source
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextSearchResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /contexts/semantic-search:
+    get:
+      tags:
+      - v2-api
+      - v2-api-contexts
+      summary: Semantic search contexts
+      description: Vector + BM25 hybrid search over contexts. Returns relevance scores
+        and highlights.
+      operationId: semantic_search_contexts_v2_v2_contexts_semantic_search_get
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          description: Search query
+          title: Q
+        description: Search query
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Number of contexts to return
+          default: 20
+          title: Limit
+        description: Number of contexts to return
+      - name: include_highlights
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Include match highlights
+          default: true
+          title: Include Highlights
+        description: Include match highlights
+      - name: workspace_filter
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by specific workspace name
+          title: Workspace Filter
+        description: Filter by specific workspace name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextSemanticSearchResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /contexts/{context_id}:
+    get:
+      tags:
+      - v2-api
+      - v2-api-contexts
+      summary: Get context
+      description: Retrieve a specific context by ID.
+      operationId: get_context_v2_v2_contexts__context_id__get
+      parameters:
+      - name: context_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Context Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextShareResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - v2-api
+      - v2-api-contexts
+      summary: Update context
+      description: Update an existing context. Re-indexes in vector store if content
+        changes.
+      operationId: update_context_v2_v2_contexts__context_id__put
+      parameters:
+      - name: context_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Context Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContextShareUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextShareResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - v2-api
+      - v2-api-contexts
+      summary: Delete context
+      description: Soft delete a context (marks inactive).
+      operationId: delete_context_v2_v2_contexts__context_id__delete
+      parameters:
+      - name: context_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Context Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /dependencies/analyze:
+    post:
+      tags:
+      - v2-api
+      - v2-api
+      summary: Analyze package manifest
+      description: Parse a package manifest and return dependency information with
+        documentation URL mappings. This is a preview - no subscriptions are created.
+      operationId: analyze_dependencies_v2_dependencies_analyze_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DependencyAnalyzeRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /dependencies/subscribe:
+    post:
+      tags:
+      - v2-api
+      - v2-api
+      summary: Subscribe to documentation for manifest dependencies
+      description: Parse a package manifest and automatically subscribe to documentation
+        for all dependencies.
+      operationId: subscribe_to_dependencies_v2_dependencies_subscribe_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DependencySubscribeRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/routes__v2__dependencies__SubscribeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /dependencies/upload:
+    post:
+      tags:
+      - v2-api
+      - v2-api
+      summary: Upload manifest file and subscribe to dependencies
+      description: Upload a package manifest file and subscribe to documentation for
+        all dependencies.
+      operationId: upload_and_subscribe_v2_dependencies_upload_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_upload_and_subscribe_v2_dependencies_upload_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/routes__v2__dependencies__SubscribeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /github/glob:
+    post:
+      tags:
+      - v2-api
+      - github-search
+      summary: Github Glob
+      description: Find files matching a glob pattern in a GitHub repository.
+      operationId: github_glob_v2_github_glob_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitHubGlobRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /github/read:
+    post:
+      tags:
+      - v2-api
+      - github-search
+      summary: Github Read
+      description: Read a file from a GitHub repository with optional line range.
+      operationId: github_read_v2_github_read_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitHubReadRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /github/search:
+    post:
+      tags:
+      - v2-api
+      - github-search
+      summary: Github Code Search
+      description: 'Search code in a GitHub repository using GitHub''s Code Search
+        API.
+
+
+        Rate limited to 10 requests/minute by GitHub. Requires authentication
+
+        for private repos (via user''s GitHub App installation).'
+      operationId: github_code_search_v2_github_search_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitHubSearchRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /github/tracer:
+    post:
+      tags:
+      - v2-api
+      - github-search
+      summary: Create Tracer Job
+      description: 'Create a Tracer search job.
+
+
+        Tracer is an autonomous agent that searches GitHub repositories
+
+        to answer your question. Returns immediately with a job_id and session_id.
+
+        Use /github/tracer/{job_id}/stream to receive real-time updates.'
+      operationId: create_tracer_job_v2_github_tracer_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TracerRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - v2-api
+      - github-search
+      summary: List Tracer Jobs
+      description: List Tracer jobs for the authenticated user.
+      operationId: list_tracer_jobs_v2_github_tracer_get
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by status
+          title: Status
+        description: Filter by status
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Max results
+          default: 50
+          title: Limit
+        description: Max results
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Offset for pagination
+          default: 0
+          title: Skip
+        description: Offset for pagination
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /github/tracer/{job_id}:
+    delete:
+      tags:
+      - v2-api
+      - github-search
+      summary: Delete Tracer Job
+      description: Delete a Tracer job by session_id or workflow_run_id.
+      operationId: delete_tracer_job_v2_github_tracer__job_id__delete
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - v2-api
+      - github-search
+      summary: Get Tracer Job
+      description: Get the status and result of a Tracer search job.
+      operationId: get_tracer_job_v2_github_tracer__job_id__get
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /github/tracer/{job_id}/stream:
+    get:
+      tags:
+      - v2-api
+      - github-search
+      summary: Stream Tracer Job
+      description: 'Stream real-time updates from a Tracer search job.
+
+
+        Uses Hatchet''s native streaming with MongoDB fallback polling.
+
+        Reconnectable: can reconnect to a running job''s stream at any time.'
+      operationId: stream_tracer_job_v2_github_tracer__job_id__stream_get
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /github/tree/{owner}/{repo}:
+    get:
+      tags:
+      - v2-api
+      - github-search
+      summary: Github Tree
+      description: Get the file tree of a GitHub repository or subdirectory.
+      operationId: github_tree_v2_github_tree__owner___repo__get
+      parameters:
+      - name: owner
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Owner
+      - name: repo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Repo
+      - name: ref
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Branch, tag, or commit SHA
+          default: HEAD
+          title: Ref
+        description: Branch, tag, or commit SHA
+      - name: path
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Subdirectory path
+          title: Path
+        description: Subdirectory path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /oracle:
+    post:
+      summary: Oracle Research
+      description: Run Oracle research and return complete result (non-streaming).
+      operationId: oracle_research_v2_oracle_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OracleResearchRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /oracle/jobs:
+    post:
+      summary: Create Oracle Job
+      description: 'Create a new Oracle research job.
+
+
+        Returns immediately with job_id and session_id.
+
+        Use /oracle/jobs/{job_id}/stream to receive real-time updates.
+
+
+        Features:
+
+        - Per-user concurrency limit: max 3 concurrent Oracle jobs
+
+        - Job queuing: additional jobs wait in queue
+
+        - 30-minute timeout per job'
+      operationId: create_oracle_job_v2_oracle_jobs_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OracleResearchRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: List Oracle Jobs
+      description: 'List Oracle research jobs for the authenticated user.
+
+
+        Returns jobs ordered by creation time (newest first).'
+      operationId: list_oracle_jobs_v2_oracle_jobs_get
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Filter by status: queued, running, completed, failed'
+          title: Status
+        description: 'Filter by status: queued, running, completed, failed'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Skip
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /oracle/jobs/{job_id}:
+    get:
+      summary: Get Oracle Job
+      description: 'Get the status and details of an Oracle research job.
+
+
+        Returns full job details including result if completed.
+
+        Includes fallback to check Hatchet state if job appears stuck in running state.'
+      operationId: get_oracle_job_v2_oracle_jobs__job_id__get
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: Cancel Oracle Job
+      description: 'Cancel a running or queued Oracle research job.
+
+
+        Note: Cancellation is best-effort. The job may complete
+
+        before cancellation takes effect.'
+      operationId: cancel_oracle_job_v2_oracle_jobs__job_id__delete
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /oracle/jobs/{job_id}/stream:
+    get:
+      summary: Stream Oracle Job
+      description: 'Stream real-time updates from an Oracle research job.
+
+
+        Uses Hatchet''s native streaming - no Redis required.
+
+        Reconnectable: can reconnect to a running job''s stream at any time.'
+      operationId: stream_oracle_job_v2_oracle_jobs__job_id__stream_get
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /oracle/sessions:
+    get:
+      summary: List Oracle Sessions
+      description: 'List Oracle research sessions for the authenticated API key.
+
+
+        This is the new primary endpoint.
+
+        The old /oracle/history endpoint is deprecated but still operational.'
+      operationId: list_oracle_sessions_v2_oracle_sessions_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 0
+          default: 0
+          title: Skip
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /oracle/sessions/{session_id}:
+    get:
+      summary: Get Oracle Session Detail
+      description: 'Retrieve the full details of a single Oracle research session.
+
+
+        This is the new primary endpoint.
+
+        The old /oracle/history/{session_id} endpoint is deprecated but still operational.'
+      operationId: get_oracle_session_detail_v2_oracle_sessions__session_id__get
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: Delete Oracle Session
+      description: Delete an Oracle research session and its associated chat messages.
+      operationId: delete_oracle_session_v2_oracle_sessions__session_id__delete
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /oracle/sessions/{session_id}/chat/stream:
+    post:
+      summary: Stream Oracle Session Chat
+      description: 'Stream a follow-up chat response for an Oracle research session.
+
+
+        The response is generated as grounded Q&A based on:
+
+        - The original research report
+
+        - Citations and sources discovered during research
+
+        - Previous chat messages in the session
+
+
+        This is a lightweight chat mode (not a full Oracle research run).'
+      operationId: stream_oracle_session_chat_v2_oracle_sessions__session_id__chat_stream_post
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OracleSessionChatRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /oracle/sessions/{session_id}/messages:
+    get:
+      summary: Get Oracle Session Messages
+      description: 'Get chat messages for an Oracle research session.
+
+
+        Returns the conversation history including the original query/report
+
+        and any follow-up messages.'
+      operationId: get_oracle_session_messages_v2_oracle_sessions__session_id__messages_get
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 100
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /packages/grep:
+    post:
+      tags:
+      - v2-api
+      - v2-api-package-search
+      summary: Grep package source
+      description: Regex search over public package source code (npm, PyPI, crates.io,
+        Go modules).
+      operationId: package_search_grep_v2_v2_packages_grep_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageSearchGrepRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /packages/read:
+    post:
+      tags:
+      - v2-api
+      - v2-api-package-search
+      summary: Read package file
+      description: Read specific lines from a package source file. Max 200 lines per
+        request.
+      operationId: package_search_read_file_v2_v2_packages_read_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageSearchReadFileRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /packages/search:
+    post:
+      tags:
+      - v2-api
+      - v2-api-package-search
+      summary: Semantic package search
+      description: Hybrid semantic + keyword search over package source. 1-5 natural
+        language queries.
+      operationId: package_search_hybrid_v2_v2_packages_search_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageSearchHybridRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /search:
+    post:
+      tags:
+      - v2-api
+      - v2-api-search
+      summary: Unified search
+      description: Single search endpoint with a mode discriminator.
+      operationId: unified_search_v2_v2_search_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - $ref: '#/components/schemas/QuerySearchRequest'
+              - $ref: '#/components/schemas/WebSearchRequestWithMode'
+              - $ref: '#/components/schemas/DeepResearchRequestWithMode'
+              - $ref: '#/components/schemas/UniversalSearchRequestWithMode'
+              title: Body
+              discriminator:
+                propertyName: mode
+                mapping:
+                  query: '#/components/schemas/QuerySearchRequest'
+                  web: '#/components/schemas/WebSearchRequestWithMode'
+                  deep: '#/components/schemas/DeepResearchRequestWithMode'
+                  universal: '#/components/schemas/UniversalSearchRequestWithMode'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources:
+    get:
+      tags:
+      - v2-api
+      - v2-api-sources
+      summary: List Sources
+      operationId: list_sources_v2_sources_get
+      parameters:
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Filter by source type
+          title: Type
+        description: Filter by source type
+      - name: query
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Search by name or identifier
+          title: Query
+        description: Search by name or identifier
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by status
+          title: Status
+        description: Filter by status
+      - name: category_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by category
+          title: Category Id
+        description: Filter by category
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceListResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - v2-api
+      - v2-api-sources
+      summary: Create Source
+      operationId: create_source_v2_sources_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceCreateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/resolve:
+    get:
+      tags:
+      - v2-api
+      - v2-api-sources
+      summary: Resolve Source
+      operationId: resolve_source_v2_sources_resolve_get
+      parameters:
+      - name: identifier
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Display name, URL, or slug
+          title: Identifier
+        description: Display name, URL, or slug
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceResolveResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/subscribe:
+    post:
+      tags:
+      - v2-api
+      - v2-api-sources
+      summary: Subscribe to a global source
+      description: Subscribe to an existing globally indexed public source. Creates
+        a local reference for instant access without re-indexing.
+      operationId: subscribe_source_v2_sources_subscribe_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlobalSourceSubscribeRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalSourceSubscribeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}:
+    get:
+      tags:
+      - v2-api
+      - v2-api-sources
+      summary: Get Source
+      operationId: get_source_v2_sources__source_id__get
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    patch:
+      tags:
+      - v2-api
+      - v2-api-sources
+      summary: Update Source
+      operationId: update_source_v2_sources__source_id__patch
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - v2-api
+      - v2-api-sources
+      summary: Delete Source
+      operationId: delete_source_v2_sources__source_id__delete
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceDeleteResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}/classification:
+    get:
+      tags:
+      - v2-api
+      - v2-api-sources
+      summary: Get Source Classification
+      operationId: get_source_classification_v2_sources__source_id__classification_get
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    patch:
+      tags:
+      - v2-api
+      - v2-api-sources
+      summary: Update Source Classification
+      operationId: update_source_classification_v2_sources__source_id__classification_patch
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassifyLocalFolderRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}/content:
+    get:
+      tags:
+      - v2-api
+      - v2-api-sources
+      summary: Get Source Content
+      operationId: get_source_content_v2_sources__source_id__content_get
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      - name: path
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Path or virtual path
+          title: Path
+        description: Path or virtual path
+      - name: url
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Direct URL (documentation)
+          title: Url
+        description: Direct URL (documentation)
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Repository branch
+          title: Branch
+        description: Repository branch
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}/grep:
+    post:
+      tags:
+      - v2-api
+      - v2-api-sources
+      summary: Grep Source
+      operationId: grep_source_v2_sources__source_id__grep_post
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}/sync:
+    post:
+      tags:
+      - v2-api
+      - v2-api-sources
+      summary: Sync Source
+      operationId: sync_source_v2_sources__source_id__sync_post
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}/tree:
+    get:
+      tags:
+      - v2-api
+      - v2-api-sources
+      summary: Get Source Tree
+      operationId: get_source_tree_v2_sources__source_id__tree_get
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Repository branch
+          title: Branch
+        description: Repository branch
+      - name: max_depth
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 20
+          minimum: 1
+          default: 10
+          title: Max Depth
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /usage:
+    get:
+      tags:
+      - v2-api
+      - v2-api
+      summary: Get usage summary
+      description: Get usage counts and limits for current billing period (queries,
+        indexing, oracle, etc.).
+      operationId: get_usage_summary_v2_v2_usage_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageSummaryResponse'
+components:
+  schemas:
+    AdvisorRequest:
+      properties:
+        query:
+          type: string
+          title: Query
+          description: User's question
+        codebase:
+          $ref: '#/components/schemas/CodebaseContext'
+          description: User's codebase context
+        search_scope:
+          anyOf:
+          - $ref: '#/components/schemas/SearchScope'
+          - type: 'null'
+          description: Nia search scope
+        output_format:
+          type: string
+          enum:
+          - explanation
+          - checklist
+          - diff
+          - structured
+          title: Output Format
+          description: Output format
+          default: explanation
+      type: object
+      required:
+      - query
+      - codebase
+      title: AdvisorRequest
+      description: Request model for advisor endpoint.
+    AdvisorResponse:
+      properties:
+        advice:
+          type: string
+          title: Advice
+          description: Tailored advice
+        sources_searched:
+          type: integer
+          title: Sources Searched
+          description: Number of sources searched
+          default: 0
+        output_format:
+          type: string
+          title: Output Format
+          default: explanation
+      type: object
+      required:
+      - advice
+      title: AdvisorResponse
+      description: Response model for advisor endpoint.
+    AnalyzeResponse:
+      properties:
+        manifest_type:
+          type: string
+          title: Manifest Type
+        total_dependencies:
+          type: integer
+          title: Total Dependencies
+        dependencies:
+          items:
+            $ref: '#/components/schemas/DependencyItem'
+          type: array
+          title: Dependencies
+        mappings:
+          items:
+            $ref: '#/components/schemas/MappingItem'
+          type: array
+          title: Mappings
+        unmapped_count:
+          type: integer
+          title: Unmapped Count
+        unmapped_packages:
+          items:
+            type: string
+          type: array
+          title: Unmapped Packages
+      type: object
+      required:
+      - manifest_type
+      - total_dependencies
+      - dependencies
+      - mappings
+      - unmapped_count
+      - unmapped_packages
+      title: AnalyzeResponse
+    Body_upload_and_subscribe_v2_dependencies_upload_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+          description: Manifest file to upload
+        include_dev_dependencies:
+          type: boolean
+          title: Include Dev Dependencies
+          description: Include dev dependencies
+          default: false
+        max_new_indexes:
+          type: integer
+          maximum: 500.0
+          minimum: 0.0
+          title: Max New Indexes
+          description: Max new indexes to start
+          default: 150
+      type: object
+      required:
+      - file
+      title: Body_upload_and_subscribe_v2_dependencies_upload_post
+    BulkDeleteItem:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Resource ID
+        type:
+          type: string
+          enum:
+          - repository
+          - documentation
+          - research_paper
+          - context
+          - local_folder
+          title: Type
+          description: Resource type
+      type: object
+      required:
+      - id
+      - type
+      title: BulkDeleteItem
+      description: Single item to delete
+    BulkDeleteRequest:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/BulkDeleteItem'
+          type: array
+          minItems: 1
+          title: Items
+          description: Items to delete
+      type: object
+      required:
+      - items
+      title: BulkDeleteRequest
+      description: Request for bulk deletion
+    BulkDeleteResponse:
+      properties:
+        deleted:
+          type: integer
+          title: Deleted
+          description: Number of successfully deleted items
+        failed:
+          type: integer
+          title: Failed
+          description: Number of failed deletions
+        results:
+          items:
+            $ref: '#/components/schemas/BulkDeleteResult'
+          type: array
+          title: Results
+          description: Per-item results
+      type: object
+      required:
+      - deleted
+      - failed
+      - results
+      title: BulkDeleteResponse
+      description: Response for bulk deletion
+    BulkDeleteResult:
+      properties:
+        id:
+          type: string
+          title: Id
+        type:
+          type: string
+          title: Type
+        success:
+          type: boolean
+          title: Success
+        error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Error
+      type: object
+      required:
+      - id
+      - type
+      - success
+      title: BulkDeleteResult
+      description: Result of a single delete operation
+    CategoryListCompatResponse:
+      properties:
+        items:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Items
+          description: List of categories
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+          description: Pagination metadata
+        categories:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Categories
+          description: Legacy categories list
+        total:
+          type: integer
+          title: Total
+          description: Legacy total count
+      type: object
+      required:
+      - pagination
+      - total
+      title: CategoryListCompatResponse
+      description: Backwards-compatible category list response.
+    CategoryResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+        user_id:
+          type: string
+          title: User Id
+        organization_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Organization Id
+        color:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Color
+        order:
+          type: integer
+          title: Order
+          default: 0
+        created_at:
+          type: string
+          title: Created At
+        updated_at:
+          type: string
+          title: Updated At
+      type: object
+      required:
+      - id
+      - name
+      - user_id
+      - created_at
+      - updated_at
+      title: CategoryResponse
+    ClassifyLocalFolderRequest:
+      properties:
+        categories:
+          items:
+            type: string
+          type: array
+          maxItems: 10
+          minItems: 2
+          title: Categories
+          description: Categories to classify content into (2-10 categories)
+        include_uncategorized:
+          type: boolean
+          title: Include Uncategorized
+          description: Whether to include an 'Uncategorized' bucket for edge cases
+          default: true
+      type: object
+      required:
+      - categories
+      title: ClassifyLocalFolderRequest
+      description: Request to classify local folder content.
+    CodebaseContext:
+      properties:
+        files:
+          additionalProperties:
+            type: string
+          type: object
+          title: Files
+          description: Map of file_path -> file_content
+        file_tree:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: File Tree
+          description: Directory structure (from tree command or similar)
+        dependencies:
+          anyOf:
+          - additionalProperties:
+              type: string
+            type: object
+          - type: 'null'
+          title: Dependencies
+          description: 'Dependency files: package.json, requirements.txt, etc.'
+        git_diff:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Git Diff
+          description: Git diff for migration/upgrade scenarios
+        summary:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Summary
+          description: High-level description of the codebase
+        focus_paths:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Focus Paths
+          description: Paths to prioritize in analysis
+      type: object
+      title: CodebaseContext
+      description: Structured codebase context from the user.
+    ContextListCompatResponse:
+      properties:
+        items:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Items
+          description: List of contexts
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+          description: Pagination metadata
+        contexts:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Contexts
+          description: Legacy contexts list
+        total:
+          type: integer
+          title: Total
+          description: Legacy total count
+      type: object
+      required:
+      - pagination
+      - total
+      title: ContextListCompatResponse
+      description: Backwards-compatible context list response.
+    ContextSearchResponse:
+      properties:
+        contexts:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Contexts
+          description: Matching contexts
+        search_query:
+          type: string
+          title: Search Query
+          description: The search query used
+        total_results:
+          type: integer
+          title: Total Results
+          description: Total number of results
+          default: 0
+      type: object
+      required:
+      - search_query
+      title: ContextSearchResponse
+      description: Response for text search in contexts.
+    ContextSemanticSearchMetadata:
+      properties:
+        search_type:
+          type: string
+          title: Search Type
+          description: Type of search performed
+          default: semantic
+        total_results:
+          type: integer
+          title: Total Results
+          description: Number of results
+          default: 0
+        vector_matches:
+          type: integer
+          title: Vector Matches
+          description: Number of vector matches
+          default: 0
+        mongodb_matches:
+          type: integer
+          title: Mongodb Matches
+          description: Number of MongoDB matches
+          default: 0
+      type: object
+      title: ContextSemanticSearchMetadata
+      description: Metadata for semantic search.
+    ContextSemanticSearchResponse:
+      properties:
+        results:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Results
+          description: Search results with scores
+        search_query:
+          type: string
+          title: Search Query
+          description: The search query used
+        search_metadata:
+          $ref: '#/components/schemas/ContextSemanticSearchMetadata'
+          description: Search metadata
+        suggestions:
+          $ref: '#/components/schemas/ContextSemanticSearchSuggestions'
+          description: Search suggestions
+      type: object
+      required:
+      - search_query
+      - search_metadata
+      - suggestions
+      title: ContextSemanticSearchResponse
+      description: Response for semantic search in contexts.
+    ContextSemanticSearchSuggestions:
+      properties:
+        related_tags:
+          items:
+            type: string
+          type: array
+          title: Related Tags
+          description: Related tags
+        workspaces:
+          items:
+            type: string
+          type: array
+          title: Workspaces
+          description: Related workspaces
+        tips:
+          items:
+            type: string
+          type: array
+          title: Tips
+          description: Search tips
+      type: object
+      title: ContextSemanticSearchSuggestions
+      description: Suggestions from semantic search.
+    ContextShareRequest:
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Title
+        summary:
+          type: string
+          maxLength: 1000
+          minLength: 10
+          title: Summary
+        content:
+          type: string
+          minLength: 50
+          title: Content
+        tags:
+          items:
+            type: string
+          type: array
+          title: Tags
+        agent_source:
+          type: string
+          title: Agent Source
+          description: Which agent created this context
+        metadata:
+          additionalProperties: true
+          type: object
+          title: Metadata
+        organization_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Organization Id
+        nia_references:
+          anyOf:
+          - $ref: '#/components/schemas/routes__v2__contexts__NiaReferences-Input'
+          - type: 'null'
+        edited_files:
+          items:
+            $ref: '#/components/schemas/routes__v2__contexts__EditedFile'
+          type: array
+          title: Edited Files
+        memory_type:
+          type: string
+          enum:
+          - scratchpad
+          - episodic
+          - fact
+          - procedural
+          title: Memory Type
+          description: 'Memory type: scratchpad (1hr), episodic (7d), fact (permanent),
+            procedural (permanent)'
+          default: episodic
+        ttl_seconds:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Ttl Seconds
+          description: Custom TTL in seconds. If not set, uses memory_type default.
+        lineage:
+          anyOf:
+          - $ref: '#/components/schemas/LineageInput'
+          - type: 'null'
+          description: Provenance tracking for this context
+      type: object
+      required:
+      - title
+      - summary
+      - content
+      - agent_source
+      title: ContextShareRequest
+      description: Request model for creating a shared context.
+    ContextShareResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        user_id:
+          type: string
+          title: User Id
+        organization_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Organization Id
+        title:
+          type: string
+          title: Title
+        summary:
+          type: string
+          title: Summary
+        content:
+          type: string
+          title: Content
+        tags:
+          items:
+            type: string
+          type: array
+          title: Tags
+        agent_source:
+          type: string
+          title: Agent Source
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Updated At
+        metadata:
+          additionalProperties: true
+          type: object
+          title: Metadata
+        nia_references:
+          anyOf:
+          - $ref: '#/components/schemas/NiaReferences-Output'
+          - type: 'null'
+        edited_files:
+          items:
+            $ref: '#/components/schemas/EditedFile-Output'
+          type: array
+          title: Edited Files
+        memory_type:
+          type: string
+          enum:
+          - scratchpad
+          - episodic
+          - fact
+          - procedural
+          title: Memory Type
+          default: episodic
+        expires_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Expires At
+        lineage:
+          anyOf:
+          - $ref: '#/components/schemas/LineageMetadata'
+          - type: 'null'
+        category_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Category Id
+      type: object
+      required:
+      - id
+      - user_id
+      - title
+      - summary
+      - content
+      - tags
+      - agent_source
+      - created_at
+      - metadata
+      title: ContextShareResponse
+      description: Response model for context operations.
+    ContextShareUpdateRequest:
+      properties:
+        title:
+          anyOf:
+          - type: string
+            maxLength: 200
+            minLength: 1
+          - type: 'null'
+          title: Title
+        summary:
+          anyOf:
+          - type: string
+            maxLength: 1000
+            minLength: 10
+          - type: 'null'
+          title: Summary
+        content:
+          anyOf:
+          - type: string
+            minLength: 50
+          - type: 'null'
+          title: Content
+        tags:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Tags
+        metadata:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Metadata
+        nia_references:
+          anyOf:
+          - $ref: '#/components/schemas/routes__v2__contexts__NiaReferences-Input'
+          - type: 'null'
+        edited_files:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/routes__v2__contexts__EditedFile'
+            type: array
+          - type: 'null'
+          title: Edited Files
+        organization_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Organization Id
+        memory_type:
+          anyOf:
+          - type: string
+            enum:
+            - scratchpad
+            - episodic
+            - fact
+            - procedural
+          - type: 'null'
+          title: Memory Type
+          description: Memory type
+        ttl_seconds:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Ttl Seconds
+          description: Custom TTL in seconds
+        lineage:
+          anyOf:
+          - $ref: '#/components/schemas/LineageInput'
+          - type: 'null'
+          description: Provenance tracking
+      type: object
+      title: ContextShareUpdateRequest
+      description: Request model for updating a shared context.
+    DatabaseFileItem:
+      properties:
+        filename:
+          type: string
+          title: Filename
+          description: Original filename (e.g., 'chat.db')
+        content:
+          type: string
+          title: Content
+          description: Base64-encoded database file content
+      type: object
+      required:
+      - filename
+      - content
+      title: DatabaseFileItem
+      description: A database file for upload.
+    DeepResearchRequestWithMode:
+      properties:
+        query:
+          type: string
+          title: Query
+          description: Research question
+        output_format:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Output Format
+          description: Optional structure hint
+        verbose:
+          type: boolean
+          title: Verbose
+          description: Include verbose trace output
+          default: false
+        mode:
+          type: string
+          const: deep
+          title: Mode
+          description: Search mode discriminator
+          default: deep
+      type: object
+      required:
+      - query
+      title: DeepResearchRequestWithMode
+    DeleteResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Whether the deletion succeeded
+        message:
+          type: string
+          title: Message
+          description: Status message
+      type: object
+      required:
+      - success
+      - message
+      title: DeleteResponse
+      description: Response for delete operations.
+    DependencyAnalyzeRequest:
+      properties:
+        manifest_content:
+          type: string
+          title: Manifest Content
+          description: Raw content of the manifest file
+        manifest_type:
+          anyOf:
+          - type: string
+            enum:
+            - package.json
+            - requirements.txt
+            - pyproject.toml
+            - Cargo.toml
+            - go.mod
+            - Gemfile
+          - type: 'null'
+          title: Manifest Type
+          description: Manifest type. Auto-detected if not provided.
+        filename:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Filename
+          description: Original filename for type detection
+      type: object
+      required:
+      - manifest_content
+      title: DependencyAnalyzeRequest
+    DependencyItem:
+      properties:
+        name:
+          type: string
+          title: Name
+        version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Version
+        registry:
+          type: string
+          title: Registry
+        is_dev:
+          type: boolean
+          title: Is Dev
+      type: object
+      required:
+      - name
+      - version
+      - registry
+      - is_dev
+      title: DependencyItem
+    DependencySubscribeRequest:
+      properties:
+        manifest_content:
+          type: string
+          title: Manifest Content
+          description: Raw content of the manifest file
+        manifest_type:
+          anyOf:
+          - type: string
+            enum:
+            - package.json
+            - requirements.txt
+            - pyproject.toml
+            - Cargo.toml
+            - go.mod
+            - Gemfile
+          - type: 'null'
+          title: Manifest Type
+          description: Manifest type. Auto-detected if not provided.
+        filename:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Filename
+          description: Original filename for type detection
+        include_dev_dependencies:
+          type: boolean
+          title: Include Dev Dependencies
+          description: Include devDependencies/dev-dependencies
+          default: false
+        max_new_indexes:
+          type: integer
+          maximum: 500.0
+          minimum: 0.0
+          title: Max New Indexes
+          description: Max number of new indexes to start (0-500)
+          default: 150
+      type: object
+      required:
+      - manifest_content
+      title: DependencySubscribeRequest
+    EditedFile-Output:
+      properties:
+        file_path:
+          type: string
+          title: File Path
+          description: Path to the file
+        operation:
+          type: string
+          title: Operation
+          description: 'Type: ''created'', ''modified'', ''deleted'''
+        changes_description:
+          type: string
+          title: Changes Description
+          description: Brief description of changes
+        key_changes:
+          items:
+            type: string
+          type: array
+          title: Key Changes
+        language:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Language
+          description: Programming language of the file
+      type: object
+      required:
+      - file_path
+      - operation
+      - changes_description
+      title: EditedFile
+      description: Represents a file that was modified during the conversation.
+    FileItem:
+      properties:
+        path:
+          type: string
+          title: Path
+          description: Relative file path (e.g., 'src/main.py')
+        content:
+          type: string
+          title: Content
+          description: File content as UTF-8 string
+      type: object
+      required:
+      - path
+      - content
+      title: FileItem
+      description: A single file in the upload batch.
+    GitHubGlobRequest:
+      properties:
+        repository:
+          type: string
+          title: Repository
+          description: Repository in owner/repo format
+        pattern:
+          type: string
+          title: Pattern
+          description: Glob pattern (e.g., '*.py', 'src/**/*.ts')
+        ref:
+          type: string
+          title: Ref
+          description: Branch, tag, or commit SHA
+          default: HEAD
+      type: object
+      required:
+      - repository
+      - pattern
+      title: GitHubGlobRequest
+    GitHubReadRequest:
+      properties:
+        repository:
+          type: string
+          title: Repository
+          description: Repository in owner/repo format
+        path:
+          type: string
+          title: Path
+          description: File path within the repository
+        ref:
+          type: string
+          title: Ref
+          description: Branch, tag, or commit SHA
+          default: HEAD
+        start_line:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Start Line
+          description: 1-based start line
+        end_line:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: End Line
+          description: 1-based end line (inclusive)
+      type: object
+      required:
+      - repository
+      - path
+      title: GitHubReadRequest
+    GitHubSearchRequest:
+      properties:
+        query:
+          type: string
+          title: Query
+          description: Code search query
+        repository:
+          type: string
+          title: Repository
+          description: Repository in owner/repo format
+        per_page:
+          type: integer
+          maximum: 100.0
+          minimum: 1.0
+          title: Per Page
+          description: Results per page
+          default: 30
+        page:
+          type: integer
+          minimum: 1.0
+          title: Page
+          description: Page number
+          default: 1
+      type: object
+      required:
+      - query
+      - repository
+      title: GitHubSearchRequest
+    GlobalSourceSubscribeRequest:
+      properties:
+        url:
+          type: string
+          title: Url
+          description: URL of the source (GitHub repo, docs URL, arXiv URL/ID, or
+            HuggingFace dataset URL)
+        source_type:
+          anyOf:
+          - type: string
+            enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+          - type: 'null'
+          title: Source Type
+          description: Source type. Auto-detected from URL if not provided.
+        ref:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ref
+          description: Git ref for repositories (branch, tag, or commit SHA)
+      type: object
+      required:
+      - url
+      title: GlobalSourceSubscribeRequest
+      description: Request model for subscribing to a global source
+    GlobalSourceSubscribeResponse:
+      properties:
+        action:
+          type: string
+          title: Action
+          description: 'Action taken: instant_access | wait_for_indexing | not_indexed
+            | use_private | indexing_started'
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of the action
+        global_source_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Global Source Id
+          description: Canonical ID of the global source
+        namespace:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Namespace
+          description: TurboPuffer namespace for the source
+        status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Status
+          description: Current status of the global source
+        local_reference_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Local Reference Id
+          description: ID of the created local reference (project/data_source)
+        display_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Display Name
+          description: Display name of the source
+      type: object
+      required:
+      - action
+      - message
+      title: GlobalSourceSubscribeResponse
+      description: Response model for global source subscription
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    IndexedResource-Output:
+      properties:
+        identifier:
+          type: string
+          title: Identifier
+          description: Repository (owner/repo) or documentation URL/ID
+        resource_type:
+          type: string
+          title: Resource Type
+          description: 'Type: ''repository'' or ''documentation'''
+        purpose:
+          type: string
+          title: Purpose
+          description: Why this resource was used/referenced
+        indexed_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Indexed At
+          description: When it was indexed
+      type: object
+      required:
+      - identifier
+      - resource_type
+      - purpose
+      title: IndexedResource
+      description: Represents a NIA resource (repository or documentation) with context.
+    LineageInput:
+      properties:
+        source_ids:
+          items:
+            type: string
+          type: array
+          title: Source Ids
+          description: Source identifiers (e.g., 'repo:owner/repo', 'doc:name')
+        confidence:
+          anyOf:
+          - type: number
+            maximum: 1.0
+            minimum: 0.0
+          - type: 'null'
+          title: Confidence
+          description: Confidence score 0-1
+        derived_from:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Derived From
+          description: Parent context IDs if derived
+        tool_calls:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Tool Calls
+          description: Tools used to create this artifact
+        model_version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model Version
+          description: Model version that created this
+      type: object
+      title: LineageInput
+      description: Input model for lineage tracking.
+    LineageMetadata:
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+          description: When this artifact was created
+        source_ids:
+          items:
+            type: string
+          type: array
+          title: Source Ids
+          description: Source identifiers (e.g., 'repo:owner/repo', 'doc:name')
+        confidence:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Confidence
+          description: Confidence score 0-1
+        derived_from:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Derived From
+          description: Parent context IDs if derived
+        tool_calls:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Tool Calls
+          description: Tools used to create this artifact
+        model_version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model Version
+          description: Model version that created this
+      type: object
+      required:
+      - created_at
+      title: LineageMetadata
+      description: Provenance tracking for content artifacts.
+    LocalSourceFilters:
+      properties:
+        source_subtype:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source Subtype
+          description: Filter by source subtype (e.g., 'database', 'telegram_export')
+        db_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Db Type
+          description: Filter by database type (e.g., 'imessage', 'telegram', 'safari_history')
+        connector_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Connector Type
+          description: Filter by connector type (e.g., 'imessage', 'whatsapp', 'contacts')
+        conversation_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Conversation Id
+          description: Filter to a specific conversation/chat
+        contact_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Contact Id
+          description: Filter to messages with a specific contact
+        sender_role:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sender Role
+          description: 'Filter by sender role: ''self'' or ''contact'''
+        time_after:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Time After
+          description: Only return results with timestamp after this ISO datetime
+        time_before:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Time Before
+          description: Only return results with timestamp before this ISO datetime
+      type: object
+      title: LocalSourceFilters
+      description: Filters for local/personal source retrieval (messages, contacts,
+        etc.).
+    MappingItem:
+      properties:
+        name:
+          type: string
+          title: Name
+        registry:
+          type: string
+          title: Registry
+        docs_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Docs Url
+        mapping_source:
+          type: string
+          title: Mapping Source
+        confidence:
+          type: number
+          title: Confidence
+      type: object
+      required:
+      - name
+      - registry
+      - docs_url
+      - mapping_source
+      - confidence
+      title: MappingItem
+    NiaReferences-Output:
+      properties:
+        indexed_resources:
+          items:
+            $ref: '#/components/schemas/IndexedResource-Output'
+          type: array
+          title: Indexed Resources
+        search_queries:
+          items:
+            $ref: '#/components/schemas/SearchQuery-Output'
+          type: array
+          title: Search Queries
+        session_summary:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Session Summary
+      type: object
+      title: NiaReferences
+      description: Structured tracking of NIA resources used during conversation.
+    OracleResearchRequest:
+      properties:
+        query:
+          type: string
+          title: Query
+          description: Research question to investigate
+        repositories:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Repositories
+          description: Optional list of repository identifiers
+        data_sources:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Data Sources
+          description: Optional list of documentation source identifiers
+        output_format:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Output Format
+          description: Optional output format specification
+        model:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model
+          description: 'Model to use: claude-opus-4-6, claude-opus-4-6-1m, claude-sonnet-4-5-20250929,
+            or claude-sonnet-4-5-1m'
+      type: object
+      required:
+      - query
+      title: OracleResearchRequest
+    OracleSessionChatRequest:
+      properties:
+        message:
+          type: string
+          maxLength: 10000
+          minLength: 1
+          title: Message
+          description: User's follow-up question
+      type: object
+      required:
+      - message
+      title: OracleSessionChatRequest
+      description: Request body for session chat.
+    PackageSearchGrepRequest:
+      properties:
+        registry:
+          type: string
+          title: Registry
+          description: 'Registry: crates_io, golang_proxy, npm, py_pi, or ruby_gems'
+        package_name:
+          type: string
+          title: Package Name
+          description: Package name
+        pattern:
+          type: string
+          title: Pattern
+          description: Regex pattern to search
+        version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Version
+          description: Package version
+        language:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Language
+          description: Language filter
+        filename_sha256:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Filename Sha256
+          description: File SHA256 filter
+        a:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: A
+          description: Lines after match
+        b:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: B
+          description: Lines before match
+        c:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: C
+          description: Lines before and after match
+        head_limit:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Head Limit
+          description: Limit results
+        output_mode:
+          type: string
+          title: Output Mode
+          description: 'Output mode: content, files_with_matches, or count'
+          default: content
+      type: object
+      required:
+      - registry
+      - package_name
+      - pattern
+      title: PackageSearchGrepRequest
+      description: Request model for package grep search
+    PackageSearchHybridRequest:
+      properties:
+        registry:
+          type: string
+          title: Registry
+          description: 'Registry: crates_io, golang_proxy, npm, py_pi, or ruby_gems'
+        package_name:
+          type: string
+          title: Package Name
+          description: Package name
+        semantic_queries:
+          items:
+            type: string
+          type: array
+          title: Semantic Queries
+          description: 1-5 semantic queries
+        version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Version
+          description: Package version
+        filename_sha256:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Filename Sha256
+          description: File SHA256 filter
+        pattern:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pattern
+          description: Regex pattern filter
+        language:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Language
+          description: Language filter
+      type: object
+      required:
+      - registry
+      - package_name
+      - semantic_queries
+      title: PackageSearchHybridRequest
+      description: Request model for package hybrid search
+    PackageSearchReadFileRequest:
+      properties:
+        registry:
+          type: string
+          title: Registry
+          description: 'Registry: crates_io, golang_proxy, npm, py_pi, or ruby_gems'
+        package_name:
+          type: string
+          title: Package Name
+          description: Package name
+        filename_sha256:
+          type: string
+          title: Filename Sha256
+          description: File SHA256
+        start_line:
+          type: integer
+          title: Start Line
+          description: Start line (1-based)
+        end_line:
+          type: integer
+          title: End Line
+          description: End line (1-based)
+        version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Version
+          description: Package version
+      type: object
+      required:
+      - registry
+      - package_name
+      - filename_sha256
+      - start_line
+      - end_line
+      title: PackageSearchReadFileRequest
+      description: Request model for reading package file
+    PaginationInfo:
+      properties:
+        total:
+          type: integer
+          title: Total
+          description: Total number of items
+        limit:
+          type: integer
+          title: Limit
+          description: Items per page
+        offset:
+          type: integer
+          title: Offset
+          description: Current offset
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more items exist
+      type: object
+      required:
+      - total
+      - limit
+      - offset
+      - has_more
+      title: PaginationInfo
+      description: Pagination metadata.
+    QuerySearchRequest:
+      properties:
+        messages:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          minItems: 1
+          title: Messages
+          description: List of chat messages
+        repositories:
+          items:
+            anyOf:
+            - type: string
+            - additionalProperties: true
+              type: object
+          type: array
+          title: Repositories
+          description: List of repositories to query. Can be strings (slug, display
+            name) or dicts with a 'repository' field.
+        data_sources:
+          items:
+            anyOf:
+            - type: string
+            - additionalProperties: true
+              type: object
+          type: array
+          title: Data Sources
+          description: List of data sources to query. Can be strings (display_name,
+            URL, or source_id) or dicts with 'source_id' or 'identifier' fields
+        local_folders:
+          items:
+            anyOf:
+            - type: string
+            - additionalProperties: true
+              type: object
+          type: array
+          title: Local Folders
+          description: List of local folders to query. Can be strings (display_name
+            or local_folder_id) or dicts with 'local_folder_id' or 'identifier' fields.
+            Local folders are private and user-scoped.
+        category:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Category
+          description: Filter local folder results by classification category (e.g.,
+            'Work', 'Personal')
+        local_source_filters:
+          anyOf:
+          - $ref: '#/components/schemas/LocalSourceFilters'
+          - type: 'null'
+          description: Filters for local/personal sources (messages, contacts, etc.)
+        search_mode:
+          type: string
+          title: Search Mode
+          description: 'Search mode: ''repositories'', ''sources'', or ''unified'''
+          default: unified
+        stream:
+          type: boolean
+          title: Stream
+          description: Whether to stream the response
+          default: false
+        include_sources:
+          type: boolean
+          title: Include Sources
+          description: Whether to include source texts in the response
+          default: true
+        fast_mode:
+          type: boolean
+          title: Fast Mode
+          description: Skip LLM processing for faster results (100-500ms vs 2-8s).
+            Set to false for deeper analysis.
+          default: true
+        skip_llm:
+          type: boolean
+          title: Skip Llm
+          description: Return raw search results without any LLM processing. Returns
+            only sources with scores.
+          default: false
+        reasoning_strategy:
+          type: string
+          title: Reasoning Strategy
+          description: 'Retrieval strategy: ''vector'' (default similarity search),
+            ''tree'' (LLM-guided tree navigation for PDFs), or ''hybrid'' (both combined)'
+          default: vector
+        max_tokens:
+          anyOf:
+          - type: integer
+            maximum: 100000.0
+            minimum: 100.0
+          - type: 'null'
+          title: Max Tokens
+          description: Maximum tokens in response. Results truncated when budget reached.
+        model:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model
+          description: 'Synthesis model override. Allowed: claude-sonnet-4-5, gpt-5.2-2025-12-11,
+            claude-haiku-4-5-20251001'
+        semantic_cache_threshold:
+          type: number
+          maximum: 1.0
+          minimum: 0.8
+          title: Semantic Cache Threshold
+          description: Minimum similarity for semantic cache hit (non-streaming only)
+          default: 0.92
+        bypass_semantic_cache:
+          type: boolean
+          title: Bypass Semantic Cache
+          description: Skip semantic cache (L2) lookup
+          default: false
+        include_follow_ups:
+          type: boolean
+          title: Include Follow Ups
+          description: Generate follow-up questions (adds ~500-1000ms LLM latency).
+            Disabled by default for speed.
+          default: false
+        mode:
+          type: string
+          const: query
+          title: Mode
+          description: Search mode discriminator
+          default: query
+      type: object
+      required:
+      - messages
+      title: QuerySearchRequest
+    SearchQuery-Output:
+      properties:
+        query:
+          type: string
+          title: Query
+          description: The search query that was performed
+        query_type:
+          type: string
+          title: Query Type
+          description: 'Type: ''codebase'', ''documentation'', etc.'
+        resources_searched:
+          items:
+            type: string
+          type: array
+          title: Resources Searched
+        key_findings:
+          type: string
+          title: Key Findings
+          description: Brief summary of what was found
+        useful_results_count:
+          type: integer
+          title: Useful Results Count
+          default: 0
+      type: object
+      required:
+      - query
+      - query_type
+      - key_findings
+      title: SearchQuery
+      description: Represents a search query performed during the conversation.
+    SearchScope:
+      properties:
+        repositories:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Repositories
+          description: Repository identifiers to search
+        data_sources:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Data Sources
+          description: Documentation source IDs to search
+      type: object
+      title: SearchScope
+      description: Scope for searching Nia's indexed sources.
+    Source:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Source identifier
+        type:
+          type: string
+          enum:
+          - repository
+          - documentation
+          - research_paper
+          - huggingface_dataset
+          - local_folder
+          title: Type
+          description: Source type
+        identifier:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Identifier
+          description: Canonical identifier (repo slug, URL, or folder path)
+        display_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Display Name
+          description: Human-readable name
+        status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Status
+          description: Indexing status
+        created_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Created At
+          description: Creation timestamp (ISO)
+        updated_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Updated At
+          description: Last update timestamp (ISO)
+        category_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Category Id
+          description: Category assignment
+        is_global:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Global
+          description: Whether the source is global/shared
+        global_source_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Global Source Id
+          description: Global source ID if applicable
+        global_namespace:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Global Namespace
+          description: Global namespace if applicable
+        metadata:
+          additionalProperties: true
+          type: object
+          title: Metadata
+          description: Type-specific metadata
+      type: object
+      required:
+      - id
+      - type
+      title: Source
+      description: Unified source representation.
+    SourceCreateRequest:
+      properties:
+        type:
+          type: string
+          enum:
+          - repository
+          - documentation
+          - research_paper
+          - huggingface_dataset
+          - local_folder
+          title: Type
+        repository:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Repository
+        branch:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Branch
+        ref:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ref
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+        url_patterns:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Url Patterns
+        exclude_patterns:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Exclude Patterns
+        project_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Project Id
+        max_age:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Max Age
+        formats:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Formats
+        only_main_content:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Only Main Content
+        limit:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Limit
+        max_depth:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Max Depth
+        crawl_entire_domain:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Crawl Entire Domain
+        wait_for:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Wait For
+        include_screenshot:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Include Screenshot
+        check_llms_txt:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Check Llms Txt
+        llms_txt_strategy:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Llms Txt Strategy
+        add_as_global_source:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Add As Global Source
+          default: true
+        is_pdf:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Pdf
+        display_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Display Name
+        focus_instructions:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Focus Instructions
+        extract_branding:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Extract Branding
+        extract_images:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Extract Images
+        config:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Config
+        folder_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Folder Name
+        folder_path:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Folder Path
+        files:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/FileItem'
+            type: array
+          - type: 'null'
+          title: Files
+        database:
+          anyOf:
+          - $ref: '#/components/schemas/DatabaseFileItem'
+          - type: 'null'
+      type: object
+      required:
+      - type
+      title: SourceCreateRequest
+    SourceDeleteResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Source ID
+        status:
+          type: string
+          title: Status
+          description: Deletion status
+      type: object
+      required:
+      - id
+      - status
+      title: SourceDeleteResponse
+      description: Response for deleting a source.
+    SourceListResponse:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Source'
+          type: array
+          title: Items
+          description: List of sources
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+          description: Pagination metadata
+      type: object
+      required:
+      - pagination
+      title: SourceListResponse
+      description: Response for listing sources.
+    SourceResolveResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Resolved source ID
+        type:
+          type: string
+          enum:
+          - repository
+          - documentation
+          - research_paper
+          - huggingface_dataset
+          - local_folder
+          title: Type
+          description: Resolved source type
+        display_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Display Name
+          description: Display name
+        identifier:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Identifier
+          description: Canonical identifier
+      type: object
+      required:
+      - id
+      - type
+      title: SourceResolveResponse
+      description: Response for resolving a source identifier.
+    SourceUpdateRequest:
+      properties:
+        display_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Display Name
+        category_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Category Id
+      type: object
+      title: SourceUpdateRequest
+    SubscriptionResultItem:
+      properties:
+        name:
+          type: string
+          title: Name
+        action:
+          type: string
+          title: Action
+        docs_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Docs Url
+        global_source_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Global Source Id
+        namespace:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Namespace
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+      - name
+      - action
+      - docs_url
+      - global_source_id
+      - namespace
+      - message
+      title: SubscriptionResultItem
+    SubscriptionResults:
+      properties:
+        instant_access:
+          items:
+            $ref: '#/components/schemas/SubscriptionResultItem'
+          type: array
+          title: Instant Access
+        wait_for_indexing:
+          items:
+            $ref: '#/components/schemas/SubscriptionResultItem'
+          type: array
+          title: Wait For Indexing
+        started_indexing:
+          items:
+            $ref: '#/components/schemas/SubscriptionResultItem'
+          type: array
+          title: Started Indexing
+        not_found:
+          items:
+            $ref: '#/components/schemas/SubscriptionResultItem'
+          type: array
+          title: Not Found
+        errors:
+          items:
+            $ref: '#/components/schemas/SubscriptionResultItem'
+          type: array
+          title: Errors
+        skipped:
+          items:
+            $ref: '#/components/schemas/SubscriptionResultItem'
+          type: array
+          title: Skipped
+      type: object
+      required:
+      - instant_access
+      - wait_for_indexing
+      - started_indexing
+      - not_found
+      - errors
+      - skipped
+      title: SubscriptionResults
+    SubscriptionSummary:
+      properties:
+        instant_access:
+          type: integer
+          title: Instant Access
+        wait_for_indexing:
+          type: integer
+          title: Wait For Indexing
+        started_indexing:
+          type: integer
+          title: Started Indexing
+        not_found:
+          type: integer
+          title: Not Found
+        errors:
+          type: integer
+          title: Errors
+        skipped:
+          type: integer
+          title: Skipped
+      type: object
+      required:
+      - instant_access
+      - wait_for_indexing
+      - started_indexing
+      - not_found
+      - errors
+      - skipped
+      title: SubscriptionSummary
+    TracerRequest:
+      properties:
+        query:
+          type: string
+          maxLength: 10000
+          minLength: 1
+          title: Query
+          description: Research question
+        repositories:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Repositories
+          description: Repositories in owner/repo format
+        context:
+          anyOf:
+          - type: string
+            maxLength: 5000
+          - type: 'null'
+          title: Context
+          description: Additional context
+        model:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model
+          description: Model override (claude-opus-4-6 or claude-opus-4-6-1m)
+      type: object
+      required:
+      - query
+      title: TracerRequest
+    UniversalSearchRequestWithMode:
+      properties:
+        query:
+          type: string
+          title: Query
+          description: Natural language search query
+        top_k:
+          type: integer
+          maximum: 100.0
+          minimum: 1.0
+          title: Top K
+          description: Total number of results
+          default: 20
+        include_repos:
+          type: boolean
+          title: Include Repos
+          description: Include repository sources
+          default: true
+        include_docs:
+          type: boolean
+          title: Include Docs
+          description: Include documentation sources
+          default: true
+        include_huggingface_datasets:
+          type: boolean
+          title: Include Huggingface Datasets
+          description: Include HuggingFace dataset sources (excluded by default to
+            prevent search pollution)
+          default: false
+        alpha:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Alpha
+          description: Weight for vector search (0.7 = 70% vector)
+          default: 0.7
+        compress_output:
+          type: boolean
+          title: Compress Output
+          description: Use AI to compress results
+          default: false
+        max_sources:
+          type: integer
+          maximum: 30.0
+          minimum: 1.0
+          title: Max Sources
+          description: Max source namespaces to deep search
+          default: 5
+        sources_for_answer:
+          type: integer
+          maximum: 30.0
+          minimum: 1.0
+          title: Sources For Answer
+          description: Number of results to use for AI answer
+          default: 10
+        bypass_cache:
+          type: boolean
+          title: Bypass Cache
+          description: Skip cache and force fresh search results
+          default: false
+        max_tokens:
+          anyOf:
+          - type: integer
+            maximum: 100000.0
+            minimum: 100.0
+          - type: 'null'
+          title: Max Tokens
+          description: Maximum tokens in response. Results truncated when budget reached.
+        boost_source_types:
+          additionalProperties:
+            type: number
+          type: object
+          title: Boost Source Types
+          description: Source type boosts (override to customize or set {} to disable)
+          default:
+            repository: 1.2
+            documentation: 1.0
+            research_paper: 0.9
+            huggingface_dataset: 0.85
+        boost_languages:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Boost Languages
+          description: Programming languages to boost (e.g., ['python', 'typescript'])
+        language_boost_factor:
+          type: number
+          maximum: 5.0
+          minimum: 1.0
+          title: Language Boost Factor
+          description: Boost multiplier for preferred languages
+          default: 1.5
+        use_native_boosting:
+          type: boolean
+          title: Use Native Boosting
+          description: Use TurboPuffer FTS v2 native Sum/Product boosting
+          default: true
+        semantic_cache_threshold:
+          type: number
+          maximum: 1.0
+          minimum: 0.8
+          title: Semantic Cache Threshold
+          description: Minimum similarity for semantic cache hit (0.8-1.0)
+          default: 0.92
+        bypass_semantic_cache:
+          type: boolean
+          title: Bypass Semantic Cache
+          description: Skip semantic cache (L2) lookup
+          default: false
+        expand_symbols:
+          type: boolean
+          title: Expand Symbols
+          description: Extract function/class names from results and search for usages
+            (cAST-inspired)
+          default: false
+        mode:
+          type: string
+          const: universal
+          title: Mode
+          description: Search mode discriminator
+          default: universal
+      type: object
+      required:
+      - query
+      title: UniversalSearchRequestWithMode
+    UsageSummaryResponse:
+      properties:
+        user_id:
+          type: string
+          title: User Id
+          description: User identifier
+        organization_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Organization Id
+          description: Organization identifier (if applicable)
+        subscription_tier:
+          type: string
+          title: Subscription Tier
+          description: Current subscription tier
+          default: free
+        billing_period_start:
+          type: string
+          format: date-time
+          title: Billing Period Start
+          description: Start of current billing period
+        billing_period_end:
+          type: string
+          format: date-time
+          title: Billing Period End
+          description: End of current billing period
+        usage:
+          additionalProperties:
+            $ref: '#/components/schemas/UsageSummaryUsageEntry'
+          type: object
+          title: Usage
+          description: Usage breakdown by operation type
+      type: object
+      required:
+      - user_id
+      - billing_period_start
+      - billing_period_end
+      title: UsageSummaryResponse
+      description: Response for usage summary.
+    UsageSummaryUsageEntry:
+      properties:
+        used:
+          type: integer
+          title: Used
+          description: Number of operations used this period
+          default: 0
+        limit:
+          type: integer
+          title: Limit
+          description: Maximum allowed operations (0 if unlimited)
+          default: 0
+        unlimited:
+          type: boolean
+          title: Unlimited
+          description: Whether this operation type is unlimited
+          default: false
+      type: object
+      title: UsageSummaryUsageEntry
+      description: Usage breakdown for a single operation type.
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    WebSearchRequestWithMode:
+      properties:
+        query:
+          type: string
+          title: Query
+          description: Search query
+        num_results:
+          type: integer
+          maximum: 10.0
+          minimum: 1.0
+          title: Num Results
+          description: Number of results
+          default: 5
+        category:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Category
+          description: 'Filter by category: github, company, research, news, tweet,
+            pdf, blog'
+        days_back:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Days Back
+          description: Only show results from last N days
+        find_similar_to:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Find Similar To
+          description: URL to find similar content to
+        mode:
+          type: string
+          const: web
+          title: Mode
+          description: Search mode discriminator
+          default: web
+      type: object
+      required:
+      - query
+      title: WebSearchRequestWithMode
+    routes__v2__categories__CategoryCreate:
+      properties:
+        name:
+          type: string
+          maxLength: 50
+          minLength: 1
+          title: Name
+          description: Category name
+        color:
+          anyOf:
+          - type: string
+            maxLength: 7
+          - type: 'null'
+          title: Color
+          description: 'Hex color (e.g., #FF5733)'
+        order:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Order
+          description: Display order
+      type: object
+      required:
+      - name
+      title: CategoryCreate
+    routes__v2__categories__CategoryUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+            maxLength: 50
+            minLength: 1
+          - type: 'null'
+          title: Name
+          description: Category name
+        color:
+          anyOf:
+          - type: string
+            maxLength: 7
+          - type: 'null'
+          title: Color
+          description: 'Hex color (e.g., #FF5733)'
+        order:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Order
+          description: Display order
+      type: object
+      title: CategoryUpdate
+    routes__v2__contexts__EditedFile:
+      properties:
+        file_path:
+          type: string
+          title: File Path
+          description: Path to the file
+        operation:
+          type: string
+          title: Operation
+          description: 'Type: ''created'', ''modified'', ''deleted'''
+        changes_description:
+          type: string
+          title: Changes Description
+          description: Brief description of changes
+        key_changes:
+          items:
+            type: string
+          type: array
+          title: Key Changes
+        language:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Language
+          description: Programming language of the file
+      type: object
+      required:
+      - file_path
+      - operation
+      - changes_description
+      title: EditedFile
+      description: Represents a file that was modified during the conversation.
+    routes__v2__contexts__IndexedResource:
+      properties:
+        identifier:
+          type: string
+          title: Identifier
+          description: Repository (owner/repo) or documentation URL/ID
+        resource_type:
+          type: string
+          title: Resource Type
+          description: 'Type: ''repository'' or ''documentation'''
+        purpose:
+          type: string
+          title: Purpose
+          description: Why this resource was used/referenced
+        indexed_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Indexed At
+          description: When it was indexed
+      type: object
+      required:
+      - identifier
+      - resource_type
+      - purpose
+      title: IndexedResource
+      description: Represents a NIA resource (repository or documentation) with context.
+    routes__v2__contexts__NiaReferences-Input:
+      properties:
+        indexed_resources:
+          items:
+            $ref: '#/components/schemas/routes__v2__contexts__IndexedResource'
+          type: array
+          title: Indexed Resources
+        search_queries:
+          items:
+            $ref: '#/components/schemas/routes__v2__contexts__SearchQuery'
+          type: array
+          title: Search Queries
+        session_summary:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Session Summary
+      type: object
+      title: NiaReferences
+      description: Structured tracking of NIA resources used during conversation.
+    routes__v2__contexts__SearchQuery:
+      properties:
+        query:
+          type: string
+          title: Query
+          description: The search query that was performed
+        query_type:
+          type: string
+          title: Query Type
+          description: 'Type: ''codebase'', ''documentation'', etc.'
+        resources_searched:
+          items:
+            type: string
+          type: array
+          title: Resources Searched
+        key_findings:
+          type: string
+          title: Key Findings
+          description: Brief summary of what was found
+        useful_results_count:
+          type: integer
+          title: Useful Results Count
+          default: 0
+      type: object
+      required:
+      - query
+      - query_type
+      - key_findings
+      title: SearchQuery
+      description: Represents a search query performed during the conversation.
+    routes__v2__dependencies__SubscribeResponse:
+      properties:
+        manifest_type:
+          type: string
+          title: Manifest Type
+        total_dependencies:
+          type: integer
+          title: Total Dependencies
+        results:
+          $ref: '#/components/schemas/SubscriptionResults'
+        summary:
+          $ref: '#/components/schemas/SubscriptionSummary'
+      type: object
+      required:
+      - manifest_type
+      - total_dependencies
+      - results
+      - summary
+      title: SubscribeResponse
+  securitySchemes: {}
+tags: []
