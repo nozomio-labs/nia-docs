@@ -1,0 +1,383 @@
+---
+title: 'Slack Search'
+description: 'Connect, index, and search Slack workspaces through Nia'
+---
+
+Nia's Slack Search lets you connect Slack workspaces, index message history, and run semantic or keyword searches across all your conversations. It supports two connection models:
+
+1. **Direct OAuth** -- Connect your own Slack workspace via the Nia dashboard
+2. **BYOT (Bring Your Own Token)** -- Register any Slack bot token via the API, designed for enterprise customers who need to index their end-users' workspaces
+
+All indexed data is stored in isolated, org-scoped namespaces. Real-time message events keep the index fresh after the initial backfill.
+
+<Info>
+  After the initial full index, new messages are indexed automatically in real-time via Slack's Events API. Sends, edits, and deletes in indexed channels are reflected within seconds.
+</Info>
+
+---
+
+## Getting Started
+
+<Steps>
+  <Step title="Connect a Workspace">
+    Connect via OAuth from the Nia dashboard, or register a bot token via the API (BYOT).
+  </Step>
+  <Step title="Configure Channels">
+    Choose which channels to index -- all channels, or a specific subset.
+  </Step>
+  <Step title="Index">
+    Trigger a full indexing job. Nia fetches all message history from configured channels, embeds, and stores everything in a vector index.
+  </Step>
+  <Step title="Search">
+    Run semantic or keyword searches across indexed messages via the API or MCP tools.
+  </Step>
+</Steps>
+
+---
+
+## Connecting a Workspace
+
+### Option 1: OAuth (Dashboard)
+
+Generate an OAuth URL and redirect the user to authorize:
+
+```bash
+curl -X POST https://api.trynia.ai/v2/slack/install \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+```json
+{
+  "url": "https://slack.com/oauth/v2/authorize?client_id=...&scope=...&redirect_uri=..."
+}
+```
+
+After authorization, Slack redirects back and the installation is created automatically.
+
+### Option 2: BYOT (Bring Your Own Token)
+
+Register an external Slack bot token directly. The workspace owner creates a Slack app, installs it, and provides the bot token to you. No OAuth flow needed.
+
+```bash
+curl -X POST https://api.trynia.ai/v2/slack/install/token \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bot_token": "xoxb-...",
+    "name": "Customer Workspace"
+  }'
+```
+
+```json
+{
+  "installation_id": "a9e51db8-...",
+  "team_id": "T12345",
+  "team_name": "Customer Workspace",
+  "status": "active"
+}
+```
+
+The `installation_id` is used in all subsequent operations.
+
+---
+
+## Managing Installations
+
+### List Installations
+
+```bash
+curl https://api.trynia.ai/v2/slack/installations \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+```json
+{
+  "installations": [
+    {
+      "id": "a9e51db8-...",
+      "team_id": "T12345",
+      "team_name": "Customer Workspace",
+      "status": "active",
+      "is_external": true,
+      "indexed_channel_count": 43,
+      "indexed_message_count": 1401,
+      "last_sync_at": "2026-02-19T18:05:02Z"
+    }
+  ]
+}
+```
+
+### Configure Channels
+
+List available channels:
+
+```bash
+curl https://api.trynia.ai/v2/slack/installations/{installation_id}/channels \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+Index all channels except specific ones:
+
+```bash
+curl -X POST https://api.trynia.ai/v2/slack/installations/{installation_id}/channels \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mode": "all",
+    "exclude_channels": ["C092VB132SE", "C092VB183B4"]
+  }'
+```
+
+Or index only specific channels:
+
+```json
+{
+  "mode": "selected",
+  "include_channels": ["C092TL9QAKF", "C0A15U8B3NW"]
+}
+```
+
+### Disconnect
+
+```bash
+curl -X DELETE https://api.trynia.ai/v2/slack/installations/{installation_id} \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+---
+
+## Indexing
+
+Trigger a full indexing job that fetches all message history from configured channels:
+
+```bash
+curl -X POST https://api.trynia.ai/v2/slack/installations/{installation_id}/index \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+```json
+{
+  "source_id": "3c7ee426-...",
+  "installation_id": "a9e51db8-...",
+  "status": "processing",
+  "workflow_run_id": "be22e100-..."
+}
+```
+
+### Check Progress
+
+```bash
+curl https://api.trynia.ai/v2/slack/installations/{installation_id}/status \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+```json
+{
+  "installation_id": "a9e51db8-...",
+  "team_name": "Customer Workspace",
+  "status": "processing",
+  "progress": 45,
+  "message": "Indexing #engineering (12/43)",
+  "indexed_channel_count": 12,
+  "indexed_message_count": 580,
+  "chunk_count": 520
+}
+```
+
+Indexing speed depends on the Slack app's rate limit tier:
+
+| Tier | `conversations.history` rate | Who |
+|------|------------------------------|-----|
+| Tier 1 | ~1 req/min | Non-Marketplace apps |
+| Tier 3 | ~50 req/min | Marketplace-listed apps |
+
+<Note>
+  For BYOT, the customer's Slack app rate limits apply. Initial indexing of large workspaces (10k+ messages) may take 30-60 minutes on Tier 1. After the initial index, real-time events keep it current with no rate limit concerns.
+</Note>
+
+---
+
+## Searching
+
+### Semantic Search
+
+Run semantic search across indexed Slack messages with AI synthesis:
+
+```bash
+curl -X POST https://api.trynia.ai/v2/search/query \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [{"role": "user", "content": "what did the team decide about the migration?"}],
+    "slack_workspaces": ["a9e51db8-..."],
+    "include_sources": true,
+    "stream": true
+  }'
+```
+
+You can combine Slack with other indexed sources like repositories:
+
+```json
+{
+  "messages": [{"role": "user", "content": "how does our auth system work?"}],
+  "repositories": [{"repository": "acme/backend"}],
+  "slack_workspaces": ["a9e51db8-..."],
+  "stream": true
+}
+```
+
+**Streamed response:**
+```
+data: {"content": "Based on the Slack discussions, the team decided to..."}
+data: {"sources": [{"content": "#engineering | @alice (2026-01-15)...", "metadata": {...}}]}
+data: [DONE]
+```
+
+### Keyword Search (Grep)
+
+BM25 full-text keyword search over indexed messages:
+
+```bash
+curl -X POST https://api.trynia.ai/v2/slack/installations/{installation_id}/grep \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pattern": "migration deadline",
+    "channel": "engineering",
+    "limit": 20
+  }'
+```
+
+```json
+{
+  "pattern": "migration deadline",
+  "channel": "engineering",
+  "result_count": 3,
+  "results": [
+    {
+      "text": "#engineering | @alice (2026-01-15 14:30 UTC)\nThe migration deadline is March 1st...",
+      "score": 12.5,
+      "metadata": {
+        "channel_name": "engineering",
+        "user_name": "alice",
+        "ts": "1736955000.000"
+      }
+    }
+  ]
+}
+```
+
+### Read Channel Messages (Live)
+
+Fetch recent messages directly from the Slack API (live, not from the index):
+
+```bash
+curl "https://api.trynia.ai/v2/slack/installations/{installation_id}/messages?channel=engineering&limit=50" \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+```json
+{
+  "channel": "engineering",
+  "message_count": 50,
+  "messages": [
+    "@alice (2026-02-19 14:30 UTC): The deployment went smoothly",
+    "@bob (2026-02-19 14:32 UTC): Great, I'll update the status page"
+  ]
+}
+```
+
+---
+
+## MCP Integration
+
+Slack workspaces are searchable via Nia's MCP tools once indexed:
+
+```python
+# Semantic search across Slack
+search(query="deployment issues last week", slack_workspaces=["a9e51db8-..."])
+
+# Keyword grep in Slack
+nia_grep(source_type="slack", slack_installation_id="a9e51db8-...", pattern="deadline")
+
+# Read messages from a channel
+nia_read(source_type="slack", slack_installation_id="a9e51db8-...", channel="engineering")
+
+# Explore channels
+nia_explore(source_type="slack", slack_installation_id="a9e51db8-...")
+```
+
+---
+
+## Enterprise Multi-Tenant Model (BYOT)
+
+For enterprises managing multiple customer workspaces, BYOT provides a clean multi-tenant architecture:
+
+```
+                ┌─────────────────────────┐
+                │    Enterprise (Acme)     │
+                │    Nia API Key: nk_...   │
+                └────────┬────────────────┘
+                         │
+          ┌──────────────┼──────────────┐
+          │              │              │
+┌─────────▼──┐  ┌───────▼────┐  ┌──────▼─────┐
+│ Customer A │  │ Customer B │  │ Customer C │
+│ xoxb-aaa   │  │ xoxb-bbb   │  │ xoxb-ccc   │
+│ inst: id-1 │  │ inst: id-2 │  │ inst: id-3 │
+└────────────┘  └────────────┘  └────────────┘
+```
+
+**How it works:**
+
+<Steps>
+  <Step title="Get an API Key">
+    Sign up for Nia and get your API key from [app.trynia.ai](https://app.trynia.ai).
+  </Step>
+  <Step title="Collect Bot Tokens">
+    Each customer creates a Slack app in their own workspace and shares the bot token with you.
+  </Step>
+  <Step title="Register Each Token">
+    Register each token via `POST /v2/slack/install/token`. Each workspace gets its own isolated namespace.
+  </Step>
+  <Step title="Search Any Workspace">
+    Search any workspace by passing the `installation_id`, or search multiple at once:
+    ```json
+    {
+      "slack_workspaces": ["id-1", "id-2", "id-3"]
+    }
+    ```
+  </Step>
+</Steps>
+
+**Privacy guarantees:**
+- Each workspace is stored in a separate vector namespace scoped to your organization
+- Customers never interact with Nia directly
+- Customers can revoke access by uninstalling their Slack app at any time
+- Bot tokens are encrypted at rest (Fernet AES-128-CBC)
+
+---
+
+## Required Slack Bot Scopes
+
+When customers create their Slack app, they need these bot token scopes:
+
+| Scope | Purpose |
+|-------|---------|
+| `channels:read` | List public channels |
+| `channels:history` | Read public channel messages |
+| `channels:join` | Auto-join public channels for indexing |
+| `groups:read` | List private channels (optional) |
+| `groups:history` | Read private channel messages (optional) |
+| `users:read` | Resolve user display names |
+| `reactions:read` | Read message reactions |
+
+<Note>
+  **Minimum required:** `channels:read`, `channels:history`, `users:read`. The other scopes are optional but recommended for full coverage.
+</Note>
+
+---
+
+<Warning>
+**Need Help?** Join our [Discord community](https://discord.gg/BBSwUMrrfn) or reach out through [app.trynia.ai](https://app.trynia.ai/) for support.
+</Warning>

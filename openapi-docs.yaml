@@ -920,6 +920,20 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
       tags:
       - Usage
+  /oracle/1m-usage:
+    get:
+      summary: Get 1M Usage
+      description: Get daily usage for 1M context window models.
+      operationId: get_1m_usage_v2_oracle_1m_usage_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyUsage1MResponse'
+      tags:
+      - Usage
   /oracle/jobs:
     post:
       summary: Create Oracle Job
@@ -1398,6 +1412,336 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /slack/install:
+    post:
+      tags:
+      - Usage
+      summary: Generate Install Url
+      description: Generate a Slack OAuth authorization URL.
+      operationId: generate_install_url_v2_slack_install_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackInstallRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/install/callback:
+    post:
+      tags:
+      - Usage
+      summary: Handle Oauth Callback
+      description: 'Exchange an OAuth code for tokens and create the installation.
+
+
+        Called by the frontend callback route after the user authorizes the Slack
+        app.'
+      operationId: handle_oauth_callback_v2_slack_install_callback_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackOAuthCallbackRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/install/token:
+    post:
+      tags:
+      - Usage
+      summary: Register External Token
+      description: 'Register an external Slack bot token (BYOT).
+
+
+        For multi-tenant scenarios: your customers provide their Slack bot token
+
+        and you manage it through Nia''s API.'
+      operationId: register_external_token_v2_slack_install_token_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackTokenRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations:
+    get:
+      tags:
+      - Usage
+      summary: List Slack Installations
+      description: List all Slack workspace connections for the authenticated user/org.
+      operationId: list_slack_installations_v2_slack_installations_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /slack/installations/{installation_id}:
+    get:
+      tags:
+      - Usage
+      summary: Get Slack Installation
+      description: Get details for a specific Slack installation.
+      operationId: get_slack_installation_v2_slack_installations__installation_id__get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Usage
+      summary: Delete Slack Installation
+      description: Disconnect a Slack workspace.
+      operationId: delete_slack_installation_v2_slack_installations__installation_id__delete
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/channels:
+    get:
+      tags:
+      - Usage
+      summary: List Slack Channels
+      description: List available Slack channels from the workspace.
+      operationId: list_slack_channels_v2_slack_installations__installation_id__channels_get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - Usage
+      summary: Configure Slack Channels
+      description: Configure which channels to index.
+      operationId: configure_slack_channels_v2_slack_installations__installation_id__channels_post
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackChannelsConfigRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/grep:
+    post:
+      tags:
+      - Usage
+      summary: Grep Slack Messages
+      description: BM25 keyword search over indexed Slack messages in TurboPuffer.
+      operationId: grep_slack_messages_v2_slack_installations__installation_id__grep_post
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackGrepRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/index:
+    post:
+      tags:
+      - Usage
+      summary: Trigger Slack Index
+      description: Trigger a full re-index of the Slack workspace.
+      operationId: trigger_slack_index_v2_slack_installations__installation_id__index_post
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/messages:
+    get:
+      tags:
+      - Usage
+      summary: Read Slack Messages
+      description: Read recent messages from a Slack channel (live from Slack API).
+      operationId: read_slack_messages_v2_slack_installations__installation_id__messages_get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      - name: channel
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Channel
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 50
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/status:
+    get:
+      tags:
+      - Usage
+      summary: Get Slack Index Status
+      description: Get the indexing status for a Slack workspace.
+      operationId: get_slack_index_status_v2_slack_installations__installation_id__status_get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /sources:
     get:
       tags:
@@ -1416,6 +1760,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Filter by source type
@@ -1531,6 +1876,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1627,6 +1973,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1668,6 +2015,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1715,6 +2063,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1757,6 +2106,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1797,6 +2147,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1844,6 +2195,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1915,6 +2267,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1964,6 +2317,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -2013,6 +2367,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -2756,6 +3111,26 @@ components:
       type: object
       title: ContextShareUpdateRequest
       description: Request model for updating a shared context.
+    DailyUsage1MResponse:
+      properties:
+        used:
+          type: integer
+          title: Used
+          description: Number of 1M context requests used today
+        limit:
+          type: integer
+          title: Limit
+          description: Daily limit for 1M context requests
+        remaining:
+          type: integer
+          title: Remaining
+          description: Remaining 1M context requests today
+      type: object
+      required:
+      - used
+      - limit
+      - remaining
+      title: DailyUsage1MResponse
     DatabaseFileItem:
       properties:
         filename:
@@ -3609,6 +3984,17 @@ components:
           description: List of local folders to query. Can be strings (display_name
             or local_folder_id) or dicts with 'local_folder_id' or 'identifier' fields.
             Local folders are private and user-scoped.
+        slack_workspaces:
+          items:
+            type: string
+          type: array
+          title: Slack Workspaces
+          description: List of Slack installation IDs to include in search
+        slack_filters:
+          anyOf:
+          - $ref: '#/components/schemas/SlackSearchFilters'
+          - type: 'null'
+          description: Filters for Slack message results (channels, users, date range)
         category:
           anyOf:
           - type: string
@@ -3748,6 +4134,148 @@ components:
       type: object
       title: SearchScope
       description: Scope for searching Nia's indexed sources.
+    SlackChannelsConfigRequest:
+      properties:
+        mode:
+          type: string
+          title: Mode
+          description: '''all'' to index all channels, ''selected'' to pick specific
+            ones'
+          default: all
+        include_channels:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Include Channels
+          description: Channel IDs to include (when mode='selected')
+        exclude_channels:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Exclude Channels
+          description: Channel IDs to exclude
+      type: object
+      title: SlackChannelsConfigRequest
+      description: Configure which channels to index.
+    SlackGrepRequest:
+      properties:
+        pattern:
+          type: string
+          minLength: 1
+          title: Pattern
+          description: Search string for BM25 keyword matching
+        channel:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Channel
+          description: Filter by channel name or ID
+        limit:
+          type: integer
+          maximum: 100.0
+          minimum: 1.0
+          title: Limit
+          description: Max results
+          default: 20
+      type: object
+      required:
+      - pattern
+      title: SlackGrepRequest
+    SlackInstallRequest:
+      properties:
+        redirect_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Redirect Uri
+          description: Custom OAuth redirect URI
+        scopes:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Scopes
+          description: Override default bot scopes
+      type: object
+      title: SlackInstallRequest
+      description: Generate an OAuth URL to install Nia's Slack app.
+    SlackOAuthCallbackRequest:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Authorization code from Slack
+        redirect_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Redirect Uri
+          description: Redirect URI used in the authorization request
+      type: object
+      required:
+      - code
+      title: SlackOAuthCallbackRequest
+      description: Handle the OAuth callback from Slack.
+    SlackSearchFilters:
+      properties:
+        channels:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Channels
+          description: Filter by channel names or IDs
+        users:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Users
+          description: Filter by Slack user names or IDs
+        date_from:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Date From
+          description: Oldest message timestamp (ISO 8601)
+        date_to:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Date To
+          description: Newest message timestamp (ISO 8601)
+        include_threads:
+          type: boolean
+          title: Include Threads
+          description: Include threaded messages in results
+          default: true
+      type: object
+      title: SlackSearchFilters
+      description: Filters for Slack message search within query endpoint.
+    SlackTokenRequest:
+      properties:
+        bot_token:
+          type: string
+          title: Bot Token
+          description: Slack bot token (xoxb-...)
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Name
+          description: Display name for this workspace
+      type: object
+      required:
+      - bot_token
+      title: SlackTokenRequest
+      description: 'BYOT: Register an external Slack bot token.'
     Source:
       properties:
         id:
@@ -3762,6 +4290,7 @@ components:
           - research_paper
           - huggingface_dataset
           - local_folder
+          - slack
           title: Type
           description: Source type
         identifier:
@@ -3839,6 +4368,7 @@ components:
           - research_paper
           - huggingface_dataset
           - local_folder
+          - slack
           title: Type
         repository:
           anyOf:
@@ -3993,6 +4523,11 @@ components:
           anyOf:
           - $ref: '#/components/schemas/DatabaseFileItem'
           - type: 'null'
+        slack_installation_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Slack Installation Id
       type: object
       required:
       - type
@@ -4043,6 +4578,7 @@ components:
           - research_paper
           - huggingface_dataset
           - local_folder
+          - slack
           title: Type
           description: Resolved source type
         display_name:
