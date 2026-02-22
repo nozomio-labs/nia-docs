@@ -147,5 +147,19 @@
   },
   "seo": {
     "indexing": "all"
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "grok",
+      "mcp",
+      "add-mcp",
+      "cursor",
+      "vscode"
+    ]
   }
 }
