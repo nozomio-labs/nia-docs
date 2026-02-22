@@ -42,7 +42,7 @@ All indexed data is stored in isolated, org-scoped namespaces. Real-time message
 Generate an OAuth URL and redirect the user to authorize:
 
 ```bash
-curl -X POST https://api.trynia.ai/v2/slack/install \
+curl -X POST https://apigcp.trynia.ai/v2/slack/install \
   -H "Authorization: Bearer $NIA_API_KEY"
 ```
 
@@ -59,7 +59,7 @@ After authorization, Slack redirects back and the installation is created automa
 Register an external Slack bot token directly. The workspace owner creates a Slack app, installs it, and provides the bot token to you. No OAuth flow needed.
 
 ```bash
-curl -X POST https://api.trynia.ai/v2/slack/install/token \
+curl -X POST https://apigcp.trynia.ai/v2/slack/install/token \
   -H "Authorization: Bearer $NIA_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -86,7 +86,7 @@ The `installation_id` is used in all subsequent operations.
 ### List Installations
 
 ```bash
-curl https://api.trynia.ai/v2/slack/installations \
+curl https://apigcp.trynia.ai/v2/slack/installations \
   -H "Authorization: Bearer $NIA_API_KEY"
 ```
 
@@ -112,14 +112,14 @@ curl https://api.trynia.ai/v2/slack/installations \
 List available channels:
 
 ```bash
-curl https://api.trynia.ai/v2/slack/installations/{installation_id}/channels \
+curl https://apigcp.trynia.ai/v2/slack/installations/{installation_id}/channels \
   -H "Authorization: Bearer $NIA_API_KEY"
 ```
 
 Index all channels except specific ones:
 
 ```bash
-curl -X POST https://api.trynia.ai/v2/slack/installations/{installation_id}/channels \
+curl -X POST https://apigcp.trynia.ai/v2/slack/installations/{installation_id}/channels \
   -H "Authorization: Bearer $NIA_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -140,7 +140,7 @@ Or index only specific channels:
 ### Disconnect
 
 ```bash
-curl -X DELETE https://api.trynia.ai/v2/slack/installations/{installation_id} \
+curl -X DELETE https://apigcp.trynia.ai/v2/slack/installations/{installation_id} \
   -H "Authorization: Bearer $NIA_API_KEY"
 ```
 
@@ -151,7 +151,7 @@ curl -X DELETE https://api.trynia.ai/v2/slack/installations/{installation_id} \
 Trigger a full indexing job that fetches all message history from configured channels:
 
 ```bash
-curl -X POST https://api.trynia.ai/v2/slack/installations/{installation_id}/index \
+curl -X POST https://apigcp.trynia.ai/v2/slack/installations/{installation_id}/index \
   -H "Authorization: Bearer $NIA_API_KEY"
 ```
 
@@ -167,7 +167,7 @@ curl -X POST https://api.trynia.ai/v2/slack/installations/{installation_id}/inde
 ### Check Progress
 
 ```bash
-curl https://api.trynia.ai/v2/slack/installations/{installation_id}/status \
+curl https://apigcp.trynia.ai/v2/slack/installations/{installation_id}/status \
   -H "Authorization: Bearer $NIA_API_KEY"
 ```
 
@@ -204,7 +204,7 @@ Indexing speed depends on the Slack app's rate limit tier:
 Run semantic search across indexed Slack messages with AI synthesis:
 
 ```bash
-curl -X POST https://api.trynia.ai/v2/search/query \
+curl -X POST https://apigcp.trynia.ai/v2/search/query \
   -H "Authorization: Bearer $NIA_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -238,7 +238,7 @@ data: [DONE]
 BM25 full-text keyword search over indexed messages:
 
 ```bash
-curl -X POST https://api.trynia.ai/v2/slack/installations/{installation_id}/grep \
+curl -X POST https://apigcp.trynia.ai/v2/slack/installations/{installation_id}/grep \
   -H "Authorization: Bearer $NIA_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -272,7 +272,7 @@ curl -X POST https://api.trynia.ai/v2/slack/installations/{installation_id}/grep
 Fetch recent messages directly from the Slack API (live, not from the index):
 
 ```bash
-curl "https://api.trynia.ai/v2/slack/installations/{installation_id}/messages?channel=engineering&limit=50" \
+curl "https://apigcp.trynia.ai/v2/slack/installations/{installation_id}/messages?channel=engineering&limit=50" \
   -H "Authorization: Bearer $NIA_API_KEY"
 ```
 
