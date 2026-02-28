@@ -1,1747 +1,55 @@
 openapi: 3.1.0
 info:
   title: Nia AI API
-  version: 1.0.0
-  description: 'Nia AI API provides a single, consistent `sources` resource for all
-    indexed content.
-
+  version: 2.3.0
+  description: |
+    Nia AI API provides a single, consistent `sources` resource for all indexed content.
 
     ## Core Resources
 
-
     **Sources** (`/sources`)
-
     - `repository`
-
     - `documentation`
-
     - `research_paper`
-
     - `huggingface_dataset`
-
     - `local_folder`
 
-
     **Search** (`/search`)
-
     - `mode`: query | web | deep | universal
 
-
     Legacy endpoints are deprecated and will be removed in a future version. Prefer
-    `/sources` and `/search` for new integrations.'
+    `/sources` and `/search` for new integrations.
+servers:
+  - url: https://apigcp.trynia.ai/v2
+    description: Production API
+  - url: http://localhost:8000/v2
+    description: Local development
+security:
+  - ApiKeyAuth: []
+tags:
+- name: Sources
+  description: Unified source management — index, list, read, search, and manage all source types
+- name: Search
+  description: Search across indexed sources, GitHub repositories, and public package registries
+- name: Contexts
+  description: Cross-agent context sharing and memory
+- name: Oracle
+  description: AI-powered autonomous research
+- name: Tracer
+  description: Autonomous agent that searches GitHub repositories to answer questions
+- name: Categories
+  description: Organize sources into categories
+- name: Advisor
+  description: Context-aware code analysis and recommendations
+- name: Dependencies
+  description: Analyze and subscribe to documentation for project dependencies
+- name: Slack
+  description: Slack workspace integration — index and search messages
+- name: Auth
+  description: Account creation and API key management
+- name: Usage
+  description: API usage statistics
 paths:
-  /advisor:
-    post:
-      tags:
-      - Advisor
-      summary: Context-aware code advisor
-      description: Analyze codebase context against Nia's indexed documentation to
-        get tailored recommendations.
-      operationId: analyze_codebase_v2_advisor_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdvisorRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdvisorResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /bulk-delete:
-    post:
-      tags:
-      - Usage
-      summary: Bulk delete resources
-      description: Delete multiple resources in a single request. Supports repositories,
-        documentation, research papers, contexts, and local folders.
-      operationId: bulk_delete_resources_v2_bulk_delete_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BulkDeleteRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BulkDeleteResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /categories:
-    get:
-      tags:
-      - Categories
-      summary: List categories
-      description: List categories for the authenticated user/organization.
-      operationId: list_categories_v2_categories_get
-      parameters:
-      - name: limit
-        in: query
-        required: false
-        schema:
-          type: integer
-          maximum: 200
-          minimum: 1
-          description: Number of categories to return
-          default: 50
-          title: Limit
-        description: Number of categories to return
-      - name: offset
-        in: query
-        required: false
-        schema:
-          type: integer
-          minimum: 0
-          description: Number of categories to skip
-          default: 0
-          title: Offset
-        description: Number of categories to skip
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CategoryListCompatResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    post:
-      tags:
-      - Categories
-      summary: Create category
-      description: Create a new category for organizing data sources.
-      operationId: create_category_v2_categories_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/routes__v2__categories__CategoryCreate'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CategoryResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /categories/{category_id}:
-    patch:
-      tags:
-      - Categories
-      summary: Update category
-      description: Update an existing category.
-      operationId: update_category_v2_categories__category_id__patch
-      parameters:
-      - name: category_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Category Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/routes__v2__categories__CategoryUpdate'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CategoryResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    delete:
-      tags:
-      - Categories
-      summary: Delete category
-      description: Delete a category. Data sources with this category will become
-        uncategorized.
-      operationId: delete_category_v2_categories__category_id__delete
-      parameters:
-      - name: category_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Category Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /contexts:
-    post:
-      tags:
-      - Context Sharing
-      summary: Save context
-      description: Save conversation context for cross-agent sharing. Indexed in vector
-        store for semantic search.
-      operationId: save_context_v2_v2_contexts_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ContextShareRequest'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContextShareResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    get:
-      tags:
-      - Context Sharing
-      summary: List contexts
-      description: List conversation contexts with pagination. Filter by tags, agent
-        source, or memory type.
-      operationId: list_contexts_v2_v2_contexts_get
-      parameters:
-      - name: limit
-        in: query
-        required: false
-        schema:
-          type: integer
-          maximum: 100
-          minimum: 1
-          description: Number of contexts to return
-          default: 20
-          title: Limit
-        description: Number of contexts to return
-      - name: offset
-        in: query
-        required: false
-        schema:
-          type: integer
-          minimum: 0
-          description: Number of contexts to skip
-          default: 0
-          title: Offset
-        description: Number of contexts to skip
-      - name: tags
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Comma-separated tags to filter by
-          title: Tags
-        description: Comma-separated tags to filter by
-      - name: agent_source
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Filter by agent source
-          title: Agent Source
-        description: Filter by agent source
-      - name: memory_type
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: 'Filter by memory type: scratchpad, episodic, fact, procedural'
-          title: Memory Type
-        description: 'Filter by memory type: scratchpad, episodic, fact, procedural'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContextListCompatResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /contexts/search:
-    get:
-      tags:
-      - Context Sharing
-      summary: Text search contexts
-      description: Search contexts by content, title, summary, or tags using MongoDB
-        text search.
-      operationId: search_contexts_v2_v2_contexts_search_get
-      parameters:
-      - name: q
-        in: query
-        required: true
-        schema:
-          type: string
-          minLength: 1
-          description: Search query
-          title: Q
-        description: Search query
-      - name: limit
-        in: query
-        required: false
-        schema:
-          type: integer
-          maximum: 100
-          minimum: 1
-          description: Number of contexts to return
-          default: 20
-          title: Limit
-        description: Number of contexts to return
-      - name: tags
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Comma-separated tags to filter by
-          title: Tags
-        description: Comma-separated tags to filter by
-      - name: agent_source
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Filter by agent source
-          title: Agent Source
-        description: Filter by agent source
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContextSearchResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /contexts/semantic-search:
-    get:
-      tags:
-      - Context Sharing
-      summary: Semantic search contexts
-      description: Vector + BM25 hybrid search over contexts. Returns relevance scores
-        and highlights.
-      operationId: semantic_search_contexts_v2_v2_contexts_semantic_search_get
-      parameters:
-      - name: q
-        in: query
-        required: true
-        schema:
-          type: string
-          minLength: 1
-          description: Search query
-          title: Q
-        description: Search query
-      - name: limit
-        in: query
-        required: false
-        schema:
-          type: integer
-          maximum: 100
-          minimum: 1
-          description: Number of contexts to return
-          default: 20
-          title: Limit
-        description: Number of contexts to return
-      - name: include_highlights
-        in: query
-        required: false
-        schema:
-          type: boolean
-          description: Include match highlights
-          default: true
-          title: Include Highlights
-        description: Include match highlights
-      - name: workspace_filter
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Filter by specific workspace name
-          title: Workspace Filter
-        description: Filter by specific workspace name
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContextSemanticSearchResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /contexts/{context_id}:
-    get:
-      tags:
-      - Context Sharing
-      summary: Get context
-      description: Retrieve a specific context by ID.
-      operationId: get_context_v2_v2_contexts__context_id__get
-      parameters:
-      - name: context_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Context Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContextShareResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    put:
-      tags:
-      - Context Sharing
-      summary: Update context
-      description: Update an existing context. Re-indexes in vector store if content
-        changes.
-      operationId: update_context_v2_v2_contexts__context_id__put
-      parameters:
-      - name: context_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Context Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ContextShareUpdateRequest'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContextShareResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    delete:
-      tags:
-      - Context Sharing
-      summary: Delete context
-      description: Soft delete a context (marks inactive).
-      operationId: delete_context_v2_v2_contexts__context_id__delete
-      parameters:
-      - name: context_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Context Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DeleteResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /dependencies/analyze:
-    post:
-      tags:
-      - Dependencies
-      summary: Analyze package manifest
-      description: Parse a package manifest and return dependency information with
-        documentation URL mappings. This is a preview - no subscriptions are created.
-      operationId: analyze_dependencies_v2_dependencies_analyze_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DependencyAnalyzeRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AnalyzeResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /dependencies/subscribe:
-    post:
-      tags:
-      - Dependencies
-      summary: Subscribe to documentation for manifest dependencies
-      description: Parse a package manifest and automatically subscribe to documentation
-        for all dependencies.
-      operationId: subscribe_to_dependencies_v2_dependencies_subscribe_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DependencySubscribeRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/routes__v2__dependencies__SubscribeResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /dependencies/upload:
-    post:
-      tags:
-      - Dependencies
-      summary: Upload manifest file and subscribe to dependencies
-      description: Upload a package manifest file and subscribe to documentation for
-        all dependencies.
-      operationId: upload_and_subscribe_v2_dependencies_upload_post
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Body_upload_and_subscribe_v2_dependencies_upload_post'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/routes__v2__dependencies__SubscribeResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /github/glob:
-    post:
-      tags:
-      - GitHub Search
-      summary: Github Glob
-      description: Find files matching a glob pattern in a GitHub repository.
-      operationId: github_glob_v2_github_glob_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GitHubGlobRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /github/read:
-    post:
-      tags:
-      - GitHub Search
-      summary: Github Read
-      description: Read a file from a GitHub repository with optional line range.
-      operationId: github_read_v2_github_read_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GitHubReadRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /github/search:
-    post:
-      tags:
-      - GitHub Search
-      summary: Github Code Search
-      description: 'Search code in a GitHub repository using GitHub''s Code Search
-        API.
-
-
-        Rate limited to 10 requests/minute by GitHub. Requires authentication
-
-        for private repos (via user''s GitHub App installation).'
-      operationId: github_code_search_v2_github_search_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GitHubSearchRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /github/tracer:
-    post:
-      tags:
-      - GitHub Search
-      summary: Create Tracer Job
-      description: 'Create a Tracer search job.
-
-
-        Tracer is an autonomous agent that searches GitHub repositories
-
-        to answer your question. Returns immediately with a job_id and session_id.
-
-        Use /github/tracer/{job_id}/stream to receive real-time updates.'
-      operationId: create_tracer_job_v2_github_tracer_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TracerRequest'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    get:
-      tags:
-      - GitHub Search
-      summary: List Tracer Jobs
-      description: List Tracer jobs for the authenticated user.
-      operationId: list_tracer_jobs_v2_github_tracer_get
-      parameters:
-      - name: status
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Filter by status
-          title: Status
-        description: Filter by status
-      - name: limit
-        in: query
-        required: false
-        schema:
-          type: integer
-          maximum: 200
-          minimum: 1
-          description: Max results
-          default: 50
-          title: Limit
-        description: Max results
-      - name: skip
-        in: query
-        required: false
-        schema:
-          type: integer
-          minimum: 0
-          description: Offset for pagination
-          default: 0
-          title: Skip
-        description: Offset for pagination
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /github/tracer/{job_id}:
-    delete:
-      tags:
-      - GitHub Search
-      summary: Delete Tracer Job
-      description: Delete a Tracer job by session_id or workflow_run_id.
-      operationId: delete_tracer_job_v2_github_tracer__job_id__delete
-      parameters:
-      - name: job_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Job Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    get:
-      tags:
-      - GitHub Search
-      summary: Get Tracer Job
-      description: Get the status and result of a Tracer search job.
-      operationId: get_tracer_job_v2_github_tracer__job_id__get
-      parameters:
-      - name: job_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Job Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /github/tracer/{job_id}/stream:
-    get:
-      tags:
-      - GitHub Search
-      summary: Stream Tracer Job
-      description: 'Stream real-time updates from a Tracer search job.
-
-
-        Uses Hatchet''s native streaming with MongoDB fallback polling.
-
-        Reconnectable: can reconnect to a running job''s stream at any time.'
-      operationId: stream_tracer_job_v2_github_tracer__job_id__stream_get
-      parameters:
-      - name: job_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Job Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /github/tree/{owner}/{repo}:
-    get:
-      tags:
-      - GitHub Search
-      summary: Github Tree
-      description: Get the file tree of a GitHub repository or subdirectory.
-      operationId: github_tree_v2_github_tree__owner___repo__get
-      parameters:
-      - name: owner
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Owner
-      - name: repo
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Repo
-      - name: ref
-        in: query
-        required: false
-        schema:
-          type: string
-          description: Branch, tag, or commit SHA
-          default: HEAD
-          title: Ref
-        description: Branch, tag, or commit SHA
-      - name: path
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Subdirectory path
-          title: Path
-        description: Subdirectory path
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /oracle:
-    post:
-      summary: Oracle Research
-      description: Run Oracle research and return complete result (non-streaming).
-      operationId: oracle_research_v2_oracle_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OracleResearchRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
-  /oracle/1m-usage:
-    get:
-      summary: Get 1M Usage
-      description: Get daily usage for 1M context window models.
-      operationId: get_1m_usage_v2_oracle_1m_usage_get
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DailyUsage1MResponse'
-      tags:
-      - Usage
-  /oracle/jobs:
-    post:
-      summary: Create Oracle Job
-      description: 'Create a new Oracle research job.
-
-
-        Returns immediately with job_id and session_id.
-
-        Use /oracle/jobs/{job_id}/stream to receive real-time updates.
-
-
-        Features:
-
-        - Per-user concurrency limit: max 3 concurrent Oracle jobs
-
-        - Job queuing: additional jobs wait in queue
-
-        - 30-minute timeout per job'
-      operationId: create_oracle_job_v2_oracle_jobs_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OracleResearchRequest'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
-    get:
-      summary: List Oracle Jobs
-      description: 'List Oracle research jobs for the authenticated user.
-
-
-        Returns jobs ordered by creation time (newest first).'
-      operationId: list_oracle_jobs_v2_oracle_jobs_get
-      parameters:
-      - name: status
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: 'Filter by status: queued, running, completed, failed'
-          title: Status
-        description: 'Filter by status: queued, running, completed, failed'
-      - name: limit
-        in: query
-        required: false
-        schema:
-          type: integer
-          maximum: 100
-          minimum: 1
-          default: 20
-          title: Limit
-      - name: skip
-        in: query
-        required: false
-        schema:
-          type: integer
-          minimum: 0
-          default: 0
-          title: Skip
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
-  /oracle/jobs/{job_id}:
-    get:
-      summary: Get Oracle Job
-      description: 'Get the status and details of an Oracle research job.
-
-
-        Returns full job details including result if completed.
-
-        Includes fallback to check Hatchet state if job appears stuck in running state.'
-      operationId: get_oracle_job_v2_oracle_jobs__job_id__get
-      parameters:
-      - name: job_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Job Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
-    delete:
-      summary: Cancel Oracle Job
-      description: 'Cancel a running or queued Oracle research job.
-
-
-        Note: Cancellation is best-effort. The job may complete
-
-        before cancellation takes effect.'
-      operationId: cancel_oracle_job_v2_oracle_jobs__job_id__delete
-      parameters:
-      - name: job_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Job Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
-  /oracle/jobs/{job_id}/stream:
-    get:
-      summary: Stream Oracle Job
-      description: 'Stream real-time updates from an Oracle research job.
-
-
-        Uses Hatchet''s native streaming - no Redis required.
-
-        Reconnectable: can reconnect to a running job''s stream at any time.'
-      operationId: stream_oracle_job_v2_oracle_jobs__job_id__stream_get
-      parameters:
-      - name: job_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Job Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
-  /oracle/sessions:
-    get:
-      summary: List Oracle Sessions
-      description: 'List Oracle research sessions for the authenticated API key.
-
-
-        This is the new primary endpoint.
-
-        The old /oracle/history endpoint is deprecated but still operational.'
-      operationId: list_oracle_sessions_v2_oracle_sessions_get
-      parameters:
-      - name: limit
-        in: query
-        required: false
-        schema:
-          type: integer
-          maximum: 100
-          minimum: 1
-          default: 20
-          title: Limit
-      - name: skip
-        in: query
-        required: false
-        schema:
-          type: integer
-          maximum: 500
-          minimum: 0
-          default: 0
-          title: Skip
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
-  /oracle/sessions/{session_id}:
-    get:
-      summary: Get Oracle Session Detail
-      description: 'Retrieve the full details of a single Oracle research session.
-
-
-        This is the new primary endpoint.
-
-        The old /oracle/history/{session_id} endpoint is deprecated but still operational.'
-      operationId: get_oracle_session_detail_v2_oracle_sessions__session_id__get
-      parameters:
-      - name: session_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Session Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
-    delete:
-      summary: Delete Oracle Session
-      description: Delete an Oracle research session and its associated chat messages.
-      operationId: delete_oracle_session_v2_oracle_sessions__session_id__delete
-      parameters:
-      - name: session_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Session Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
-  /oracle/sessions/{session_id}/chat/stream:
-    post:
-      summary: Stream Oracle Session Chat
-      description: 'Stream a follow-up chat response for an Oracle research session.
-
-
-        The response is generated as grounded Q&A based on:
-
-        - The original research report
-
-        - Citations and sources discovered during research
-
-        - Previous chat messages in the session
-
-
-        This is a lightweight chat mode (not a full Oracle research run).'
-      operationId: stream_oracle_session_chat_v2_oracle_sessions__session_id__chat_stream_post
-      parameters:
-      - name: session_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Session Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OracleSessionChatRequest'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
-  /oracle/sessions/{session_id}/messages:
-    get:
-      summary: Get Oracle Session Messages
-      description: 'Get chat messages for an Oracle research session.
-
-
-        Returns the conversation history including the original query/report
-
-        and any follow-up messages.'
-      operationId: get_oracle_session_messages_v2_oracle_sessions__session_id__messages_get
-      parameters:
-      - name: session_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Session Id
-      - name: limit
-        in: query
-        required: false
-        schema:
-          type: integer
-          maximum: 500
-          minimum: 1
-          default: 100
-          title: Limit
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
-  /packages/grep:
-    post:
-      tags:
-      - Usage
-      summary: Grep package source
-      description: Regex search over public package source code (npm, PyPI, crates.io,
-        Go modules).
-      operationId: package_search_grep_v2_v2_packages_grep_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PackageSearchGrepRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /packages/read:
-    post:
-      tags:
-      - Usage
-      summary: Read package file
-      description: Read specific lines from a package source file. Max 200 lines per
-        request.
-      operationId: package_search_read_file_v2_v2_packages_read_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PackageSearchReadFileRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /packages/search:
-    post:
-      tags:
-      - Usage
-      summary: Semantic package search
-      description: Hybrid semantic + keyword search over package source. 1-5 natural
-        language queries.
-      operationId: package_search_hybrid_v2_v2_packages_search_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PackageSearchHybridRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /search:
-    post:
-      tags:
-      - Search
-      summary: Unified search
-      description: Single search endpoint with a mode discriminator.
-      operationId: unified_search_v2_v2_search_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              oneOf:
-              - $ref: '#/components/schemas/QuerySearchRequest'
-              - $ref: '#/components/schemas/WebSearchRequestWithMode'
-              - $ref: '#/components/schemas/DeepResearchRequestWithMode'
-              - $ref: '#/components/schemas/UniversalSearchRequestWithMode'
-              title: Body
-              discriminator:
-                propertyName: mode
-                mapping:
-                  query: '#/components/schemas/QuerySearchRequest'
-                  web: '#/components/schemas/WebSearchRequestWithMode'
-                  deep: '#/components/schemas/DeepResearchRequestWithMode'
-                  universal: '#/components/schemas/UniversalSearchRequestWithMode'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /slack/install:
-    post:
-      tags:
-      - Usage
-      summary: Generate Install Url
-      description: Generate a Slack OAuth authorization URL.
-      operationId: generate_install_url_v2_slack_install_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SlackInstallRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /slack/install/callback:
-    post:
-      tags:
-      - Usage
-      summary: Handle Oauth Callback
-      description: 'Exchange an OAuth code for tokens and create the installation.
-
-
-        Called by the frontend callback route after the user authorizes the Slack
-        app.'
-      operationId: handle_oauth_callback_v2_slack_install_callback_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SlackOAuthCallbackRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /slack/install/token:
-    post:
-      tags:
-      - Usage
-      summary: Register External Token
-      description: 'Register an external Slack bot token (BYOT).
-
-
-        For multi-tenant scenarios: your customers provide their Slack bot token
-
-        and you manage it through Nia''s API.'
-      operationId: register_external_token_v2_slack_install_token_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SlackTokenRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /slack/installations:
-    get:
-      tags:
-      - Usage
-      summary: List Slack Installations
-      description: List all Slack workspace connections for the authenticated user/org.
-      operationId: list_slack_installations_v2_slack_installations_get
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-  /slack/installations/{installation_id}:
-    get:
-      tags:
-      - Usage
-      summary: Get Slack Installation
-      description: Get details for a specific Slack installation.
-      operationId: get_slack_installation_v2_slack_installations__installation_id__get
-      parameters:
-      - name: installation_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Installation Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    delete:
-      tags:
-      - Usage
-      summary: Delete Slack Installation
-      description: Disconnect a Slack workspace.
-      operationId: delete_slack_installation_v2_slack_installations__installation_id__delete
-      parameters:
-      - name: installation_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Installation Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /slack/installations/{installation_id}/channels:
-    get:
-      tags:
-      - Usage
-      summary: List Slack Channels
-      description: List available Slack channels from the workspace.
-      operationId: list_slack_channels_v2_slack_installations__installation_id__channels_get
-      parameters:
-      - name: installation_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Installation Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    post:
-      tags:
-      - Usage
-      summary: Configure Slack Channels
-      description: Configure which channels to index.
-      operationId: configure_slack_channels_v2_slack_installations__installation_id__channels_post
-      parameters:
-      - name: installation_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Installation Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SlackChannelsConfigRequest'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /slack/installations/{installation_id}/grep:
-    post:
-      tags:
-      - Usage
-      summary: Grep Slack Messages
-      description: BM25 keyword search over indexed Slack messages in TurboPuffer.
-      operationId: grep_slack_messages_v2_slack_installations__installation_id__grep_post
-      parameters:
-      - name: installation_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Installation Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SlackGrepRequest'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /slack/installations/{installation_id}/index:
-    post:
-      tags:
-      - Usage
-      summary: Trigger Slack Index
-      description: Trigger a full re-index of the Slack workspace.
-      operationId: trigger_slack_index_v2_slack_installations__installation_id__index_post
-      parameters:
-      - name: installation_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Installation Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /slack/installations/{installation_id}/messages:
-    get:
-      tags:
-      - Usage
-      summary: Read Slack Messages
-      description: Read recent messages from a Slack channel (live from Slack API).
-      operationId: read_slack_messages_v2_slack_installations__installation_id__messages_get
-      parameters:
-      - name: installation_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Installation Id
-      - name: channel
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Channel
-      - name: limit
-        in: query
-        required: false
-        schema:
-          type: integer
-          default: 50
-          title: Limit
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /slack/installations/{installation_id}/status:
-    get:
-      tags:
-      - Usage
-      summary: Get Slack Index Status
-      description: Get the indexing status for a Slack workspace.
-      operationId: get_slack_index_status_v2_slack_installations__installation_id__status_get
-      parameters:
-      - name: installation_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Installation Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
   /sources:
     get:
       tags:
@@ -1927,7 +235,7 @@ paths:
       tags:
       - Sources
       summary: Get PDF upload URL
-      description: Generate a signed URL for direct PDF upload. Use the returned gcs_path
+      description: Generate a signed URL for direct PDF upload. Use the returned upload_path
         in POST /v2/sources.
       operationId: create_source_upload_url_v2_sources_upload_url_post
       requestBody:
@@ -2404,6 +712,1811 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /bulk-delete:
+    post:
+      tags:
+      - Sources
+      summary: Bulk delete resources
+      description: Delete multiple resources in a single request. Supports repositories,
+        documentation, research papers, contexts, and local folders.
+      operationId: bulk_delete_resources_v2_bulk_delete_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDeleteRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkDeleteResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /search:
+    post:
+      tags:
+      - Search
+      summary: Unified search
+      description: Single search endpoint with a mode discriminator.
+      operationId: unified_search_v2_v2_search_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - $ref: '#/components/schemas/QuerySearchRequest'
+              - $ref: '#/components/schemas/WebSearchRequestWithMode'
+              - $ref: '#/components/schemas/DeepResearchRequestWithMode'
+              - $ref: '#/components/schemas/UniversalSearchRequestWithMode'
+              title: Body
+              discriminator:
+                propertyName: mode
+                mapping:
+                  query: '#/components/schemas/QuerySearchRequest'
+                  web: '#/components/schemas/WebSearchRequestWithMode'
+                  deep: '#/components/schemas/DeepResearchRequestWithMode'
+                  universal: '#/components/schemas/UniversalSearchRequestWithMode'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /github/glob:
+    post:
+      tags:
+      - Search
+      summary: Github Glob
+      description: Find files matching a glob pattern in a GitHub repository.
+      operationId: github_glob_v2_github_glob_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitHubGlobRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /github/read:
+    post:
+      tags:
+      - Search
+      summary: Github Read
+      description: Read a file from a GitHub repository with optional line range.
+      operationId: github_read_v2_github_read_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitHubReadRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /github/search:
+    post:
+      tags:
+      - Search
+      summary: Github Code Search
+      description: 'Search code in a GitHub repository using GitHub''s Code Search
+        API.
+
+
+        Rate limited to 10 requests/minute by GitHub. Requires authentication
+
+        for private repos (via user''s GitHub App installation).'
+      operationId: github_code_search_v2_github_search_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitHubSearchRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /github/tree/{owner}/{repo}:
+    get:
+      tags:
+      - Search
+      summary: Github Tree
+      description: Get the file tree of a GitHub repository or subdirectory.
+      operationId: github_tree_v2_github_tree__owner___repo__get
+      parameters:
+      - name: owner
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Owner
+      - name: repo
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Repo
+      - name: ref
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Branch, tag, or commit SHA
+          default: HEAD
+          title: Ref
+        description: Branch, tag, or commit SHA
+      - name: path
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Subdirectory path
+          title: Path
+        description: Subdirectory path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /packages/grep:
+    post:
+      tags:
+      - Search
+      summary: Grep package source
+      description: Regex search over public package source code (npm, PyPI, crates.io,
+        Go modules).
+      operationId: package_search_grep_v2_v2_packages_grep_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageSearchGrepRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /packages/read:
+    post:
+      tags:
+      - Search
+      summary: Read package file
+      description: Read specific lines from a package source file. Max 200 lines per
+        request.
+      operationId: package_search_read_file_v2_v2_packages_read_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageSearchReadFileRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /packages/search:
+    post:
+      tags:
+      - Search
+      summary: Semantic package search
+      description: Hybrid semantic + keyword search over package source. 1-5 natural
+        language queries.
+      operationId: package_search_hybrid_v2_v2_packages_search_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageSearchHybridRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /contexts:
+    post:
+      tags:
+      - Contexts
+      summary: Save context
+      description: Save conversation context for cross-agent sharing. Indexed in vector
+        store for semantic search.
+      operationId: save_context_v2_v2_contexts_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContextShareRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextShareResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Contexts
+      summary: List contexts
+      description: List conversation contexts with pagination. Filter by tags, agent
+        source, or memory type.
+      operationId: list_contexts_v2_v2_contexts_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Number of contexts to return
+          default: 20
+          title: Limit
+        description: Number of contexts to return
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of contexts to skip
+          default: 0
+          title: Offset
+        description: Number of contexts to skip
+      - name: tags
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated tags to filter by
+          title: Tags
+        description: Comma-separated tags to filter by
+      - name: agent_source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by agent source
+          title: Agent Source
+        description: Filter by agent source
+      - name: memory_type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Filter by memory type: scratchpad, episodic, fact, procedural'
+          title: Memory Type
+        description: 'Filter by memory type: scratchpad, episodic, fact, procedural'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextListCompatResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /contexts/search:
+    get:
+      tags:
+      - Contexts
+      summary: Text search contexts
+      description: Search contexts by content, title, summary, or tags using full-text search.
+      operationId: search_contexts_v2_v2_contexts_search_get
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          description: Search query
+          title: Q
+        description: Search query
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Number of contexts to return
+          default: 20
+          title: Limit
+        description: Number of contexts to return
+      - name: tags
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated tags to filter by
+          title: Tags
+        description: Comma-separated tags to filter by
+      - name: agent_source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by agent source
+          title: Agent Source
+        description: Filter by agent source
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextSearchResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /contexts/semantic-search:
+    get:
+      tags:
+      - Contexts
+      summary: Semantic search contexts
+      description: Hybrid semantic + keyword search over contexts. Returns relevance
+        scores and highlights.
+      operationId: semantic_search_contexts_v2_v2_contexts_semantic_search_get
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          description: Search query
+          title: Q
+        description: Search query
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Number of contexts to return
+          default: 20
+          title: Limit
+        description: Number of contexts to return
+      - name: include_highlights
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Include match highlights
+          default: true
+          title: Include Highlights
+        description: Include match highlights
+      - name: workspace_filter
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by specific workspace name
+          title: Workspace Filter
+        description: Filter by specific workspace name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextSemanticSearchResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /contexts/{context_id}:
+    get:
+      tags:
+      - Contexts
+      summary: Get context
+      description: Retrieve a specific context by ID.
+      operationId: get_context_v2_v2_contexts__context_id__get
+      parameters:
+      - name: context_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Context Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextShareResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - Contexts
+      summary: Update context
+      description: Update an existing context. Re-indexes automatically if content
+        changes.
+      operationId: update_context_v2_v2_contexts__context_id__put
+      parameters:
+      - name: context_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Context Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContextShareUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextShareResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Contexts
+      summary: Delete context
+      description: Soft delete a context (marks inactive).
+      operationId: delete_context_v2_v2_contexts__context_id__delete
+      parameters:
+      - name: context_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Context Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /oracle:
+    post:
+      summary: Oracle Research
+      description: Run Oracle research and return complete result (non-streaming).
+      operationId: oracle_research_v2_oracle_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OracleResearchRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
+  /oracle/1m-usage:
+    get:
+      summary: Get 1M Usage
+      description: Get daily usage for 1M context window models.
+      operationId: get_1m_usage_v2_oracle_1m_usage_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyUsage1MResponse'
+      tags:
+      - Oracle
+  /oracle/jobs:
+    post:
+      summary: Create Oracle Job
+      description: 'Create a new Oracle research job.
+
+
+        Returns immediately with job_id and session_id.
+
+        Use /oracle/jobs/{job_id}/stream to receive real-time updates.
+
+
+        Features:
+
+        - Per-user concurrency limit: max 3 concurrent Oracle jobs
+
+        - Job queuing: additional jobs wait in queue
+
+        - 30-minute timeout per job'
+      operationId: create_oracle_job_v2_oracle_jobs_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OracleResearchRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
+    get:
+      summary: List Oracle Jobs
+      description: 'List Oracle research jobs for the authenticated user.
+
+
+        Returns jobs ordered by creation time (newest first).'
+      operationId: list_oracle_jobs_v2_oracle_jobs_get
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Filter by status: queued, running, completed, failed'
+          title: Status
+        description: 'Filter by status: queued, running, completed, failed'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Skip
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
+  /oracle/jobs/{job_id}:
+    get:
+      summary: Get Oracle Job
+      description: 'Get the status and details of an Oracle research job.
+
+
+        Returns full job details including result if completed.
+
+        Includes automatic state recovery if a job appears stuck in running state.'
+      operationId: get_oracle_job_v2_oracle_jobs__job_id__get
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
+    delete:
+      summary: Cancel Oracle Job
+      description: 'Cancel a running or queued Oracle research job.
+
+
+        Note: Cancellation is best-effort. The job may complete
+
+        before cancellation takes effect.'
+      operationId: cancel_oracle_job_v2_oracle_jobs__job_id__delete
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
+  /oracle/jobs/{job_id}/stream:
+    get:
+      summary: Stream Oracle Job
+      description: 'Stream real-time updates from an Oracle research job.
+
+
+        Server-sent events stream.
+
+        Reconnectable: can reconnect to a running job''s stream at any time.'
+      operationId: stream_oracle_job_v2_oracle_jobs__job_id__stream_get
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
+  /oracle/sessions:
+    get:
+      summary: List Oracle Sessions
+      description: 'List Oracle research sessions for the authenticated API key.
+
+
+        This is the new primary endpoint.
+
+        The old /oracle/history endpoint is deprecated but still operational.'
+      operationId: list_oracle_sessions_v2_oracle_sessions_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 0
+          default: 0
+          title: Skip
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
+  /oracle/sessions/{session_id}:
+    get:
+      summary: Get Oracle Session Detail
+      description: 'Retrieve the full details of a single Oracle research session.
+
+
+        This is the new primary endpoint.
+
+        The old /oracle/history/{session_id} endpoint is deprecated but still operational.'
+      operationId: get_oracle_session_detail_v2_oracle_sessions__session_id__get
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
+    delete:
+      summary: Delete Oracle Session
+      description: Delete an Oracle research session and its associated chat messages.
+      operationId: delete_oracle_session_v2_oracle_sessions__session_id__delete
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
+  /oracle/sessions/{session_id}/chat/stream:
+    post:
+      summary: Stream Oracle Session Chat
+      description: 'Stream a follow-up chat response for an Oracle research session.
+
+
+        The response is generated as grounded Q&A based on:
+
+        - The original research report
+
+        - Citations and sources discovered during research
+
+        - Previous chat messages in the session
+
+
+        This is a lightweight chat mode (not a full Oracle research run).'
+      operationId: stream_oracle_session_chat_v2_oracle_sessions__session_id__chat_stream_post
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OracleSessionChatRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
+  /oracle/sessions/{session_id}/messages:
+    get:
+      summary: Get Oracle Session Messages
+      description: 'Get chat messages for an Oracle research session.
+
+
+        Returns the conversation history including the original query/report
+
+        and any follow-up messages.'
+      operationId: get_oracle_session_messages_v2_oracle_sessions__session_id__messages_get
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 100
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Oracle
+  /github/tracer:
+    post:
+      tags:
+      - Tracer
+      summary: Create Tracer Job
+      description: 'Create a Tracer search job.
+
+
+        Tracer is an autonomous agent that searches GitHub repositories
+
+        to answer your question. Returns immediately with a job_id and session_id.
+
+        Use /github/tracer/{job_id}/stream to receive real-time updates.'
+      operationId: create_tracer_job_v2_github_tracer_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TracerRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Tracer
+      summary: List Tracer Jobs
+      description: List Tracer jobs for the authenticated user.
+      operationId: list_tracer_jobs_v2_github_tracer_get
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by status
+          title: Status
+        description: Filter by status
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Max results
+          default: 50
+          title: Limit
+        description: Max results
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Offset for pagination
+          default: 0
+          title: Skip
+        description: Offset for pagination
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /github/tracer/{job_id}:
+    delete:
+      tags:
+      - Tracer
+      summary: Delete Tracer Job
+      description: Delete a Tracer job by session_id or job_id.
+      operationId: delete_tracer_job_v2_github_tracer__job_id__delete
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Tracer
+      summary: Get Tracer Job
+      description: Get the status and result of a Tracer search job.
+      operationId: get_tracer_job_v2_github_tracer__job_id__get
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /github/tracer/{job_id}/stream:
+    get:
+      tags:
+      - Tracer
+      summary: Stream Tracer Job
+      description: 'Stream real-time updates from a Tracer search job.
+
+
+        Server-sent events stream with automatic fallback polling.
+
+        Reconnectable: can reconnect to a running job''s stream at any time.'
+      operationId: stream_tracer_job_v2_github_tracer__job_id__stream_get
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /categories:
+    get:
+      tags:
+      - Categories
+      summary: List categories
+      description: List categories for the authenticated user/organization.
+      operationId: list_categories_v2_categories_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Number of categories to return
+          default: 50
+          title: Limit
+        description: Number of categories to return
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of categories to skip
+          default: 0
+          title: Offset
+        description: Number of categories to skip
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryListCompatResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - Categories
+      summary: Create category
+      description: Create a new category for organizing data sources.
+      operationId: create_category_v2_categories_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/routes__v2__categories__CategoryCreate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /categories/{category_id}:
+    patch:
+      tags:
+      - Categories
+      summary: Update category
+      description: Update an existing category.
+      operationId: update_category_v2_categories__category_id__patch
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Category Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/routes__v2__categories__CategoryUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Categories
+      summary: Delete category
+      description: Delete a category. Data sources with this category will become
+        uncategorized.
+      operationId: delete_category_v2_categories__category_id__delete
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Category Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /advisor:
+    post:
+      tags:
+      - Advisor
+      summary: Context-aware code advisor
+      description: Analyze codebase context against Nia's indexed documentation to
+        get tailored recommendations.
+      operationId: analyze_codebase_v2_advisor_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdvisorRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvisorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /dependencies/analyze:
+    post:
+      tags:
+      - Dependencies
+      summary: Analyze package manifest
+      description: Parse a package manifest and return dependency information with
+        documentation URL mappings. This is a preview - no subscriptions are created.
+      operationId: analyze_dependencies_v2_dependencies_analyze_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DependencyAnalyzeRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /dependencies/subscribe:
+    post:
+      tags:
+      - Dependencies
+      summary: Subscribe to documentation for manifest dependencies
+      description: Parse a package manifest and automatically subscribe to documentation
+        for all dependencies.
+      operationId: subscribe_to_dependencies_v2_dependencies_subscribe_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DependencySubscribeRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/routes__v2__dependencies__SubscribeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /dependencies/upload:
+    post:
+      tags:
+      - Dependencies
+      summary: Upload manifest file and subscribe to dependencies
+      description: Upload a package manifest file and subscribe to documentation for
+        all dependencies.
+      operationId: upload_and_subscribe_v2_dependencies_upload_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_upload_and_subscribe_v2_dependencies_upload_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/routes__v2__dependencies__SubscribeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/install:
+    post:
+      tags:
+      - Slack
+      summary: Generate Install Url
+      description: Generate a Slack OAuth authorization URL.
+      operationId: generate_install_url_v2_slack_install_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackInstallRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/install/callback:
+    post:
+      tags:
+      - Slack
+      summary: Handle Oauth Callback
+      description: 'Exchange an OAuth code for tokens and create the installation.
+
+
+        Called by the frontend callback route after the user authorizes the Slack
+        app.'
+      operationId: handle_oauth_callback_v2_slack_install_callback_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackOAuthCallbackRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/install/token:
+    post:
+      tags:
+      - Slack
+      summary: Register External Token
+      description: 'Register an external Slack bot token (BYOT).
+
+
+        For multi-tenant scenarios: your customers provide their Slack bot token
+
+        and you manage it through Nia''s API.'
+      operationId: register_external_token_v2_slack_install_token_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackTokenRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations:
+    get:
+      tags:
+      - Slack
+      summary: List Slack Installations
+      description: List all Slack workspace connections for the authenticated user/org.
+      operationId: list_slack_installations_v2_slack_installations_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /slack/installations/{installation_id}:
+    get:
+      tags:
+      - Slack
+      summary: Get Slack Installation
+      description: Get details for a specific Slack installation.
+      operationId: get_slack_installation_v2_slack_installations__installation_id__get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Slack
+      summary: Delete Slack Installation
+      description: Disconnect a Slack workspace.
+      operationId: delete_slack_installation_v2_slack_installations__installation_id__delete
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/channels:
+    get:
+      tags:
+      - Slack
+      summary: List Slack Channels
+      description: List available Slack channels from the workspace.
+      operationId: list_slack_channels_v2_slack_installations__installation_id__channels_get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - Slack
+      summary: Configure Slack Channels
+      description: Configure which channels to index.
+      operationId: configure_slack_channels_v2_slack_installations__installation_id__channels_post
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/routes__v2__slack__SlackChannelsConfigRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/grep:
+    post:
+      tags:
+      - Slack
+      summary: Grep Slack Messages
+      description: Keyword search over indexed Slack messages.
+      operationId: grep_slack_messages_v2_slack_installations__installation_id__grep_post
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackGrepRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/index:
+    post:
+      tags:
+      - Slack
+      summary: Trigger Slack Index
+      description: Trigger a full re-index of the Slack workspace.
+      operationId: trigger_slack_index_v2_slack_installations__installation_id__index_post
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/messages:
+    get:
+      tags:
+      - Slack
+      summary: Read Slack Messages
+      description: Read recent messages from a Slack channel (live from Slack API).
+      operationId: read_slack_messages_v2_slack_installations__installation_id__messages_get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      - name: channel
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Channel
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 50
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/status:
+    get:
+      tags:
+      - Slack
+      summary: Get Slack Index Status
+      description: Get the indexing status for a Slack workspace.
+      operationId: get_slack_index_status_v2_slack_installations__installation_id__status_get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/bootstrap-key:
+    post:
+      tags:
+      - Auth
+      summary: Bootstrap Key
+      description: 'Exchange a bootstrap token for an nk_ API key (one-time use).
+
+
+        The returned api_key is shown only once — store it securely.'
+      operationId: bootstrap_key_v2_auth_bootstrap_key_post
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BootstrapKeyRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BootstrapKeyResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/login-key:
+    post:
+      tags:
+      - Auth
+      summary: Login Key
+      description: 'Authenticate with email + password and receive a new nk_ API key.
+
+
+        For returning users who already have an account but need a new key
+
+        (e.g. an AI agent setting up in a new environment).'
+      operationId: login_key_v2_auth_login_key_post
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginKeyRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginKeyResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/signup:
+    post:
+      tags:
+      - Auth
+      summary: Signup
+      description: 'Create a new account and receive a bootstrap token.
+
+
+        The bootstrap token can be exchanged exactly once via POST /v2/auth/bootstrap-key
+
+        to obtain an nk_ API key.'
+      operationId: signup_v2_auth_signup_post
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /usage:
     get:
       tags:
@@ -2529,6 +2642,40 @@ components:
       required:
       - file
       title: Body_upload_and_subscribe_v2_dependencies_upload_post
+    BootstrapKeyRequest:
+      properties:
+        bootstrap_token:
+          type: string
+          title: Bootstrap Token
+          description: Token from /v2/auth/signup response
+      type: object
+      required:
+      - bootstrap_token
+      title: BootstrapKeyRequest
+    BootstrapKeyResponse:
+      properties:
+        api_key:
+          type: string
+          title: Api Key
+          description: Your new nk_ API key — store it securely, it cannot be retrieved
+            again
+        api_key_id:
+          type: string
+          title: Api Key Id
+        user_id:
+          type: string
+          title: User Id
+        organization_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Organization Id
+      type: object
+      required:
+      - api_key
+      - api_key_id
+      - user_id
+      title: BootstrapKeyResponse
     BulkDeleteItem:
       properties:
         id:
@@ -2813,10 +2960,10 @@ components:
           title: Vector Matches
           description: Number of vector matches
           default: 0
-        mongodb_matches:
+        text_matches:
           type: integer
-          title: Mongodb Matches
-          description: Number of MongoDB matches
+          title: Text Matches
+          description: Number of full-text search matches
           default: 0
       type: object
       title: ContextSemanticSearchMetadata
@@ -3464,7 +3611,7 @@ components:
           - type: string
           - type: 'null'
           title: Namespace
-          description: TurboPuffer namespace for the source
+          description: Search index namespace for the source
         status:
           anyOf:
           - type: string
@@ -3666,6 +3813,52 @@ components:
       title: LocalSourceFilters
       description: Filters for local/personal source retrieval (messages, contacts,
         etc.).
+    LoginKeyRequest:
+      properties:
+        email:
+          type: string
+          title: Email
+        password:
+          type: string
+          title: Password
+        organization_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Organization Id
+          description: Org to scope the new key to (must be a member)
+        idempotency_key:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency Key
+      type: object
+      required:
+      - email
+      - password
+      title: LoginKeyRequest
+    LoginKeyResponse:
+      properties:
+        api_key:
+          type: string
+          title: Api Key
+        api_key_id:
+          type: string
+          title: Api Key Id
+        user_id:
+          type: string
+          title: User Id
+        organization_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Organization Id
+      type: object
+      required:
+      - api_key
+      - api_key_id
+      - user_id
+      title: LoginKeyResponse
     MappingItem:
       properties:
         name:
@@ -4134,40 +4327,78 @@ components:
       type: object
       title: SearchScope
       description: Scope for searching Nia's indexed sources.
-    SlackChannelsConfigRequest:
+    SignupRequest:
       properties:
-        mode:
+        email:
           type: string
-          title: Mode
-          description: '''all'' to index all channels, ''selected'' to pick specific
-            ones'
-          default: all
-        include_channels:
+          title: Email
+          description: User email address
+        password:
+          type: string
+          minLength: 8
+          title: Password
+          description: Account password (min 8 chars)
+        first_name:
           anyOf:
-          - items:
-              type: string
-            type: array
+          - type: string
           - type: 'null'
-          title: Include Channels
-          description: Channel IDs to include (when mode='selected')
-        exclude_channels:
+          title: First Name
+        last_name:
           anyOf:
-          - items:
-              type: string
-            type: array
+          - type: string
           - type: 'null'
-          title: Exclude Channels
-          description: Channel IDs to exclude
+          title: Last Name
+        organization_name:
+          type: string
+          minLength: 1
+          title: Organization Name
+          description: Organization name (required — all API keys are org-scoped)
+        idempotency_key:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency Key
+          description: Idempotency key for safe retries
       type: object
-      title: SlackChannelsConfigRequest
-      description: Configure which channels to index.
+      required:
+      - email
+      - password
+      - organization_name
+      title: SignupRequest
+    SignupResponse:
+      properties:
+        user_id:
+          type: string
+          title: User Id
+        organization_id:
+          type: string
+          title: Organization Id
+        bootstrap_token:
+          type: string
+          title: Bootstrap Token
+          description: One-time token to exchange for an API key via /v2/auth/bootstrap-key
+        expires_at:
+          type: string
+          title: Expires At
+        email_verified:
+          type: boolean
+          title: Email Verified
+          description: Whether the email is already verified in the identity provider
+          default: false
+      type: object
+      required:
+      - user_id
+      - organization_id
+      - bootstrap_token
+      - expires_at
+      title: SignupResponse
     SlackGrepRequest:
       properties:
         pattern:
           type: string
           minLength: 1
           title: Pattern
-          description: Search string for BM25 keyword matching
+          description: Search string for keyword matching
         channel:
           anyOf:
           - type: string
@@ -4481,7 +4712,7 @@ components:
           anyOf:
           - type: string
           - type: 'null'
-          title: Gcs Path
+          title: Upload Path
         focus_instructions:
           anyOf:
           - type: string
@@ -4637,8 +4868,8 @@ components:
           description: Signed URL for direct upload (HTTP PUT)
         gcs_path:
           type: string
-          title: Gcs Path
-          description: GCS path to pass to create-source payload
+          title: Upload Path
+          description: Cloud storage path to pass to create-source payload
         expires_in_seconds:
           type: integer
           title: Expires In Seconds
@@ -4780,9 +5011,24 @@ components:
         model:
           anyOf:
           - type: string
+            enum:
+            - claude-haiku-4-5-20251001
+            - claude-opus-4-6
+            - claude-opus-4-6-1m
           - type: 'null'
           title: Model
-          description: Model override (claude-opus-4-6 or claude-opus-4-6-1m)
+          description: Optional model override (claude-haiku-4-5-20251001, claude-opus-4-6,
+            or claude-opus-4-6-1m). Must match mode when both are provided.
+        mode:
+          anyOf:
+          - type: string
+            enum:
+            - tracer-fast
+            - tracer-deep
+          - type: 'null'
+          title: Mode
+          description: 'Tracer mode: tracer-fast (Haiku) or tracer-deep (Opus). Defaults
+            to tracer-deep. When mode and model are both provided, they must agree.'
       type: object
       required:
       - query
@@ -4821,7 +5067,7 @@ components:
           maximum: 1.0
           minimum: 0.0
           title: Alpha
-          description: Weight for vector search (0.7 = 70% vector)
+          description: Weight for semantic search (0.7 = 70% semantic)
           default: 0.7
         compress_output:
           type: boolean
@@ -4884,7 +5130,7 @@ components:
         use_native_boosting:
           type: boolean
           title: Use Native Boosting
-          description: Use TurboPuffer FTS v2 native Sum/Product boosting
+          description: Use native full-text search Sum/Product boosting
           default: true
         semantic_cache_threshold:
           type: number
@@ -5217,34 +5463,36 @@ components:
       - results
       - summary
       title: SubscribeResponse
+    routes__v2__slack__SlackChannelsConfigRequest:
+      properties:
+        mode:
+          type: string
+          title: Mode
+          description: '''all'' to index all channels, ''selected'' to pick specific
+            ones'
+          default: all
+        include_channels:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Include Channels
+          description: Channel IDs to include (when mode='selected')
+        exclude_channels:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Exclude Channels
+          description: Channel IDs to exclude
+      type: object
+      title: SlackChannelsConfigRequest
+      description: Configure which channels to index.
   securitySchemes:
     ApiKeyAuth:
       type: http
       scheme: bearer
       bearerFormat: API Key
       description: API key must be provided in the Authorization header
-tags:
-- name: Sources
-  description: Unified source management (repositories, documentation, papers, datasets,
-    local folders)
-- name: Search
-  description: Unified search endpoint with mode discriminator
-- name: Context Sharing
-  description: Cross-agent context management and retrieval
-- name: Categories
-  description: Category management for organizing indexed sources
-- name: GitHub Search
-  description: Live GitHub search and repository exploration
-- name: Advisor
-  description: Context-aware code advisor against indexed documentation
-- name: Dependencies
-  description: Dependency analysis and documentation subscription
-- name: Usage
-  description: Usage tracking and bulk operations
-servers:
-- url: https://apigcp.trynia.ai/v2
-  description: Production API
-- url: http://localhost:8000/v2
-  description: Local development
-security:
-- ApiKeyAuth: []
