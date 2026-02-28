@@ -2,38 +2,13 @@ openapi: 3.1.0
 info:
   title: Nia AI API
   version: 1.0.0
-  description: 'Nia AI API provides a single, consistent `sources` resource for all
-    indexed content.
-
-
-    ## Core Resources
-
-
-    **Sources** (`/sources`)
-
-    - `repository`
-
-    - `documentation`
-
-    - `research_paper`
-
-    - `huggingface_dataset`
-
-    - `local_folder`
-
-
-    **Search** (`/search`)
-
-    - `mode`: query | web | deep | universal
-
-
-    Legacy endpoints are deprecated and will be removed in a future version. Prefer
-    `/sources` and `/search` for new integrations.'
+  description: Nia API contract used to generate official Python and TypeScript SDKs.
 paths:
   /advisor:
     post:
       tags:
-      - Advisor
+      - v2-api
+      - advisor
       summary: Context-aware code advisor
       description: Analyze codebase context against Nia's indexed documentation to
         get tailored recommendations.
@@ -57,10 +32,105 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /auth/bootstrap-key:
+    post:
+      tags:
+      - v2-api
+      - auth-bootstrap
+      summary: Bootstrap Key
+      description: 'Exchange a bootstrap token for an nk_ API key (one-time use).
+
+
+        The returned api_key is shown only once — store it securely.'
+      operationId: bootstrap_key_v2_auth_bootstrap_key_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BootstrapKeyRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BootstrapKeyResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/login-key:
+    post:
+      tags:
+      - v2-api
+      - auth-bootstrap
+      summary: Login Key
+      description: 'Authenticate with email + password and receive a new nk_ API key.
+
+
+        For returning users who already have an account but need a new key
+
+        (e.g. an AI agent setting up in a new environment).'
+      operationId: login_key_v2_auth_login_key_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginKeyRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginKeyResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/signup:
+    post:
+      tags:
+      - v2-api
+      - auth-bootstrap
+      summary: Signup
+      description: 'Create a new account and receive a bootstrap token.
+
+
+        The bootstrap token can be exchanged exactly once via POST /v2/auth/bootstrap-key
+
+        to obtain an nk_ API key.'
+      operationId: signup_v2_auth_signup_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /bulk-delete:
     post:
       tags:
-      - Usage
+      - v2-api
+      - v2-api
       summary: Bulk delete resources
       description: Delete multiple resources in a single request. Supports repositories,
         documentation, research papers, contexts, and local folders.
@@ -87,7 +157,8 @@ paths:
   /categories:
     get:
       tags:
-      - Categories
+      - v2-api
+      - v2-api-categories
       summary: List categories
       description: List categories for the authenticated user/organization.
       operationId: list_categories_v2_categories_get
@@ -128,7 +199,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     post:
       tags:
-      - Categories
+      - v2-api
+      - v2-api-categories
       summary: Create category
       description: Create a new category for organizing data sources.
       operationId: create_category_v2_categories_post
@@ -154,7 +226,8 @@ paths:
   /categories/{category_id}:
     patch:
       tags:
-      - Categories
+      - v2-api
+      - v2-api-categories
       summary: Update category
       description: Update an existing category.
       operationId: update_category_v2_categories__category_id__patch
@@ -186,7 +259,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     delete:
       tags:
-      - Categories
+      - v2-api
+      - v2-api-categories
       summary: Delete category
       description: Delete a category. Data sources with this category will become
         uncategorized.
@@ -213,7 +287,8 @@ paths:
   /contexts:
     post:
       tags:
-      - Context Sharing
+      - v2-api
+      - v2-api-contexts
       summary: Save context
       description: Save conversation context for cross-agent sharing. Indexed in vector
         store for semantic search.
@@ -239,7 +314,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     get:
       tags:
-      - Context Sharing
+      - v2-api
+      - v2-api-contexts
       summary: List contexts
       description: List conversation contexts with pagination. Filter by tags, agent
         source, or memory type.
@@ -312,7 +388,8 @@ paths:
   /contexts/search:
     get:
       tags:
-      - Context Sharing
+      - v2-api
+      - v2-api-contexts
       summary: Text search contexts
       description: Search contexts by content, title, summary, or tags using MongoDB
         text search.
@@ -374,7 +451,8 @@ paths:
   /contexts/semantic-search:
     get:
       tags:
-      - Context Sharing
+      - v2-api
+      - v2-api-contexts
       summary: Semantic search contexts
       description: Vector + BM25 hybrid search over contexts. Returns relevance scores
         and highlights.
@@ -435,7 +513,8 @@ paths:
   /contexts/{context_id}:
     get:
       tags:
-      - Context Sharing
+      - v2-api
+      - v2-api-contexts
       summary: Get context
       description: Retrieve a specific context by ID.
       operationId: get_context_v2_v2_contexts__context_id__get
@@ -461,7 +540,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     put:
       tags:
-      - Context Sharing
+      - v2-api
+      - v2-api-contexts
       summary: Update context
       description: Update an existing context. Re-indexes in vector store if content
         changes.
@@ -494,7 +574,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     delete:
       tags:
-      - Context Sharing
+      - v2-api
+      - v2-api-contexts
       summary: Delete context
       description: Soft delete a context (marks inactive).
       operationId: delete_context_v2_v2_contexts__context_id__delete
@@ -521,7 +602,8 @@ paths:
   /dependencies/analyze:
     post:
       tags:
-      - Dependencies
+      - v2-api
+      - v2-api
       summary: Analyze package manifest
       description: Parse a package manifest and return dependency information with
         documentation URL mappings. This is a preview - no subscriptions are created.
@@ -548,7 +630,8 @@ paths:
   /dependencies/subscribe:
     post:
       tags:
-      - Dependencies
+      - v2-api
+      - v2-api
       summary: Subscribe to documentation for manifest dependencies
       description: Parse a package manifest and automatically subscribe to documentation
         for all dependencies.
@@ -575,7 +658,8 @@ paths:
   /dependencies/upload:
     post:
       tags:
-      - Dependencies
+      - v2-api
+      - v2-api
       summary: Upload manifest file and subscribe to dependencies
       description: Upload a package manifest file and subscribe to documentation for
         all dependencies.
@@ -602,7 +686,8 @@ paths:
   /github/glob:
     post:
       tags:
-      - GitHub Search
+      - v2-api
+      - github-search
       summary: Github Glob
       description: Find files matching a glob pattern in a GitHub repository.
       operationId: github_glob_v2_github_glob_post
@@ -627,7 +712,8 @@ paths:
   /github/read:
     post:
       tags:
-      - GitHub Search
+      - v2-api
+      - github-search
       summary: Github Read
       description: Read a file from a GitHub repository with optional line range.
       operationId: github_read_v2_github_read_post
@@ -652,7 +738,8 @@ paths:
   /github/search:
     post:
       tags:
-      - GitHub Search
+      - v2-api
+      - github-search
       summary: Github Code Search
       description: 'Search code in a GitHub repository using GitHub''s Code Search
         API.
@@ -683,7 +770,8 @@ paths:
   /github/tracer:
     post:
       tags:
-      - GitHub Search
+      - v2-api
+      - github-search
       summary: Create Tracer Job
       description: 'Create a Tracer search job.
 
@@ -714,7 +802,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     get:
       tags:
-      - GitHub Search
+      - v2-api
+      - github-search
       summary: List Tracer Jobs
       description: List Tracer jobs for the authenticated user.
       operationId: list_tracer_jobs_v2_github_tracer_get
@@ -765,7 +854,8 @@ paths:
   /github/tracer/{job_id}:
     delete:
       tags:
-      - GitHub Search
+      - v2-api
+      - github-search
       summary: Delete Tracer Job
       description: Delete a Tracer job by session_id or workflow_run_id.
       operationId: delete_tracer_job_v2_github_tracer__job_id__delete
@@ -790,7 +880,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     get:
       tags:
-      - GitHub Search
+      - v2-api
+      - github-search
       summary: Get Tracer Job
       description: Get the status and result of a Tracer search job.
       operationId: get_tracer_job_v2_github_tracer__job_id__get
@@ -816,7 +907,8 @@ paths:
   /github/tracer/{job_id}/stream:
     get:
       tags:
-      - GitHub Search
+      - v2-api
+      - github-search
       summary: Stream Tracer Job
       description: 'Stream real-time updates from a Tracer search job.
 
@@ -847,7 +939,8 @@ paths:
   /github/tree/{owner}/{repo}:
     get:
       tags:
-      - GitHub Search
+      - v2-api
+      - github-search
       summary: Github Tree
       description: Get the file tree of a GitHub repository or subdirectory.
       operationId: github_tree_v2_github_tree__owner___repo__get
@@ -918,8 +1011,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
+  /oracle/1m-usage:
+    get:
+      summary: Get 1M Usage
+      description: Get daily usage for 1M context window models.
+      operationId: get_1m_usage_v2_oracle_1m_usage_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyUsage1MResponse'
   /oracle/jobs:
     post:
       summary: Create Oracle Job
@@ -957,8 +1060,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
     get:
       summary: List Oracle Jobs
       description: 'List Oracle research jobs for the authenticated user.
@@ -1006,8 +1107,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
   /oracle/jobs/{job_id}:
     get:
       summary: Get Oracle Job
@@ -1037,8 +1136,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
     delete:
       summary: Cancel Oracle Job
       description: 'Cancel a running or queued Oracle research job.
@@ -1067,8 +1164,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
   /oracle/jobs/{job_id}/stream:
     get:
       summary: Stream Oracle Job
@@ -1098,8 +1193,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
   /oracle/sessions:
     get:
       summary: List Oracle Sessions
@@ -1141,8 +1234,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
   /oracle/sessions/{session_id}:
     get:
       summary: Get Oracle Session Detail
@@ -1172,8 +1263,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
     delete:
       summary: Delete Oracle Session
       description: Delete an Oracle research session and its associated chat messages.
@@ -1197,8 +1286,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
   /oracle/sessions/{session_id}/chat/stream:
     post:
       summary: Stream Oracle Session Chat
@@ -1241,8 +1328,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
   /oracle/sessions/{session_id}/messages:
     get:
       summary: Get Oracle Session Messages
@@ -1281,12 +1366,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-      tags:
-      - Usage
   /packages/grep:
     post:
       tags:
-      - Usage
+      - v2-api
+      - v2-api-package-search
       summary: Grep package source
       description: Regex search over public package source code (npm, PyPI, crates.io,
         Go modules).
@@ -1312,7 +1396,8 @@ paths:
   /packages/read:
     post:
       tags:
-      - Usage
+      - v2-api
+      - v2-api-package-search
       summary: Read package file
       description: Read specific lines from a package source file. Max 200 lines per
         request.
@@ -1338,7 +1423,8 @@ paths:
   /packages/search:
     post:
       tags:
-      - Usage
+      - v2-api
+      - v2-api-package-search
       summary: Semantic package search
       description: Hybrid semantic + keyword search over package source. 1-5 natural
         language queries.
@@ -1364,7 +1450,8 @@ paths:
   /search:
     post:
       tags:
-      - Search
+      - v2-api
+      - v2-api-search
       summary: Unified search
       description: Single search endpoint with a mode discriminator.
       operationId: unified_search_v2_v2_search_post
@@ -1398,10 +1485,353 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /slack/install:
+    post:
+      tags:
+      - v2-api
+      - v2-api-slack
+      summary: Generate Install Url
+      description: Generate a Slack OAuth authorization URL.
+      operationId: generate_install_url_v2_slack_install_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackInstallRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/install/callback:
+    post:
+      tags:
+      - v2-api
+      - v2-api-slack
+      summary: Handle Oauth Callback
+      description: 'Exchange an OAuth code for tokens and create the installation.
+
+
+        Called by the frontend callback route after the user authorizes the Slack
+        app.'
+      operationId: handle_oauth_callback_v2_slack_install_callback_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackOAuthCallbackRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/install/token:
+    post:
+      tags:
+      - v2-api
+      - v2-api-slack
+      summary: Register External Token
+      description: 'Register an external Slack bot token (BYOT).
+
+
+        For multi-tenant scenarios: your customers provide their Slack bot token
+
+        and you manage it through Nia''s API.'
+      operationId: register_external_token_v2_slack_install_token_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackTokenRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations:
+    get:
+      tags:
+      - v2-api
+      - v2-api-slack
+      summary: List Slack Installations
+      description: List all Slack workspace connections for the authenticated user/org.
+      operationId: list_slack_installations_v2_slack_installations_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /slack/installations/{installation_id}:
+    get:
+      tags:
+      - v2-api
+      - v2-api-slack
+      summary: Get Slack Installation
+      description: Get details for a specific Slack installation.
+      operationId: get_slack_installation_v2_slack_installations__installation_id__get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - v2-api
+      - v2-api-slack
+      summary: Delete Slack Installation
+      description: Disconnect a Slack workspace.
+      operationId: delete_slack_installation_v2_slack_installations__installation_id__delete
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/channels:
+    get:
+      tags:
+      - v2-api
+      - v2-api-slack
+      summary: List Slack Channels
+      description: List available Slack channels from the workspace.
+      operationId: list_slack_channels_v2_slack_installations__installation_id__channels_get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - v2-api
+      - v2-api-slack
+      summary: Configure Slack Channels
+      description: Configure which channels to index.
+      operationId: configure_slack_channels_v2_slack_installations__installation_id__channels_post
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/routes__v2__slack__SlackChannelsConfigRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/grep:
+    post:
+      tags:
+      - v2-api
+      - v2-api-slack
+      summary: Grep Slack Messages
+      description: BM25 keyword search over indexed Slack messages in TurboPuffer.
+      operationId: grep_slack_messages_v2_slack_installations__installation_id__grep_post
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackGrepRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/index:
+    post:
+      tags:
+      - v2-api
+      - v2-api-slack
+      summary: Trigger Slack Index
+      description: Trigger a full re-index of the Slack workspace.
+      operationId: trigger_slack_index_v2_slack_installations__installation_id__index_post
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/messages:
+    get:
+      tags:
+      - v2-api
+      - v2-api-slack
+      summary: Read Slack Messages
+      description: Read recent messages from a Slack channel (live from Slack API).
+      operationId: read_slack_messages_v2_slack_installations__installation_id__messages_get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      - name: channel
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Channel
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 50
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /slack/installations/{installation_id}/status:
+    get:
+      tags:
+      - v2-api
+      - v2-api-slack
+      summary: Get Slack Index Status
+      description: Get the indexing status for a Slack workspace.
+      operationId: get_slack_index_status_v2_slack_installations__installation_id__status_get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /sources:
     get:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: List Sources
       operationId: list_sources_v2_sources_get
       parameters:
@@ -1416,6 +1846,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Filter by source type
@@ -1483,7 +1914,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     post:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: Create Source
       operationId: create_source_v2_sources_post
       requestBody:
@@ -1508,7 +1940,8 @@ paths:
   /sources/resolve:
     get:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: Resolve Source
       operationId: resolve_source_v2_sources_resolve_get
       parameters:
@@ -1531,6 +1964,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1552,7 +1986,8 @@ paths:
   /sources/subscribe:
     post:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: Subscribe to a global source
       description: Subscribe to an existing globally indexed public source. Creates
         a local reference for instant access without re-indexing.
@@ -1579,7 +2014,8 @@ paths:
   /sources/upload-url:
     post:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: Get PDF upload URL
       description: Generate a signed URL for direct PDF upload. Use the returned gcs_path
         in POST /v2/sources.
@@ -1606,7 +2042,8 @@ paths:
   /sources/{source_id}:
     get:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: Get Source
       operationId: get_source_v2_sources__source_id__get
       parameters:
@@ -1627,6 +2064,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1647,7 +2085,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     patch:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: Update Source
       operationId: update_source_v2_sources__source_id__patch
       parameters:
@@ -1668,6 +2107,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1694,7 +2134,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     delete:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: Delete Source
       operationId: delete_source_v2_sources__source_id__delete
       parameters:
@@ -1715,6 +2156,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1736,7 +2178,8 @@ paths:
   /sources/{source_id}/classification:
     get:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: Get Source Classification
       operationId: get_source_classification_v2_sources__source_id__classification_get
       parameters:
@@ -1757,6 +2200,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1776,7 +2220,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     patch:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: Update Source Classification
       operationId: update_source_classification_v2_sources__source_id__classification_patch
       parameters:
@@ -1797,6 +2242,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1823,7 +2269,8 @@ paths:
   /sources/{source_id}/content:
     get:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: Get Source Content
       operationId: get_source_content_v2_sources__source_id__content_get
       parameters:
@@ -1844,6 +2291,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1894,7 +2342,8 @@ paths:
   /sources/{source_id}/grep:
     post:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: Grep Source
       operationId: grep_source_v2_sources__source_id__grep_post
       parameters:
@@ -1915,6 +2364,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1943,7 +2393,8 @@ paths:
   /sources/{source_id}/sync:
     post:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: Sync Source
       operationId: sync_source_v2_sources__source_id__sync_post
       parameters:
@@ -1964,6 +2415,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -1992,7 +2444,8 @@ paths:
   /sources/{source_id}/tree:
     get:
       tags:
-      - Sources
+      - v2-api
+      - v2-api-sources
       summary: Get Source Tree
       operationId: get_source_tree_v2_sources__source_id__tree_get
       parameters:
@@ -2013,6 +2466,7 @@ paths:
             - research_paper
             - huggingface_dataset
             - local_folder
+            - slack
             type: string
           - type: 'null'
           description: Source type hint
@@ -2052,7 +2506,8 @@ paths:
   /usage:
     get:
       tags:
-      - Usage
+      - v2-api
+      - v2-api
       summary: Get usage summary
       description: Get usage counts and limits for current billing period (queries,
         indexing, oracle, etc.).
@@ -2174,6 +2629,40 @@ components:
       required:
       - file
       title: Body_upload_and_subscribe_v2_dependencies_upload_post
+    BootstrapKeyRequest:
+      properties:
+        bootstrap_token:
+          type: string
+          title: Bootstrap Token
+          description: Token from /v2/auth/signup response
+      type: object
+      required:
+      - bootstrap_token
+      title: BootstrapKeyRequest
+    BootstrapKeyResponse:
+      properties:
+        api_key:
+          type: string
+          title: Api Key
+          description: Your new nk_ API key — store it securely, it cannot be retrieved
+            again
+        api_key_id:
+          type: string
+          title: Api Key Id
+        user_id:
+          type: string
+          title: User Id
+        organization_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Organization Id
+      type: object
+      required:
+      - api_key
+      - api_key_id
+      - user_id
+      title: BootstrapKeyResponse
     BulkDeleteItem:
       properties:
         id:
@@ -2756,6 +3245,26 @@ components:
       type: object
       title: ContextShareUpdateRequest
       description: Request model for updating a shared context.
+    DailyUsage1MResponse:
+      properties:
+        used:
+          type: integer
+          title: Used
+          description: Number of 1M context requests used today
+        limit:
+          type: integer
+          title: Limit
+          description: Daily limit for 1M context requests
+        remaining:
+          type: integer
+          title: Remaining
+          description: Remaining 1M context requests today
+      type: object
+      required:
+      - used
+      - limit
+      - remaining
+      title: DailyUsage1MResponse
     DatabaseFileItem:
       properties:
         filename:
@@ -3291,6 +3800,52 @@ components:
       title: LocalSourceFilters
       description: Filters for local/personal source retrieval (messages, contacts,
         etc.).
+    LoginKeyRequest:
+      properties:
+        email:
+          type: string
+          title: Email
+        password:
+          type: string
+          title: Password
+        organization_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Organization Id
+          description: Org to scope the new key to (must be a member)
+        idempotency_key:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency Key
+      type: object
+      required:
+      - email
+      - password
+      title: LoginKeyRequest
+    LoginKeyResponse:
+      properties:
+        api_key:
+          type: string
+          title: Api Key
+        api_key_id:
+          type: string
+          title: Api Key Id
+        user_id:
+          type: string
+          title: User Id
+        organization_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Organization Id
+      type: object
+      required:
+      - api_key
+      - api_key_id
+      - user_id
+      title: LoginKeyResponse
     MappingItem:
       properties:
         name:
@@ -3609,6 +4164,17 @@ components:
           description: List of local folders to query. Can be strings (display_name
             or local_folder_id) or dicts with 'local_folder_id' or 'identifier' fields.
             Local folders are private and user-scoped.
+        slack_workspaces:
+          items:
+            type: string
+          type: array
+          title: Slack Workspaces
+          description: List of Slack installation IDs to include in search
+        slack_filters:
+          anyOf:
+          - $ref: '#/components/schemas/SlackSearchFilters'
+          - type: 'null'
+          description: Filters for Slack message results (channels, users, date range)
         category:
           anyOf:
           - type: string
@@ -3748,6 +4314,186 @@ components:
       type: object
       title: SearchScope
       description: Scope for searching Nia's indexed sources.
+    SignupRequest:
+      properties:
+        email:
+          type: string
+          title: Email
+          description: User email address
+        password:
+          type: string
+          minLength: 8
+          title: Password
+          description: Account password (min 8 chars)
+        first_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: First Name
+        last_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Last Name
+        organization_name:
+          type: string
+          minLength: 1
+          title: Organization Name
+          description: Organization name (required — all API keys are org-scoped)
+        idempotency_key:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency Key
+          description: Idempotency key for safe retries
+      type: object
+      required:
+      - email
+      - password
+      - organization_name
+      title: SignupRequest
+    SignupResponse:
+      properties:
+        user_id:
+          type: string
+          title: User Id
+        organization_id:
+          type: string
+          title: Organization Id
+        bootstrap_token:
+          type: string
+          title: Bootstrap Token
+          description: One-time token to exchange for an API key via /v2/auth/bootstrap-key
+        expires_at:
+          type: string
+          title: Expires At
+        email_verified:
+          type: boolean
+          title: Email Verified
+          description: Whether the email is already verified in the identity provider
+          default: false
+      type: object
+      required:
+      - user_id
+      - organization_id
+      - bootstrap_token
+      - expires_at
+      title: SignupResponse
+    SlackGrepRequest:
+      properties:
+        pattern:
+          type: string
+          minLength: 1
+          title: Pattern
+          description: Search string for BM25 keyword matching
+        channel:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Channel
+          description: Filter by channel name or ID
+        limit:
+          type: integer
+          maximum: 100.0
+          minimum: 1.0
+          title: Limit
+          description: Max results
+          default: 20
+      type: object
+      required:
+      - pattern
+      title: SlackGrepRequest
+    SlackInstallRequest:
+      properties:
+        redirect_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Redirect Uri
+          description: Custom OAuth redirect URI
+        scopes:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Scopes
+          description: Override default bot scopes
+      type: object
+      title: SlackInstallRequest
+      description: Generate an OAuth URL to install Nia's Slack app.
+    SlackOAuthCallbackRequest:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Authorization code from Slack
+        redirect_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Redirect Uri
+          description: Redirect URI used in the authorization request
+      type: object
+      required:
+      - code
+      title: SlackOAuthCallbackRequest
+      description: Handle the OAuth callback from Slack.
+    SlackSearchFilters:
+      properties:
+        channels:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Channels
+          description: Filter by channel names or IDs
+        users:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Users
+          description: Filter by Slack user names or IDs
+        date_from:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Date From
+          description: Oldest message timestamp (ISO 8601)
+        date_to:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Date To
+          description: Newest message timestamp (ISO 8601)
+        include_threads:
+          type: boolean
+          title: Include Threads
+          description: Include threaded messages in results
+          default: true
+      type: object
+      title: SlackSearchFilters
+      description: Filters for Slack message search within query endpoint.
+    SlackTokenRequest:
+      properties:
+        bot_token:
+          type: string
+          title: Bot Token
+          description: Slack bot token (xoxb-...)
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Name
+          description: Display name for this workspace
+      type: object
+      required:
+      - bot_token
+      title: SlackTokenRequest
+      description: 'BYOT: Register an external Slack bot token.'
     Source:
       properties:
         id:
@@ -3762,6 +4508,7 @@ components:
           - research_paper
           - huggingface_dataset
           - local_folder
+          - slack
           title: Type
           description: Source type
         identifier:
@@ -3839,6 +4586,7 @@ components:
           - research_paper
           - huggingface_dataset
           - local_folder
+          - slack
           title: Type
         repository:
           anyOf:
@@ -3993,6 +4741,11 @@ components:
           anyOf:
           - $ref: '#/components/schemas/DatabaseFileItem'
           - type: 'null'
+        slack_installation_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Slack Installation Id
       type: object
       required:
       - type
@@ -4043,6 +4796,7 @@ components:
           - research_paper
           - huggingface_dataset
           - local_folder
+          - slack
           title: Type
           description: Resolved source type
         display_name:
@@ -4244,9 +4998,24 @@ components:
         model:
           anyOf:
           - type: string
+            enum:
+            - claude-haiku-4-5-20251001
+            - claude-opus-4-6
+            - claude-opus-4-6-1m
           - type: 'null'
           title: Model
-          description: Model override (claude-opus-4-6 or claude-opus-4-6-1m)
+          description: Optional model override (claude-haiku-4-5-20251001, claude-opus-4-6,
+            or claude-opus-4-6-1m). Must match mode when both are provided.
+        mode:
+          anyOf:
+          - type: string
+            enum:
+            - tracer-fast
+            - tracer-deep
+          - type: 'null'
+          title: Mode
+          description: 'Tracer mode: tracer-fast (Haiku) or tracer-deep (Opus). Defaults
+            to tracer-deep. When mode and model are both provided, they must agree.'
       type: object
       required:
       - query
@@ -4681,34 +5450,31 @@ components:
       - results
       - summary
       title: SubscribeResponse
-  securitySchemes:
-    ApiKeyAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: API Key
-      description: API key must be provided in the Authorization header
-tags:
-- name: Sources
-  description: Unified source management (repositories, documentation, papers, datasets,
-    local folders)
-- name: Search
-  description: Unified search endpoint with mode discriminator
-- name: Context Sharing
-  description: Cross-agent context management and retrieval
-- name: Categories
-  description: Category management for organizing indexed sources
-- name: GitHub Search
-  description: Live GitHub search and repository exploration
-- name: Advisor
-  description: Context-aware code advisor against indexed documentation
-- name: Dependencies
-  description: Dependency analysis and documentation subscription
-- name: Usage
-  description: Usage tracking and bulk operations
-servers:
-- url: https://apigcp.trynia.ai/v2
-  description: Production API
-- url: http://localhost:8000/v2
-  description: Local development
-security:
-- ApiKeyAuth: []
+    routes__v2__slack__SlackChannelsConfigRequest:
+      properties:
+        mode:
+          type: string
+          title: Mode
+          description: '''all'' to index all channels, ''selected'' to pick specific
+            ones'
+          default: all
+        include_channels:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Include Channels
+          description: Channel IDs to include (when mode='selected')
+        exclude_channels:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Exclude Channels
+          description: Channel IDs to exclude
+      type: object
+      title: SlackChannelsConfigRequest
+      description: Configure which channels to index.
+  securitySchemes: {}

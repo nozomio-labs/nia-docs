@@ -1,0 +1,129 @@
+---
+title: "Agent Onboarding"
+description: "API-first account creation and non-interactive skill installation for autonomous agents"
+---
+
+Use this guide when an AI agent needs to onboard without browser prompts.
+
+## Prerequisites
+
+- Base URL: `https://apigcp.trynia.ai/v2`
+- API-first auth must be enabled on the backend (`ENABLE_API_FIRST_SIGNUP=true`).
+- `nia-wizard` installed or runnable with `npx`.
+
+## Flow Overview
+
+1. Create account and bootstrap session token with `POST /v2/auth/signup`.
+2. Exchange bootstrap token for an API key with `POST /v2/auth/bootstrap-key`.
+3. Install Nia skill in non-interactive mode using `nia-wizard skill add`.
+
+For returning users, skip steps 1-2 and call `POST /v2/auth/login-key`.
+
+## Create Account (API-First)
+
+```bash
+curl -sS -X POST "https://apigcp.trynia.ai/v2/auth/signup" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "agent@example.com",
+    "password": "strong-password-123",
+    "organization_name": "Agent Org",
+    "first_name": "Agent",
+    "last_name": "Runner",
+    "idempotency_key": "signup-agent-001"
+  }'
+```
+
+Response includes:
+- `bootstrap_token`
+- `expires_at`
+- `user_id`
+- `organization_id`
+
+## Exchange Bootstrap Token For API Key
+
+```bash
+curl -sS -X POST "https://apigcp.trynia.ai/v2/auth/bootstrap-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bootstrap_token": "<bootstrap-token>"
+  }'
+```
+
+Response includes:
+- `api_key`
+- `api_key_id`
+- `user_id`
+- `organization_id`
+
+## Returning User Login (Email + Password)
+
+```bash
+curl -sS -X POST "https://apigcp.trynia.ai/v2/auth/login-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "agent@example.com",
+    "password": "strong-password-123",
+    "organization_id": "<optional-org-id>",
+    "idempotency_key": "login-agent-001"
+  }'
+```
+
+Response includes a fresh `api_key`.
+
+## Install Nia Skill Non-Interactively
+
+```bash
+npx nia-wizard skill add \
+  --api-key "<api-key-from-auth-endpoint>" \
+  --source nozomio-labs/nia-skill \
+  --non-interactive \
+  --ci
+```
+
+Optional target pinning:
+
+```bash
+npx nia-wizard skill add \
+  --api-key "<api-key-from-auth-endpoint>" \
+  --target codex \
+  --non-interactive \
+  --ci
+```
+
+## End-To-End Script (Headless)
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+BASE_URL="https://apigcp.trynia.ai/v2"
+EMAIL="agent@example.com"
+PASSWORD="strong-password-123"
+ORG_NAME="Agent Org"
+
+SIGNUP_JSON=$(curl -sS -X POST "$BASE_URL/auth/signup" \
+  -H "Content-Type: application/json" \
+  -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\",\"organization_name\":\"$ORG_NAME\"}")
+
+BOOTSTRAP_TOKEN=$(echo "$SIGNUP_JSON" | jq -r '.bootstrap_token')
+
+KEY_JSON=$(curl -sS -X POST "$BASE_URL/auth/bootstrap-key" \
+  -H "Content-Type: application/json" \
+  -d "{\"bootstrap_token\":\"$BOOTSTRAP_TOKEN\"}")
+
+API_KEY=$(echo "$KEY_JSON" | jq -r '.api_key')
+
+npx nia-wizard skill add --api-key "$API_KEY" --non-interactive --ci
+```
+
+<Warning>
+Handle credentials and generated API keys as secrets. Do not print them to shared logs.
+</Warning>
+
+## Reference
+
+See API Reference for these endpoints:
+- `POST /auth/signup`
+- `POST /auth/bootstrap-key`
+- `POST /auth/login-key`

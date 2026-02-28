@@ -13,6 +13,8 @@ Authorization: Bearer YOUR_API_KEY
 
 Get your API key at [app.trynia.ai](https://app.trynia.ai). 
 
+For autonomous agents, use [Agent Onboarding](/agent-onboarding) to create accounts and keys via API (`/v2/auth/signup`, `/v2/auth/bootstrap-key`, `/v2/auth/login-key`) and then install the skill non-interactively.
+
 <Warning>
   Store your API key in an environment variable or secret manager. Rotate it immediately if compromised.
 </Warning>
@@ -284,4 +286,3 @@ results = response.json()
 <Info>
   Check out the [API Reference](/api-reference) for complete endpoint documentation with request/response schemas.
 </Info>
-

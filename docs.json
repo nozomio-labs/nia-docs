@@ -37,6 +37,7 @@
                 ]
               },
               "api-guide",
+              "agent-onboarding",
               "pricing",
               "troubleshooting"
             ]
@@ -153,13 +154,7 @@
       "copy",
       "view",
       "chatgpt",
-      "claude",
-      "perplexity",
-      "grok",
-      "mcp",
-      "add-mcp",
-      "cursor",
-      "vscode"
+      "claude"
     ]
   }
 }

@@ -25,7 +25,27 @@ Your agent reads the skill file and uses it as a reference to make HTTP requests
 
 ## Installation
 
-Install the Nia skill using your preferred package manager:
+Install the Nia skill in non-interactive mode (recommended for agents/automation):
+
+```bash
+npx nia-wizard skill add \
+  --api-key "nk_your_api_key" \
+  --source nozomio-labs/nia-skill \
+  --non-interactive \
+  --ci
+```
+
+Optional target pinning:
+
+```bash
+npx nia-wizard skill add \
+  --api-key "nk_your_api_key" \
+  --target codex \
+  --non-interactive \
+  --ci
+```
+
+Manual installation via skills CLI:
 
 ```bash
 npx skills add nozomio-labs/nia-skill        # npm
@@ -41,6 +61,8 @@ yarn dlx skills add nozomio-labs/nia-skill   # yarn
 ### 1. Get Your API Key
 
 Sign up at [trynia.ai](https://trynia.ai) to get your API key.
+
+For full headless onboarding (API signup/login + non-interactive install), use the [Agent Onboarding guide](/agent-onboarding).
 
 ### 2. Configure Your Agent
 
