@@ -4,12 +4,14 @@ description: 'Autonomous agent for searching GitHub repositories without indexin
 ---
 
 <Info>
-  **Pro Feature** - Tracer is available on Pro plans.
+  **Pro Feature** - Tracer is included with Pro and Startup plans. Free plan users can also use Tracer with purchased credits (10 credits per job).
 </Info>
 
 ## Overview
 
-Tracer is an autonomous sub-agent that searches code on GitHub without requiring you to index repositories first. Powered by Claude Opus 4.6 with 1M context window support, it explores codebases, reads files, and synthesizes findings into comprehensive reports.
+Tracer is an autonomous agent that searches code on GitHub without requiring you to index repositories first. It delegates tasks to specialized sub-agents — each handling search, reading, or analysis in parallel — to deliver faster, more thorough results than a single-agent approach.
+
+Tracer supports two modes: **Fast** (powered by Claude Haiku for quick lookups) and **Deep** (powered by Claude Opus with 1M context window for thorough investigations).
 
 Use Tracer when you need to quickly search unfamiliar code, find implementation examples, or understand how libraries work internally.
 
@@ -22,22 +24,29 @@ Use Tracer when you need to quickly search unfamiliar code, find implementation 
   />
 </Frame>
 
+## Modes
+
+| Mode | API Value | Model | Best For |
+|------|-----------|-------|----------|
+| **Fast** | `tracer-fast` | Claude Haiku | Quick lookups, simple questions, rapid iteration |
+| **Deep** | `tracer-deep` | Claude Opus (1M context) | Thorough investigations, complex codebases, multi-file analysis |
+
 ## How It Works
 
-You provide a question and repositories to search. Tracer handles the rest:
+You provide a question, repositories to search, and optionally a mode. Tracer delegates work to specialized sub-agents that operate in parallel:
 
 <Steps>
+  <Step title="Plan">
+    The coordinator analyzes your query and breaks it into sub-tasks
+  </Step>
   <Step title="Explore">
-    Browse repository structure to understand the layout
+    Sub-agents browse repository structures to understand layouts
   </Step>
-  <Step title="Search">
-    Find relevant code using GitHub's Code Search API
-  </Step>
-  <Step title="Read">
-    Analyze specific files and line ranges in detail
+  <Step title="Search & Read">
+    Sub-agents search and read files concurrently using GitHub's Code Search API
   </Step>
   <Step title="Iterate">
-    Follow code paths as search results reveal new areas to explore
+    Follow code paths as results reveal new areas, with sub-agents working in parallel
   </Step>
   <Step title="Synthesize">
     Generate a comprehensive report with file paths and line citations
@@ -66,7 +75,8 @@ curl -X POST https://apigcp.trynia.ai/v2/github/tracer \
   -d '{
     "query": "How does the streaming response work in generateText?",
     "repositories": ["vercel/ai"],
-    "context": "Focus on the core streaming implementation, not the React hooks."
+    "context": "Focus on the core streaming implementation, not the React hooks.",
+    "mode": "tracer-deep"
   }'
 ```
 
@@ -77,6 +87,7 @@ curl -X POST https://apigcp.trynia.ai/v2/github/tracer \
 | `query` | string | Yes | Your research question |
 | `repositories` | string[] | No | Repositories to search (owner/repo format) |
 | `context` | string | No | Additional context to guide the agent's focus |
+| `mode` | string | No | `"tracer-fast"` (Haiku) or `"tracer-deep"` (Opus with 1M context). Defaults to `"tracer-deep"` |
 
 **Response:**
 
@@ -153,7 +164,7 @@ Tracer is available as an MCP tool. Once configured, use it in Claude Code, Curs
 
 | Aspect | Tracer | Nia Search |
 |--------|--------|------------|
-| **Speed** | Slower (live API calls) | Faster (pre-indexed) |
+| **Speed** | Fast mode is quick; Deep mode is thorough | Fastest (pre-indexed) |
 | **Setup** | None | Requires indexing |
 | **Coverage** | All public GitHub | Only indexed sources |
 | **Best for** | Exploration, one-off queries | Repeated searches, production use |

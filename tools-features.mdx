@@ -3,17 +3,42 @@ title: 'Agent Tools'
 description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 ---
 
+### Indexing
+
+<Frame>
+  <iframe
+    src="https://www.youtube.com/embed/vT9PhJBI0Gg"
+    title="Nia Indexing Demo"
+    className="w-full aspect-video rounded-xl"
+    allowFullScreen
+  />
+</Frame>
+
+### Search
+
+<Frame>
+  <iframe
+    src="https://www.youtube.com/embed/7hEe0SBuwvg"
+    title="Nia Search Demo"
+    className="w-full aspect-video rounded-xl"
+    allowFullScreen
+  />
+</Frame>
+
+---
+
 <Steps>
   <Step title="Search Package Source Code (No indexing required!)">
     Ask your coding agent: *"Use package search to find how error handling is implemented in the `requests` Python library"* or *"Search the numpy package for array manipulation examples"*
   </Step>
 
-  <Step title="Index Documentation, Repositories, Research Papers, or Datasets">
-    Try indexing public documentation, a repository, research papers, or HuggingFace datasets:
+  <Step title="Index Documentation, Repositories, Research Papers, Datasets, or Spreadsheets">
+    Try indexing public documentation, a repository, research papers, HuggingFace datasets, or spreadsheets:
     - *"Index https://docs.trynia.ai/"*
     - *"Index https://github.com/browser-use/browser-use"*
     - *"Index https://arxiv.org/abs/2401.12345"* (arXiv papers)
     - *"Index https://huggingface.co/datasets/openai/gsm8k"* (HuggingFace datasets)
+    - Upload a CSV, TSV, XLSX, or XLS file to index spreadsheet data
     - *"Use nia deep research to compare the best GraphRAG frameworks and then index the one with least latency."*
   </Step>
 
@@ -89,6 +114,7 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
     - GitHub URLs (containing "github.com") → Repository indexing
     - arXiv URLs (containing "arxiv.org") → Research paper indexing
     - HuggingFace dataset URLs (containing "huggingface.co/datasets") → Dataset indexing
+    - Spreadsheet files (CSV, TSV, XLSX, XLS) → Spreadsheet indexing with header-aware row chunking
     - Local folder path provided → Local folder indexing
     - All other URLs → Documentation indexing
 
