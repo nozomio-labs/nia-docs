@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "8a67710d36b0",
+  "session_id": "ecfaec17-8b3d-477a-8aa7-c22867c91e77",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-09T21:22:28.436864Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "local-sync.mdx",
+    "oracle-research.mdx",
+    "pdf-indexing.mdx",
+    "pricing.mdx",
+    "tools-features.mdx",
+    "tracer.mdx",
+    "welcome.mdx"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 55,
+    "cache_creation_tokens": 460448,
+    "cache_read_tokens": 3638805,
+    "output_tokens": 19819,
+    "api_call_count": 45
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-09T21:22:28.346669Z",
+    "agent_lines": 0,
+    "human_added": 550,
+    "human_modified": 383,
+    "human_removed": 0,
+    "total_committed": 550,
+    "agent_percentage": 0
+  }
+}
