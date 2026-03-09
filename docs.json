@@ -43,19 +43,31 @@
             ]
           },
           {
-            "group": "Features",
+            "group": "Capabilities",
             "pages": [
               "tools-features",
               "tracer",
-              "local-sync",
+              "oracle-research",
+              "context-sharing",
+              "scoped-mcp",
+              "local-sync"
+            ]
+          },
+          {
+            "group": "Source Types",
+            "pages": [
+              "source-types",
+              "google-drive",
               "pdf-indexing",
               "huggingface-datasets",
-              "pre-indexed-sources",
-              "explore-chat",
-              "scoped-mcp",
-              "context-sharing",
-              "oracle-research",
               "slack-search"
+            ]
+          },
+          {
+            "group": "Explore",
+            "pages": [
+              "explore-chat",
+              "pre-indexed-sources"
             ]
           },
           {

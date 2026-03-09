@@ -1,0 +1,95 @@
+---
+title: 'Google Drive Integration'
+description: 'Connect Google Drive, select files and folders, index them for semantic search, and keep them synced in Nia.'
+---
+
+Connect a Google Drive account, choose the files or folders you want, and make that content searchable through the same unified Nia workflows used for other source types.
+
+## How It Works
+
+<Steps>
+  <Step title="Connect a Drive Account">
+    Authenticate with Google OAuth using read-only Drive access. Each successful connection creates an installation representing that Google account.
+  </Step>
+
+  <Step title="Choose What to Index">
+    Browse My Drive and shared drives, then pick specific files or folders. Folder selections recurse through all children, and Drive shortcuts resolve to their targets.
+  </Step>
+
+  <Step title="Search It Like Any Other Source">
+    Once indexed, Drive content works with the same search, read, grep, and tree flows as other Nia sources.
+  </Step>
+
+  <Step title="Keep It Fresh with Sync">
+    After the first full index, incremental sync updates only changed files instead of rebuilding everything.
+  </Step>
+</Steps>
+
+## Account Model
+
+- Users connect Google Drive through Google OAuth with read-only Drive scopes.
+- Each connection creates an installation tied to that Google account.
+- Multiple Google accounts can be connected per user or organization.
+
+## Supported File Types
+
+| Type | How Nia handles it |
+|------|---------------------|
+| Google Docs | Exported as plain text |
+| Google Sheets | Exported as spreadsheets |
+| Google Slides and Drawings | Exported as PDFs |
+| PDFs, CSVs, Excel files | Indexed directly |
+| Plain text files | Markdown, JSON, YAML, XML, HTML, code files, and similar text-compatible formats |
+| Unsupported binary files | Skipped automatically |
+
+## What Gets Indexed
+
+Each selected file is downloaded, chunked, and embedded. Chunks preserve the original folder structure as file paths, and each chunk carries metadata such as:
+
+- file path
+- modification time
+- link back to the original Drive file
+
+## Search Experience
+
+<CardGroup cols={2}>
+  <Card title="Semantic Search" icon="magnifying-glass">
+    Ask natural-language questions across all indexed Drive content or alongside your other Nia sources.
+  </Card>
+
+  <Card title="Read" icon="book-open">
+    Retrieve the content of specific Drive-backed files through the same source-reading flow as other indexed content.
+  </Card>
+
+  <Card title="Grep" icon="code">
+    Run regex pattern matching across indexed Drive files.
+  </Card>
+
+  <Card title="Tree" icon="folder">
+    Browse the indexed file structure with the original folder hierarchy preserved.
+  </Card>
+</CardGroup>
+
+## Sync Behavior
+
+After the initial full index, Nia tracks changes in Drive and re-indexes only affected files when content is modified, added, or deleted.
+
+Sync scopes are tracked separately for user change logs and shared drives so the system can keep Drive content current without rebuilding the entire source each time.
+
+## API Surface
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /google-drive/install` | Start the Google OAuth install flow |
+| `POST /google-drive/install/callback` | Complete OAuth and create the installation |
+| `GET /google-drive/installations` | List connected Drive accounts |
+| `GET /google-drive/installations/{installation_id}/browse` | Browse Drive files and folders |
+| `GET /google-drive/installations/{installation_id}/selection` | View the current indexing selection |
+| `POST /google-drive/installations/{installation_id}/selection` | Update which Drive items should be indexed |
+| `POST /google-drive/installations/{installation_id}/index` | Trigger the initial indexing run |
+| `GET /google-drive/installations/{installation_id}/status` | Check indexing status |
+| `POST /google-drive/installations/{installation_id}/sync` | Trigger incremental sync |
+
+<Note>
+Google Drive content becomes searchable through the same unified search and source APIs used for repositories, docs, PDFs, datasets, Slack, and local sources.
+</Note>

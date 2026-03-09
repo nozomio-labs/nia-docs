@@ -1,0 +1,206 @@
+---
+title: 'Source Types'
+description: 'Browse Nia by the kind of knowledge you want to bring in: code, docs, PDFs, datasets, Slack, Google Drive, spreadsheets, and local sources.'
+---
+
+Use this page when your first question is not "which tool do I call?" but "what kind of source do I have?"
+
+If you prefer to browse by job to be done, start at [Capabilities](/tools-features).
+
+<CardGroup cols={2}>
+  <Card title="Capabilities" icon="wand-magic-sparkles" href="/tools-features">
+    Browse Nia by what it does: index, search, read, research, sync, and share context.
+  </Card>
+
+  <Card title="API Reference" icon="code" href="/api-reference">
+    Need endpoint details and schemas? Jump straight to the API reference.
+  </Card>
+</CardGroup>
+
+## At a Glance
+
+<CardGroup cols={3}>
+  <Card title="Code & Repositories" icon="code-branch">
+    GitHub repositories, package source code, file trees, grep, and code search workflows.
+  </Card>
+
+  <Card title="Documentation Sites" icon="book-open">
+    Crawl public docs, honor `llms.txt` when available, and search pages semantically or with regex.
+  </Card>
+
+  <Card title="PDFs & Research Papers" icon="file-pdf" href="/pdf-indexing">
+    Structured PDF parsing, section-aware retrieval, and paper search for technical documents.
+  </Card>
+
+  <Card title="HuggingFace Datasets" icon="database" href="/huggingface-datasets">
+    Index dataset rows and schema-like structure for semantic retrieval.
+  </Card>
+
+  <Card title="Google Drive" icon="cloud" href="/google-drive">
+    Connect Drive, browse files and shared drives, select content, and keep it synced.
+  </Card>
+
+  <Card title="Spreadsheets & Tables" icon="table">
+    CSV, TSV, XLSX, and XLS ingestion with row-aware indexing.
+  </Card>
+
+  <Card title="Slack & Conversations" icon="comments" href="/slack-search">
+    Index Slack history and search conversations with org-scoped isolation.
+  </Card>
+
+  <Card title="Local Knowledge" icon="folder">
+    Local folders, databases, and chat history via direct folder indexing or continuous sync.
+  </Card>
+</CardGroup>
+
+## Source-Type Matrix
+
+| Source type | Bring it in with | Best tools after that | Notes |
+|-------------|------------------|-----------------------|-------|
+| Code & repositories | `index`, [Tracer](/tracer), `get_github_file_tree` | `search`, `nia_read`, `nia_grep`, `nia_explore` | Package source code also works without indexing via `nia_package_search_hybrid` |
+| Documentation sites | `index` | `search`, `nia_read`, `nia_grep`, `nia_explore` | `llms.txt` aware, supports crawl filters |
+| PDFs & research papers | `index`, [PDF Indexing](/pdf-indexing) | `search`, `nia_read` | Tree-guided retrieval for long documents |
+| HuggingFace datasets | `index`, [HuggingFace Datasets](/huggingface-datasets) | `search`, `nia_read`, `nia_explore` | Large datasets are sampled intelligently |
+| Google Drive | [Google Drive Integration](/google-drive) | `search`, `nia_read`, `nia_grep`, `nia_explore` | Supports selected files, folders, shared drives, and incremental sync |
+| Spreadsheets & tables | `index` with CSV, TSV, XLSX, or XLS | `search`, `nia_read`, `nia_explore` | Row and header aware |
+| Slack | [Slack Search](/slack-search) | `search`, `nia_grep` | Workspace data stays org-scoped |
+| Local folders, databases, chat history | `index(folder_path=...)`, [Local Sync](/local-sync) | `search`, `nia_read`, `nia_grep`, `nia_explore` | Best fit for continuously changing personal or team knowledge |
+
+## Code & Repositories
+
+Best for source code, implementation patterns, architecture exploration, and exact file reading.
+
+**Use when**:
+- you want to index a GitHub repository and search it semantically
+- you need grep-style matching across a repo
+- you want public package source code without indexing first
+- you want GitHub code search without maintaining an index
+
+**Start with**:
+- `index` for repositories you want in your own workspace
+- `nia_package_search_hybrid` for package source code
+- [Tracer](/tracer) for public GitHub repo search without indexing
+- `get_github_file_tree` for quick structure inspection
+
+**Typical prompts**:
+```text
+"Index https://github.com/vercel/ai"
+"Search the indexed repo for how streaming responses are implemented"
+"Use Tracer to find how auth middleware works in the Next.js repo"
+"Search the fastapi package for authentication examples"
+```
+
+## Documentation Sites
+
+Best for framework docs, product docs, API docs, and structured technical websites.
+
+**Use when**:
+- you want grounded answers from official docs
+- you need a source your agents can cite and revisit
+- you want to crawl a docs site with include or exclude patterns
+
+**Start with**:
+- `index` on the docs URL
+- `search` to find relevant pages
+- `nia_read` and `nia_grep` for deeper inspection
+
+**Typical prompts**:
+```text
+"Index https://nextjs.org/docs"
+"Search the docs for cache invalidation"
+"Read the page about route handlers"
+```
+
+## PDFs & Research Papers
+
+Best for long technical documents where section structure matters.
+
+**Use when**:
+- you have PDFs, papers, filings, manuals, or legal docs
+- you need section-aware retrieval instead of flat chunk search
+
+**Start with**:
+- [PDF Indexing](/pdf-indexing)
+- `index` on a PDF URL or arXiv URL
+
+## HuggingFace Datasets
+
+Best for row-level search, schema discovery, and agentic retrieval over dataset contents.
+
+**Use when**:
+- you need to search examples, records, or splits
+- you want natural-language access to a dataset instead of manual browsing
+
+**Start with**:
+- [HuggingFace Datasets](/huggingface-datasets)
+- `index` on a dataset URL
+
+## Google Drive
+
+Best for cloud-hosted files and folders you want to browse selectively, index deeply, and keep in sync over time.
+
+**Use when**:
+- your working knowledge already lives in Drive instead of a repo or docs site
+- you need selected files or folders rather than a full bucket import
+- you want shared drives and incremental sync support
+
+**Start with**:
+- [Google Drive Integration](/google-drive)
+
+## Spreadsheets & Tables
+
+Best for CSVs, TSVs, Excel files, and structured business data.
+
+**Use when**:
+- your source is tabular
+- you want row-aware retrieval and header-aware indexing
+- you need a lighter-weight alternative to database sync
+
+**Start with**:
+- `index` on CSV, TSV, XLSX, or XLS files
+- `search` for semantic lookup
+- `nia_read` and `nia_explore` to inspect rows and structure
+
+## Slack & Conversations
+
+Best for operational knowledge, team decisions, support threads, and internal discussion history.
+
+**Use when**:
+- important context lives in Slack instead of docs
+- you want semantic and keyword retrieval over conversations
+
+**Start with**:
+- [Slack Search](/slack-search)
+
+## Local Knowledge
+
+Best for internal notes, local folders, private documents, databases, and saved chat history.
+
+**Use when**:
+- the knowledge lives on disk or in a local database
+- you want a continuously fresh private index
+- you want to sync chat history and local project context into Nia
+
+**Start with**:
+- `index(folder_path=...)` for one-off folder indexing
+- [Local Sync](/local-sync) for continuous synchronization
+
+## Related Pages
+
+<CardGroup cols={2}>
+  <Card title="Capabilities" icon="wand-magic-sparkles" href="/tools-features">
+    Browse the platform by what it can do.
+  </Card>
+
+  <Card title="Explore & Chat" icon="globe" href="/explore-chat">
+    Search and chat across pre-indexed knowledge without setting up everything yourself.
+  </Card>
+
+  <Card title="Pre-indexed Sources" icon="database" href="/pre-indexed-sources">
+    Subscribe to sources the community has already indexed.
+  </Card>
+
+  <Card title="Local Sync" icon="folder-sync" href="/local-sync">
+    Keep private local knowledge fresh over time.
+  </Card>
+</CardGroup>

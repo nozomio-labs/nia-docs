@@ -13,6 +13,8 @@ info:
     - `research_paper`
     - `huggingface_dataset`
     - `local_folder`
+    - `slack`
+    - `google_drive`
 
     **Search** (`/search`)
     - `mode`: query | web | deep | universal
@@ -45,6 +47,8 @@ tags:
   description: Analyze and subscribe to documentation for project dependencies
 - name: Slack
   description: Slack workspace integration — index and search messages
+- name: Google Drive
+  description: Google Drive integration — connect accounts, browse Drive items, index selections, and sync changes
 - name: Auth
   description: Account creation and API key management
 - name: Usage
@@ -69,6 +73,7 @@ paths:
             - huggingface_dataset
             - local_folder
             - slack
+            - google_drive
             type: string
           - type: 'null'
           description: Filter by source type
@@ -185,6 +190,7 @@ paths:
             - huggingface_dataset
             - local_folder
             - slack
+            - google_drive
             type: string
           - type: 'null'
           description: Source type hint
@@ -235,7 +241,7 @@ paths:
       tags:
       - Sources
       summary: Get PDF upload URL
-      description: Generate a signed URL for direct PDF upload. Use the returned upload_path
+      description: Generate a signed URL for direct upload. Use the returned gcs_path
         in POST /v2/sources.
       operationId: create_source_upload_url_v2_sources_upload_url_post
       requestBody:
@@ -282,6 +288,7 @@ paths:
             - huggingface_dataset
             - local_folder
             - slack
+            - google_drive
             type: string
           - type: 'null'
           description: Source type hint
@@ -324,6 +331,7 @@ paths:
             - huggingface_dataset
             - local_folder
             - slack
+            - google_drive
             type: string
           - type: 'null'
           description: Source type hint
@@ -372,6 +380,7 @@ paths:
             - huggingface_dataset
             - local_folder
             - slack
+            - google_drive
             type: string
           - type: 'null'
           description: Source type hint
@@ -415,6 +424,7 @@ paths:
             - huggingface_dataset
             - local_folder
             - slack
+            - google_drive
             type: string
           - type: 'null'
           description: Source type hint
@@ -456,6 +466,7 @@ paths:
             - huggingface_dataset
             - local_folder
             - slack
+            - google_drive
             type: string
           - type: 'null'
           description: Source type hint
@@ -504,6 +515,7 @@ paths:
             - huggingface_dataset
             - local_folder
             - slack
+            - google_drive
             type: string
           - type: 'null'
           description: Source type hint
@@ -576,6 +588,7 @@ paths:
             - huggingface_dataset
             - local_folder
             - slack
+            - google_drive
             type: string
           - type: 'null'
           description: Source type hint
@@ -626,6 +639,7 @@ paths:
             - huggingface_dataset
             - local_folder
             - slack
+            - google_drive
             type: string
           - type: 'null'
           description: Source type hint
@@ -2423,6 +2437,338 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /google-drive/install:
+    post:
+      tags:
+      - Google Drive
+      summary: Generate Install Url
+      description: Generate a Google OAuth authorization URL for connecting a Drive account.
+      operationId: generate_install_url_v2_google_drive_install_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleDriveInstallRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /google-drive/install/callback:
+    post:
+      tags:
+      - Google Drive
+      summary: Handle Oauth Callback
+      description: Exchange the Google OAuth code for tokens and create the Drive installation.
+      operationId: handle_oauth_callback_v2_google_drive_install_callback_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleDriveOAuthCallbackRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /google-drive/installations:
+    get:
+      tags:
+      - Google Drive
+      summary: List Google Drive Installations
+      description: List connected Google Drive accounts for the authenticated user or organization.
+      operationId: list_google_drive_installations_v2_google_drive_installations_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /google-drive/installations/{installation_id}:
+    get:
+      tags:
+      - Google Drive
+      summary: Get Google Drive Installation
+      description: Get details for a specific Google Drive installation.
+      operationId: get_google_drive_installation_v2_google_drive_installations__installation_id__get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Google Drive
+      summary: Delete Google Drive Installation
+      description: Disconnect a Google Drive account.
+      operationId: delete_google_drive_installation_v2_google_drive_installations__installation_id__delete
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /google-drive/installations/{installation_id}/browse:
+    get:
+      tags:
+      - Google Drive
+      summary: Browse Google Drive Items
+      description: Browse files and folders from My Drive or shared drives.
+      operationId: browse_google_drive_items_v2_google_drive_installations__installation_id__browse_get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      - name: folder_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional Drive folder ID to browse
+          title: Folder Id
+        description: Optional Drive folder ID to browse
+      - name: q
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional Drive item name search
+          title: Q
+        description: Optional Drive item name search
+      - name: page_token
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Pagination token from the previous response
+          title: Page Token
+        description: Pagination token from the previous response
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Maximum Drive items to return
+          default: 100
+          title: Page Size
+        description: Maximum Drive items to return
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /google-drive/installations/{installation_id}/index:
+    post:
+      tags:
+      - Google Drive
+      summary: Trigger Google Drive Index
+      description: Trigger indexing for the selected Google Drive files and folders.
+      operationId: trigger_google_drive_index_v2_google_drive_installations__installation_id__index_post
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - $ref: '#/components/schemas/routes__v2__google_drive__GoogleDriveIndexRequest'
+              - type: 'null'
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /google-drive/installations/{installation_id}/selection:
+    get:
+      tags:
+      - Google Drive
+      summary: Get Google Drive Selection
+      description: Get the current file and folder selection for a Drive installation.
+      operationId: get_google_drive_selection_v2_google_drive_installations__installation_id__selection_get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - Google Drive
+      summary: Update Google Drive Selection
+      description: Update which Drive files or folders should be indexed.
+      operationId: update_google_drive_selection_v2_google_drive_installations__installation_id__selection_post
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/routes__v2__google_drive__GoogleDriveSelectionRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /google-drive/installations/{installation_id}/status:
+    get:
+      tags:
+      - Google Drive
+      summary: Get Google Drive Index Status
+      description: Get the current indexing status for a Google Drive installation.
+      operationId: get_google_drive_index_status_v2_google_drive_installations__installation_id__status_get
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /google-drive/installations/{installation_id}/sync:
+    post:
+      tags:
+      - Google Drive
+      summary: Trigger Google Drive Sync
+      description: Trigger incremental sync for a Google Drive installation.
+      operationId: trigger_google_drive_sync_v2_google_drive_installations__installation_id__sync_post
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Installation Id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - $ref: '#/components/schemas/routes__v2__google_drive__GoogleDriveSyncRequest'
+              - type: 'null'
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /auth/bootstrap-key:
     post:
       tags:
@@ -3636,6 +3982,41 @@ components:
       - message
       title: GlobalSourceSubscribeResponse
       description: Response model for global source subscription
+    GoogleDriveInstallRequest:
+      properties:
+        redirect_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Redirect Uri
+          description: Optional OAuth redirect URI override. Defaults to the backend
+            callback URL.
+        scopes:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Scopes
+          description: Optional scope override. Defaults to readonly Drive scopes.
+      type: object
+      title: GoogleDriveInstallRequest
+    GoogleDriveOAuthCallbackRequest:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Authorization code from Google
+        redirect_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Redirect Uri
+          description: Redirect URI used in the authorization request
+      type: object
+      required:
+      - code
+      title: GoogleDriveOAuthCallbackRequest
     HTTPValidationError:
       properties:
         detail:
@@ -4522,6 +4903,7 @@ components:
           - huggingface_dataset
           - local_folder
           - slack
+          - google_drive
           title: Type
           description: Source type
         identifier:
@@ -4600,6 +4982,7 @@ components:
           - huggingface_dataset
           - local_folder
           - slack
+          - google_drive
           title: Type
         repository:
           anyOf:
@@ -4703,6 +5086,11 @@ components:
           - type: boolean
           - type: 'null'
           title: Is Pdf
+        is_spreadsheet:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Spreadsheet
         display_name:
           anyOf:
           - type: string
@@ -4712,7 +5100,7 @@ components:
           anyOf:
           - type: string
           - type: 'null'
-          title: Upload Path
+          title: Gcs Path
         focus_instructions:
           anyOf:
           - type: string
@@ -4759,6 +5147,25 @@ components:
           - type: string
           - type: 'null'
           title: Slack Installation Id
+        google_drive_installation_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Google Drive Installation Id
+        google_drive_file_ids:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Google Drive File Ids
+        google_drive_folder_ids:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Google Drive Folder Ids
       type: object
       required:
       - type
@@ -4810,6 +5217,7 @@ components:
           - huggingface_dataset
           - local_folder
           - slack
+          - google_drive
           title: Type
           description: Resolved source type
         display_name:
@@ -4854,7 +5262,7 @@ components:
         content_type:
           type: string
           title: Content Type
-          description: MIME type. Currently only application/pdf is supported.
+          description: MIME type for upload (PDF, CSV, TSV, XLS, XLSX)
           default: application/pdf
       type: object
       required:
@@ -4868,8 +5276,8 @@ components:
           description: Signed URL for direct upload (HTTP PUT)
         gcs_path:
           type: string
-          title: Upload Path
-          description: Cloud storage path to pass to create-source payload
+          title: Gcs Path
+          description: GCS path to pass to create-source payload
         expires_in_seconds:
           type: integer
           title: Expires In Seconds
@@ -5463,6 +5871,64 @@ components:
       - results
       - summary
       title: SubscribeResponse
+    routes__v2__google_drive__GoogleDriveIndexRequest:
+      properties:
+        file_ids:
+          items:
+            type: string
+          type: array
+          title: File Ids
+          description: Drive file IDs to index
+        folder_ids:
+          items:
+            type: string
+          type: array
+          title: Folder Ids
+          description: Drive folder IDs to index
+        display_name:
+          anyOf:
+          - type: string
+            maxLength: 120
+          - type: 'null'
+          title: Display Name
+          description: Optional custom display name for the indexed Drive source
+      type: object
+      title: GoogleDriveIndexRequest
+    routes__v2__google_drive__GoogleDriveSelectionRequest:
+      properties:
+        item_ids:
+          items:
+            type: string
+          type: array
+          minItems: 1
+          title: Item Ids
+          description: Drive file or folder IDs to index
+        display_name:
+          anyOf:
+          - type: string
+            maxLength: 120
+          - type: 'null'
+          title: Display Name
+          description: Optional custom display name for the Drive source
+      type: object
+      required:
+      - item_ids
+      title: GoogleDriveSelectionRequest
+    routes__v2__google_drive__GoogleDriveSyncRequest:
+      properties:
+        force_full:
+          type: boolean
+          title: Force Full
+          description: Force a full rebuild instead of incremental sync
+          default: false
+        scope_ids:
+          items:
+            type: string
+          type: array
+          title: Scope Ids
+          description: Optional sync scope IDs to limit the sync run
+      type: object
+      title: GoogleDriveSyncRequest
     routes__v2__slack__SlackChannelsConfigRequest:
       properties:
         mode:

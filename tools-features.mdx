@@ -1,457 +1,209 @@
 ---
-title: 'Agent Tools'
-description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
+title: 'Capabilities'
+description: 'Browse Nia by job to be done: index, search, read, research, sync, and share context.'
 ---
 
-### Indexing
+Nia has two ways to browse the product:
 
-<Frame>
-  <iframe
-    src="https://www.youtube.com/embed/vT9PhJBI0Gg"
-    title="Nia Indexing Demo"
-    className="w-full aspect-video rounded-xl"
-    allowFullScreen
-  />
-</Frame>
+- **Capabilities**: what Nia does for you
+- **Source types**: what kind of knowledge you want to work with
 
-### Search
-
-<Frame>
-  <iframe
-    src="https://www.youtube.com/embed/7hEe0SBuwvg"
-    title="Nia Search Demo"
-    className="w-full aspect-video rounded-xl"
-    allowFullScreen
-  />
-</Frame>
-
----
-
-<Steps>
-  <Step title="Search Package Source Code (No indexing required!)">
-    Ask your coding agent: *"Use package search to find how error handling is implemented in the `requests` Python library"* or *"Search the numpy package for array manipulation examples"*
-  </Step>
-
-  <Step title="Index Documentation, Repositories, Research Papers, Datasets, or Spreadsheets">
-    Try indexing public documentation, a repository, research papers, HuggingFace datasets, or spreadsheets:
-    - *"Index https://docs.trynia.ai/"*
-    - *"Index https://github.com/browser-use/browser-use"*
-    - *"Index https://arxiv.org/abs/2401.12345"* (arXiv papers)
-    - *"Index https://huggingface.co/datasets/openai/gsm8k"* (HuggingFace datasets)
-    - Upload a CSV, TSV, XLSX, or XLS file to index spreadsheet data
-    - *"Use nia deep research to compare the best GraphRAG frameworks and then index the one with least latency."*
-  </Step>
-
-  <Step title="Monitor Progress and Explore">
-    Check your indexed resources using `manage_resource`:
-    - *"List my resources"* or *"Check the status of my indexing jobs"*
-    - Visit [app.trynia.ai](https://app.trynia.ai) to see all your indexed content
-  </Step>
-</Steps>
-
-## Available Tools
+If you already know you need PDFs, code, documentation, datasets, Slack, or Google Drive, start at [Source Types](/source-types). This page is the capability view.
 
 <CardGroup cols={2}>
-  <Card title="Universal Indexing" icon="database">
-    - **`index`** - Index repos, docs, research papers, or local folders (auto-detects type)
-    - **`auto_subscribe_dependencies`** - Index all dependencies from package.json, requirements.txt, and more
+  <Card title="Source Types" icon="folder" href="/source-types">
+    Browse Nia by repositories, docs, PDFs, datasets, spreadsheets, Slack, Google Drive, and local sources.
   </Card>
 
-  <Card title="Universal Search" icon="magnifying-glass">
-    - **`search`** - Semantic search across repos, docs, papers, and local folders
-    - **`nia_package_search_hybrid`** - AI-powered semantic search in package source code
-  </Card>
-
-  <Card title="Navigation & Reading" icon="book">
-    - **`nia_read`** - Read content from repo, docs, package, or local folder
-    - **`nia_grep`** - Regex search in repo, docs, package, or local folder
-    - **`nia_explore`** - Browse file structure (tree/ls actions)
-  </Card>
-
-  <Card title="Resource Management" icon="folder">
-    - **`manage_resource`** - List, status, rename, delete, or subscribe to resources
-  </Card>
-
-  <Card title="Research & Analysis" icon="flask">
-    - **`nia_research`** - AI research with 3 modes: quick, deep, oracle
-    - **`nia_advisor`** - Analyze your code against documentation for recommendations
-  </Card>
-
-  <Card title="Context Sharing" icon="comments">
-    - **`context`** - Cross-agent context sharing with memory types (scratchpad, episodic, fact, procedural)
+  <Card title="API Reference" icon="code" href="/api-reference">
+    Need the full endpoint and schema reference? Jump straight to the API docs.
   </Card>
 </CardGroup>
 
-## Complete Tool Reference
+---
+
+## Capability Overview
+
+<CardGroup cols={2}>
+  <Card title="Index & Subscribe" icon="database">
+    Bring knowledge into Nia from repositories, docs, papers, datasets, spreadsheets, Google Drive, and local folders. Use `index`, `manage_resource`, and `auto_subscribe_dependencies`.
+  </Card>
+
+  <Card title="Search, Read & Explore" icon="magnifying-glass">
+    Search semantically, grep precisely, read files and sections, and inspect structures. Use `search`, `nia_read`, `nia_grep`, `nia_explore`, and `nia_package_search_hybrid`.
+  </Card>
+
+  <Card title="Research & Analysis" icon="flask">
+    Ask Nia to compare options, investigate a problem, or review your code against documentation. Use `nia_research`, `nia_advisor`, [Tracer](/tracer), and [Oracle Research Agent](/oracle-research).
+  </Card>
+
+  <Card title="Search Without Indexing" icon="code-branch">
+    Need quick answers from public code right now? Use [Tracer](/tracer) for GitHub repositories and `nia_package_search_hybrid` for package source code.
+  </Card>
+
+  <Card title="Local Sync" icon="folder-sync">
+    Keep local folders, databases, and chat history fresh in Nia with continuous synchronization. Start with [Local Sync](/local-sync).
+  </Card>
+
+  <Card title="Context Sharing" icon="comments">
+    Save plans, discoveries, edited files, and conversation state so another agent can pick up where you left off. Use `context`.
+  </Card>
+
+  <Card title="Scoped MCP" icon="server">
+    Create a smaller, task-specific MCP surface for a particular source or workflow. Start with [Scoped MCP Servers](/scoped-mcp).
+  </Card>
+
+  <Card title="Explore Pre-indexed Knowledge" icon="globe">
+    Ask questions across existing indexed sources without setting up everything yourself. Use [Explore & Chat](/explore-chat) and [Pre-indexed Sources](/pre-indexed-sources).
+  </Card>
+</CardGroup>
+
+## Pick the Right Starting Point
+
+| If your goal is... | Start here | Primary tools or pages |
+|--------------------|------------|-------------------------|
+| Bring a new source into Nia | Index & Subscribe | `index`, `manage_resource`, `auto_subscribe_dependencies` |
+| Search or inspect what is already indexed | Search, Read & Explore | `search`, `nia_read`, `nia_grep`, `nia_explore` |
+| Search public package code without setup | Search Without Indexing | `nia_package_search_hybrid` |
+| Search public GitHub repos without setup | Search Without Indexing | [Tracer](/tracer) |
+| Compare options or investigate a question | Research & Analysis | `nia_research`, [Oracle Research Agent](/oracle-research) |
+| Review your code against docs | Research & Analysis | `nia_advisor` |
+| Connect cloud file storage and keep it synced | Google Drive | [Google Drive Integration](/google-drive) |
+| Keep local knowledge fresh over time | Local Sync | [Local Sync](/local-sync) |
+| Hand off work between agents | Context Sharing | `context` |
+| Reduce tool surface for a focused workflow | Scoped MCP | [Scoped MCP Servers](/scoped-mcp) |
+
+## Common Starting Flows
+
+<Steps>
+  <Step title="Bring in a Source">
+    Index a repository, documentation site, paper, dataset, spreadsheet, or local folder with `index`, or use the dedicated [Google Drive Integration](/google-drive) flow for Drive content.
+  </Step>
+
+  <Step title="Search or Inspect It">
+    Use `search` for semantic retrieval, `nia_grep` for pattern matching, `nia_read` to open content, and `nia_explore` to inspect structure.
+  </Step>
+
+  <Step title="Escalate to Research When Needed">
+    Use `nia_research`, [Tracer](/tracer), or [Oracle Research Agent](/oracle-research) when you need synthesis, comparisons, or deeper investigation.
+  </Step>
+
+  <Step title="Save What Matters">
+    Use `context` to save the findings, then reuse them in another agent or follow-up session.
+  </Step>
+</Steps>
+
+## Tool Guide
 
 <AccordionGroup>
-  <Accordion title="Package Search (No Indexing Required)">
-    ### `nia_package_search_hybrid`
-    Semantic search in package source code with optional regex filtering. Search 3,000+ packages from PyPI, NPM, Crates.io, and Go modules without indexing.
+  <Accordion title="Index & Subscribe">
+    ### `index`
+    Universal entry point for repositories, documentation, research papers, HuggingFace datasets, spreadsheets, and local folders.
 
-    **Parameters**:
-    - `registry` (str): One of "npm", "py_pi", "crates_io", "golang_proxy"
-    - `package_name` (str): Package name (for Go: "org/repo" format)
-    - `query` (str): Natural language search query
-    - `pattern` (str, optional): Regex filter to narrow results
-    - `version` (str, optional): Specific package version
+    **Auto-detects**:
+    - GitHub URLs as repositories
+    - arXiv and PDF URLs as papers or PDFs
+    - HuggingFace dataset URLs as datasets
+    - CSV, TSV, XLSX, and XLS files as spreadsheets
+    - Local paths as local folders
+    - Other web URLs as documentation
 
-    **Example**:
+    **Typical prompts**:
     ```
-    # Ask your agent:
+    "Index https://github.com/owner/repo"
+    "Index https://docs.example.com"
+    "Index https://arxiv.org/abs/2401.12345"
+    "Index https://huggingface.co/datasets/openai/gsm8k"
+    ```
+
+    ### `auto_subscribe_dependencies`
+    Parse a manifest such as `package.json`, `requirements.txt`, `pyproject.toml`, `Cargo.toml`, or `go.mod`, then subscribe or index related documentation sources automatically.
+
+    **Best for**:
+    - dependency onboarding
+    - spinning up a project knowledge base quickly
+    - keeping documentation context aligned with a codebase
+
+    ### `manage_resource`
+    List, check status, rename, delete, or subscribe to indexed resources.
+
+    **Most common actions**:
+    - `list`
+    - `status`
+    - `rename`
+    - `delete`
+    - `subscribe`
+  </Accordion>
+
+  <Accordion title="Search, Read & Explore">
+    ### `search`
+    Semantic search across indexed repositories, docs, papers, datasets, spreadsheets, Google Drive, and local folders.
+
+    **Best for**:
+    - answering natural-language questions
+    - finding relevant sections before reading deeply
+    - searching across multiple sources at once
+
+    ### `nia_read`
+    Read content from a repository, documentation source, package, Google Drive source, local folder, or HuggingFace dataset.
+
+    ### `nia_grep`
+    Regex search across repositories, documentation, packages, Google Drive sources, local folders, and datasets.
+
+    ### `nia_explore`
+    Browse trees and directories before reading individual files or rows.
+
+    ### `get_github_file_tree`
+    Inspect a GitHub repository structure without indexing it first.
+
+    ### `nia_package_search_hybrid`
+    Semantic search across public package source code without indexing first. Supports PyPI, npm, Crates.io, and Go modules.
+
+    **Typical prompts**:
+    ```
     "Search the requests package for how error handling works"
     "Find authentication examples in the fastapi package"
     ```
-
-    **Best for**: Understanding implementation patterns, finding usage examples, exploring package architecture.
-  </Accordion>
-
-  <Accordion title="Universal Indexing Tools">
-    ### `index`
-    Universal indexing tool that intelligently detects and indexes GitHub repositories, documentation, research papers, or local folders.
-
-    **Auto-Detection**:
-    - GitHub URLs (containing "github.com") → Repository indexing
-    - arXiv URLs (containing "arxiv.org") → Research paper indexing
-    - HuggingFace dataset URLs (containing "huggingface.co/datasets") → Dataset indexing
-    - Spreadsheet files (CSV, TSV, XLSX, XLS) → Spreadsheet indexing with header-aware row chunking
-    - Local folder path provided → Local folder indexing
-    - All other URLs → Documentation indexing
-
-    **Parameters**:
-    - `url` (str, optional): GitHub repository URL, documentation site URL, arXiv ID/URL, or HuggingFace dataset URL (not needed for local folders)
-    - `resource_type` (str, optional): Override auto-detection - "repository", "documentation", "research_paper", "huggingface_dataset", or "local_folder"
-
-    **Repository-specific**:
-    - `branch` (str, optional): Branch to index (defaults to main branch)
-
-    **Documentation-specific**:
-    - `url_patterns` (List[str], optional): URL patterns to include in crawling
-    - `exclude_patterns` (List[str], optional): URL patterns to exclude from crawling
-    - `only_main_content` (bool, default=True): Extract main content only, skip nav/footer
-    - `check_llms_txt` (bool, default=True): Check for /llms.txt file
-    - `llms_txt_strategy` (str, default="prefer"): Strategy for handling llms.txt - "prefer", "only", or "ignore"
-    - `wait_for` (int, optional): Wait time in milliseconds for dynamic content to load
-    - `include_screenshot` (bool, optional): Capture screenshots of pages
-    - `max_age` (int, optional): Cache max age in seconds
-
-    **Local folder-specific**:
-    - `folder_path` (str, optional): Absolute path to a folder on your machine (e.g., `/Users/me/project`)
-    - `folder_name` (str, optional): Display name for the folder (defaults to folder basename)
-    - `files` (List[dict], optional): List of `{path, content}` dicts (auto-read if `folder_path` provided)
-
-    **Usage**: Monitor progress with `manage_resource` action "status"
-
-    **Examples**:
-    ```
-    # Index a repository (auto-detected)
-    index("https://github.com/owner/repo", branch="main")
-
-    # Index documentation (auto-detected)
-    index("https://docs.example.com", url_patterns=["*/api/*"])
-
-    # Index a research paper from arXiv
-    index("https://arxiv.org/abs/2401.12345")
-
-    # Index a HuggingFace dataset (auto-detected)
-    index("https://huggingface.co/datasets/openai/gsm8k")
-
-    # Index a local folder
-    index(folder_path="/Users/me/notes", folder_name="My Notes")
-    ```
-
-    ### `get_github_file_tree`
-    Get file and folder structure directly from GitHub API without indexing.
-
-    **Parameters**:
-    - `repository` (str, required): Repository identifier (owner/repo format)
-    - `branch` (str, optional): Branch name (defaults to repository's default branch)
-    - `include_paths` (List[str], optional): Only show files in these paths
-    - `exclude_paths` (List[str], optional): Hide files in these paths
-    - `file_extensions` (List[str], optional): Only show these file types
-    - `exclude_extensions` (List[str], optional): Hide these file types
-    - `show_full_paths` (bool, default=False): Show full paths instead of tree structure
-
-    **Best for**: Quick repository exploration without indexing overhead.
-
-    ### `auto_subscribe_dependencies`
-    Automatically index all dependencies from your project's manifest file. Parses the manifest, maps packages to documentation URLs, and subscribes to indexed docs.
-
-    <Frame>
-      <iframe
-        src="https://www.youtube.com/embed/qFQDsElWyO0"
-        title="Dependency Auto-Subscribe Demo"
-        className="w-full aspect-video rounded-xl"
-        allowFullScreen
-      />
-    </Frame>
-
-    **Supported Manifests**:
-    - `package.json` (npm/Node.js)
-    - `requirements.txt` (Python)
-    - `pyproject.toml` (Python)
-    - `Cargo.toml` (Rust)
-    - `go.mod` (Go)
-    - `Gemfile` (Ruby)
-
-    **Parameters**:
-    - `manifest_content` (str, required): Raw content of the manifest file
-    - `manifest_type` (str, optional): Auto-detected from content if not provided
-    - `include_dev_dependencies` (bool, default=False): Include devDependencies
-    - `max_new_indexes` (int, default=150): Maximum new documentation indexes to start
-    - `dry_run` (bool, default=False): Preview mode - shows what would happen without subscribing
-
-    **Example**:
-    ```
-    # Ask your agent:
-    "Read my package.json and auto-subscribe to all dependencies"
-    "Index all the libraries from my requirements.txt"
-    "Use auto_subscribe_dependencies on my Cargo.toml"
-    ```
-
-    <Info>
-      This feature indexes 10-100 dependencies at a time. Best suited for **Pro & Startup plans** due to indexing volume.
-    </Info>
-  </Accordion>
-
-  <Accordion title="Universal Search">
-    ### `search`
-    Semantic search across indexed repositories, documentation, research papers, and local folders. Omit sources for universal hybrid search across all indexed content.
-
-    **Parameters**:
-    - `query` (str, required): Natural language search question
-    - `repositories` (List[str], optional): List of repositories to search (owner/repo format)
-    - `data_sources` (List[str], optional): Documentation/research paper sources (UUID, display_name, URL, or arXiv URL)
-    - `local_folders` (List[str], optional): Local folder IDs to search (private, searched separately)
-    - `category` (str, optional): Filter local folder results by classification category
-    - `search_mode` (str, default="unified"): Search scope - "unified", "repositories", or "sources"
-    - `include_sources` (bool, default=True): Include source code/document snippets
-
-    **Example**:
-    ```
-    # Universal search across everything
-    "Search for how authentication is implemented"
-
-    # Target specific sources
-    "Search the react repo for useEffect implementation"
-    ```
-
-    **Best for**: Searching across your indexed knowledge base with natural language.
-  </Accordion>
-
-  <Accordion title="Navigation & Reading Tools">
-    These tools work across all source types: repositories, documentation, packages, local folders, and HuggingFace datasets. The `source_type` parameter determines which source to target.
-
-    ### `nia_read`
-    Read content from any source type.
-
-    **Parameters**:
-    - `source_type` (str, required): "repository", "documentation", "package", "local_folder", or "huggingface_dataset"
-    - For **repository**: `source_identifier` (owner/repo:path/to/file)
-    - For **documentation**: `doc_source_id` (UUID, display_name, or URL) + `path`
-    - For **package**: `registry`, `package_name`, `filename_sha256`, `start_line`, `end_line`
-    - For **local_folder**: `local_folder_id` + `path`
-    - `line_start` / `line_end` (int, optional): Line range
-    - `max_tokens` (int, optional): Maximum tokens to return
-
-    ### `nia_grep`
-    Regex search in any source type.
-
-    **Parameters**:
-    - `source_type` (str, required): "repository", "documentation", "package", "local_folder", or "huggingface_dataset"
-    - `pattern` (str, required): Regex pattern to search for
-    - For **repository**: `repository` (owner/repo format)
-    - For **documentation**: `doc_source_id` (UUID, display_name, or URL)
-    - For **package**: `registry`, `package_name`
-    - For **local_folder**: `local_folder_id`
-    - `path` (str, optional): Path prefix to limit search scope
-    - `case_sensitive` (bool, default=False): Case-sensitive matching
-    - `context_lines` (int, optional): Lines of context around matches
-    - `output_mode` (str, default="content"): "content", "files_with_matches", or "count"
-
-    ### `nia_explore`
-    Browse file structure of any source type.
-
-    **Parameters**:
-    - `source_type` (str, required): "repository", "documentation", "local_folder", or "huggingface_dataset"
-    - `action` (str, default="tree"): "tree" for full structure, "ls" for directory listing
-    - For **repository**: `repository` (owner/repo format)
-    - For **documentation**: `doc_source_id`
-    - For **local_folder**: `local_folder_id`
-    - `path` (str, default="/"): Path for ls action
-
-    **Examples**:
-    ```
-    # Read from a repository
-    nia_read(source_type="repository", source_identifier="vercel/ai-sdk:src/index.ts")
-
-    # Grep in documentation
-    nia_grep(source_type="documentation", doc_source_id="nextjs-docs", pattern="getServerSideProps")
-
-    # Explore local folder structure
-    nia_explore(source_type="local_folder", local_folder_id="my-notes", action="tree")
-    ```
-  </Accordion>
-
-  <Accordion title="Resource Management">
-    ### `manage_resource`
-    Unified resource management tool for repositories, documentation, research papers, HuggingFace datasets, and local folders.
-
-    **Actions**:
-
-    #### Action: "list"
-    List all indexed resources with their status.
-
-    **Parameters**:
-    - `action` (str, required): "list"
-    - `resource_type` (str, optional): Filter by "repository", "documentation", "research_paper", "huggingface_dataset", "local_folder", or None for all
-    - `query` (str, optional): Text filter (matches repo/display_name/url/title/id)
-    - `limit` (int, default=10): Maximum items to return per section (1-100)
-    - `offset` (int, default=0): Pagination offset
-    - `view` (str, default="auto"): Output detail level - "auto", "summary", "compact", "detailed"
-    - `show_all` (bool, default=False): Ignore limit/offset and show all matches
-
-    #### Action: "status"
-    Check indexing progress and status of any resource.
-
-    **Parameters**:
-    - `action` (str, required): "status"
-    - `resource_type` (str, required): "repository", "documentation", "research_paper", "huggingface_dataset", or "local_folder"
-    - `identifier` (str, required): Repository name (owner/repo), documentation UUID/URL, paper identifier, or local folder ID
-
-    #### Action: "rename"
-    Rename a resource for better organization.
-
-    **Parameters**:
-    - `action` (str, required): "rename"
-    - `resource_type` (str, required): "repository", "documentation", "research_paper", "huggingface_dataset", or "local_folder"
-    - `identifier` (str, required): Resource identifier (owner/repo, UUID/URL, or local folder ID)
-    - `new_name` (str, required): New display name (1-100 characters)
-
-    #### Action: "delete"
-    Remove an indexed resource.
-
-    **Parameters**:
-    - `action` (str, required): "delete"
-    - `resource_type` (str, required): "repository", "documentation", "research_paper", "huggingface_dataset", or "local_folder"
-    - `identifier` (str, required): Resource identifier (owner/repo, UUID/URL, or local folder ID)
-
-    #### Action: "subscribe"
-    Subscribe to a globally indexed public source. If the source is already indexed by others, you get instant access without re-indexing.
-
-    **Parameters**:
-    - `action` (str, required): "subscribe"
-    - `resource_type` (str, required): "repository", "documentation", "research_paper", or "huggingface_dataset"
-    - `identifier` (str, required): URL of the source to subscribe to
-
-    **Example**:
-    ```
-    manage_resource(action='subscribe', identifier='https://github.com/vercel/ai-sdk', resource_type='repository')
-    ```
-
-    **Identifier Formats**:
-    - For repositories: owner/repo format (e.g., "facebook/react") or GitHub URL
-    - For documentation: UUID preferred, also supports display name or URL
-    - For research papers: UUID or arXiv abs/pdf URL
-    - For HuggingFace datasets: UUID or dataset_id (e.g., "openai/gsm8k", "squad")
-    - For local folders: UUID or display name
   </Accordion>
 
   <Accordion title="Research & Analysis Tools">
     ### `nia_research`
-    AI-powered research with three modes for different use cases.
+    AI-powered research with three modes for different levels of depth.
 
-    **Modes**:
-
-    | Mode | Description | Best For |
-    |------|-------------|----------|
-    | `quick` | Fast web search | Finding repos, docs, quick answers |
-    | `deep` | AI agent research | Comparisons, evaluations, analysis |
-    | `oracle` | Full autonomous research | Complex multi-step investigations |
-
-    **Parameters**:
-    - `query` (str, required): Research question
-    - `mode` (str, default="quick"): "quick", "deep", or "oracle"
-
-    **Examples**:
-    ```
-    # Quick web search
-    "Use nia_research quick to find the best GraphRAG frameworks"
-
-    # Deep analysis
-    "Use nia_research deep to compare Prisma vs Drizzle"
-
-    # Full autonomous research
-    "Use nia_research oracle to investigate authentication best practices for Next.js"
-    ```
+    | Mode | Best for |
+    |------|----------|
+    | `quick` | Fast web search and quick source discovery |
+    | `deep` | Comparisons, evaluations, and multi-source analysis |
+    | `oracle` | Complex multi-step investigations with autonomous research |
 
     ### `nia_advisor`
-    Analyze your code against documentation for tailored recommendations. Compares your implementation with best practices from indexed docs.
+    Analyze your code against indexed documentation for grounded recommendations.
 
-    **Parameters**:
-    - `code` (str, required): Your code to analyze
-    - `doc_source_id` (str, required): Documentation source to compare against
-    - `question` (str, optional): Specific aspect to focus on
-
-    **Example**:
+    **Typical prompts**:
     ```
-    # Ask your agent:
+    "Use nia_research deep to compare Prisma vs Drizzle"
+    "Use nia_research oracle to investigate authentication best practices for Next.js"
     "Use nia_advisor to check my authentication code against the BetterAuth docs"
-    "Analyze my React component against the Next.js App Router documentation"
     ```
 
-    **Best for**: Getting documentation-grounded recommendations for improving your code.
+    **Related pages**:
+    - [Tracer](/tracer)
+    - [Oracle Research Agent](/oracle-research)
   </Accordion>
 
   <Accordion title="Context Sharing">
     ### `context`
-    Cross-agent context sharing for saving, retrieving, and managing conversation contexts.
+    Save, retrieve, search, update, and delete cross-agent conversation context.
 
-    **Memory Types**:
+    **Memory types**:
+    - `scratchpad` for short-lived working memory
+    - `episodic` for session-level continuity
+    - `fact` for persistent facts
+    - `procedural` for reusable how-to knowledge
 
-    | Type | Duration | Best For |
-    |------|----------|----------|
-    | `scratchpad` | 1 hour | Temporary working memory |
-    | `episodic` | 7 days | Session-based context |
-    | `fact` | Permanent | Learned facts about the codebase |
-    | `procedural` | Permanent | How-to knowledge and procedures |
-
-    **Actions**:
-
-    #### Action: "save"
-    Save conversation context.
-
-    **Parameters**:
-    - `action` (str, required): "save"
-    - `title` (str, required): Descriptive title
-    - `summary` (str, required): Brief summary
-    - `content` (str, required): Full conversation context
-    - `agent_source` (str, required): Which agent created this (e.g., "cursor", "claude-code")
-    - `memory_type` (str, optional): "scratchpad", "episodic", "fact", or "procedural"
-    - `tags` (List[str], optional): Searchable tags
-    - `edited_files` (List[dict], optional): Files modified during conversation
-
-    #### Action: "list"
-    List saved contexts with optional filtering.
-
-    #### Action: "retrieve"
-    Get full context by ID.
-
-    #### Action: "search" / "semantic-search" / "keyword-search"
-    Search contexts using different strategies.
-
-    #### Action: "update"
-    Update existing context.
-
-    #### Action: "delete"
-    Delete a context.
-
-    **Example**:
+    **Typical prompts**:
     ```
-    # Save context for later
     "Save this conversation about authentication setup"
-
-    # Retrieve relevant context
     "Search my saved contexts for database migrations"
     ```
   </Accordion>
@@ -459,6 +211,6 @@ description: 'Comprehensive guide to all Nia MCP tools and capabilities.'
 
 ---
 
-<Warning>
-**Need Help?** Join our community or reach out through [app.trynia.ai](http://app.trynia.ai/) for support and updates.
-</Warning>
+<Note>
+This page is the clean capability view. If you are organizing docs around user inputs like code, docs, PDFs, datasets, Slack, or Google Drive, continue with [Source Types](/source-types).
+</Note>
