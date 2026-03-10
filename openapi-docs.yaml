@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Nia AI API
-  version: 2.3.0
+  version: 1.0.0
   description: |
     Nia AI API provides a single, consistent `sources` resource for all indexed content.
 
@@ -399,6 +399,208 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}/annotations:
+    get:
+      tags:
+      - Sources
+      summary: List Source Annotations
+      operationId: list_source_annotations_v2_sources__source_id__annotations_get
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            - slack
+            - google_drive
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SourceAnnotation'
+                title: Response List Source Annotations V2 Sources  Source Id  Annotations
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - Sources
+      summary: Create Source Annotation
+      operationId: create_source_annotation_v2_sources__source_id__annotations_post
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            - slack
+            - google_drive
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceAnnotationCreateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceCurationResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}/annotations/{annotation_id}:
+    patch:
+      tags:
+      - Sources
+      summary: Update Source Annotation
+      operationId: update_source_annotation_v2_sources__source_id__annotations__annotation_id__patch
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: annotation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Annotation Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            - slack
+            - google_drive
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceAnnotationUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceCurationResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Sources
+      summary: Delete Source Annotation
+      operationId: delete_source_annotation_v2_sources__source_id__annotations__annotation_id__delete
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: annotation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Annotation Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            - slack
+            - google_drive
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceCurationResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /sources/{source_id}/classification:
     get:
       tags:
@@ -551,12 +753,156 @@ paths:
           description: Repository branch
           title: Branch
         description: Repository branch
+      - name: page
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: PDF page number
+          title: Page
+        description: PDF page number
+      - name: tree_node_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: PDF tree node identifier
+          title: Tree Node Id
+        description: PDF tree node identifier
+      - name: line_start
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Starting line number
+          title: Line Start
+        description: Starting line number
+      - name: line_end
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Ending line number
+          title: Line End
+        description: Ending line number
+      - name: max_length
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Maximum content length
+          title: Max Length
+        description: Maximum content length
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/SourceContentResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sources/{source_id}/curation:
+    get:
+      tags:
+      - Sources
+      summary: Get Source Curation
+      operationId: get_source_curation_v2_sources__source_id__curation_get
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            - slack
+            - google_drive
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceCurationResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - Sources
+      summary: Update Source Curation
+      operationId: update_source_curation_v2_sources__source_id__curation_put
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - repository
+            - documentation
+            - research_paper
+            - huggingface_dataset
+            - local_folder
+            - slack
+            - google_drive
+            type: string
+          - type: 'null'
+          description: Source type hint
+          title: Type
+        description: Source type hint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceCurationUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceCurationResponse'
         '422':
           description: Validation Error
           content:
@@ -690,6 +1036,7 @@ paths:
             - huggingface_dataset
             - local_folder
             - slack
+            - google_drive
             type: string
           - type: 'null'
           description: Source type hint
@@ -1104,7 +1451,8 @@ paths:
       tags:
       - Contexts
       summary: Text search contexts
-      description: Search contexts by content, title, summary, or tags using full-text search.
+      description: Search contexts by content, title, summary, or tags using MongoDB
+        text search.
       operationId: search_contexts_v2_v2_contexts_search_get
       parameters:
       - name: q
@@ -1165,8 +1513,8 @@ paths:
       tags:
       - Contexts
       summary: Semantic search contexts
-      description: Hybrid semantic + keyword search over contexts. Returns relevance
-        scores and highlights.
+      description: Vector + BM25 hybrid search over contexts. Returns relevance scores
+        and highlights.
       operationId: semantic_search_contexts_v2_v2_contexts_semantic_search_get
       parameters:
       - name: q
@@ -1252,7 +1600,7 @@ paths:
       tags:
       - Contexts
       summary: Update context
-      description: Update an existing context. Re-indexes automatically if content
+      description: Update an existing context. Re-indexes in vector store if content
         changes.
       operationId: update_context_v2_v2_contexts__context_id__put
       parameters:
@@ -1442,7 +1790,7 @@ paths:
 
         Returns full job details including result if completed.
 
-        Includes automatic state recovery if a job appears stuck in running state.'
+        Includes fallback to check Hatchet state if job appears stuck in running state.'
       operationId: get_oracle_job_v2_oracle_jobs__job_id__get
       parameters:
       - name: job_id
@@ -1501,7 +1849,7 @@ paths:
       description: 'Stream real-time updates from an Oracle research job.
 
 
-        Server-sent events stream.
+        Uses Hatchet''s native streaming - no Redis required.
 
         Reconnectable: can reconnect to a running job''s stream at any time.'
       operationId: stream_oracle_job_v2_oracle_jobs__job_id__stream_get
@@ -1796,7 +2144,7 @@ paths:
       tags:
       - Tracer
       summary: Delete Tracer Job
-      description: Delete a Tracer job by session_id or job_id.
+      description: Delete a Tracer job by session_id or workflow_run_id.
       operationId: delete_tracer_job_v2_github_tracer__job_id__delete
       parameters:
       - name: job_id
@@ -1850,7 +2198,7 @@ paths:
       description: 'Stream real-time updates from a Tracer search job.
 
 
-        Server-sent events stream with automatic fallback polling.
+        Uses Hatchet''s native streaming with MongoDB fallback polling.
 
         Reconnectable: can reconnect to a running job''s stream at any time.'
       operationId: stream_tracer_job_v2_github_tracer__job_id__stream_get
@@ -2317,7 +2665,7 @@ paths:
       tags:
       - Slack
       summary: Grep Slack Messages
-      description: Keyword search over indexed Slack messages.
+      description: BM25 keyword search over indexed Slack messages in TurboPuffer.
       operationId: grep_slack_messages_v2_slack_installations__installation_id__grep_post
       parameters:
       - name: installation_id
@@ -3306,10 +3654,10 @@ components:
           title: Vector Matches
           description: Number of vector matches
           default: 0
-        text_matches:
+        mongodb_matches:
           type: integer
-          title: Text Matches
-          description: Number of full-text search matches
+          title: Mongodb Matches
+          description: Number of MongoDB matches
           default: 0
       type: object
       title: ContextSemanticSearchMetadata
@@ -3957,7 +4305,7 @@ components:
           - type: string
           - type: 'null'
           title: Namespace
-          description: Search index namespace for the source
+          description: TurboPuffer namespace for the source
         status:
           anyOf:
           - type: string
@@ -4581,6 +4929,11 @@ components:
           - $ref: '#/components/schemas/LocalSourceFilters'
           - type: 'null'
           description: Filters for local/personal sources (messages, contacts, etc.)
+        source_trust_filter:
+          anyOf:
+          - $ref: '#/components/schemas/SourceTrustFilter'
+          - type: 'null'
+          description: Optional trust-aware filtering for curated source results
         search_mode:
           type: string
           title: Search Mode
@@ -4779,7 +5132,7 @@ components:
           type: string
           minLength: 1
           title: Pattern
-          description: Search string for keyword matching
+          description: Search string for BM25 keyword matching
         channel:
           anyOf:
           - type: string
@@ -4965,6 +5318,11 @@ components:
           type: object
           title: Metadata
           description: Type-specific metadata
+        curation:
+          anyOf:
+          - $ref: '#/components/schemas/SourceCurationSummary'
+          - type: 'null'
+          description: Trust signals and curated guidance summary
       type: object
       required:
       - id
@@ -5170,6 +5528,269 @@ components:
       required:
       - type
       title: SourceCreateRequest
+    SourceAnnotation:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Annotation identifier
+        kind:
+          type: string
+          enum:
+          - note
+          - tip
+          - warning
+          - gotcha
+          title: Kind
+          description: Annotation category
+          default: note
+        content:
+          type: string
+          title: Content
+          description: Annotation text
+        created_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Created At
+          description: Creation timestamp (ISO)
+        updated_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Updated At
+          description: Last update timestamp (ISO)
+      type: object
+      required:
+      - id
+      - content
+      title: SourceAnnotation
+      description: A saved note attached to a source.
+    SourceAnnotationCreateRequest:
+      properties:
+        kind:
+          type: string
+          enum:
+          - note
+          - tip
+          - warning
+          - gotcha
+          title: Kind
+          description: Annotation category
+          default: note
+        content:
+          type: string
+          minLength: 1
+          title: Content
+          description: Annotation body
+      type: object
+      required:
+      - content
+      title: SourceAnnotationCreateRequest
+    SourceAnnotationUpdateRequest:
+      properties:
+        kind:
+          anyOf:
+          - type: string
+            enum:
+            - note
+            - tip
+            - warning
+            - gotcha
+          - type: 'null'
+          title: Kind
+          description: Updated annotation category
+        content:
+          anyOf:
+          - type: string
+            minLength: 1
+          - type: 'null'
+          title: Content
+          description: Updated annotation body
+      type: object
+      title: SourceAnnotationUpdateRequest
+    SourceContentResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Whether retrieval succeeded
+        content:
+          type: string
+          title: Content
+          description: Source content
+          default: ''
+        metadata:
+          additionalProperties: true
+          type: object
+          title: Metadata
+          description: Content metadata
+        error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Error
+          description: Error message if failed
+      type: object
+      required:
+      - success
+      title: SourceContentResponse
+      description: Response for source content retrieval.
+    SourceCuratedOverlay:
+      properties:
+        kind:
+          type: string
+          enum:
+          - custom
+          - nia_verified
+          title: Kind
+          description: Overlay provenance
+          default: custom
+        summary:
+          type: string
+          title: Summary
+          description: Short high-confidence summary for the source
+        guidance:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Guidance
+          description: Longer coding-agent guidance or caveats
+        recommended_queries:
+          items:
+            type: string
+          type: array
+          title: Recommended Queries
+          description: Suggested follow-up prompts for agents
+        updated_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Updated At
+          description: Last overlay update timestamp (ISO)
+      type: object
+      required:
+      - summary
+      title: SourceCuratedOverlay
+      description: Structured high-confidence guidance layered on top of a source.
+    SourceCurationResponse:
+      properties:
+        source_id:
+          type: string
+          title: Source Id
+          description: Source identifier
+        source_type:
+          type: string
+          enum:
+          - repository
+          - documentation
+          - research_paper
+          - huggingface_dataset
+          - local_folder
+          - slack
+          - google_drive
+          title: Source Type
+          description: Source type
+        trust_signals:
+          $ref: '#/components/schemas/SourceTrustSignals'
+          description: Derived trust signals
+        overlay:
+          anyOf:
+          - $ref: '#/components/schemas/SourceCuratedOverlay'
+          - type: 'null'
+          description: Curated overlay if present
+        annotations:
+          items:
+            $ref: '#/components/schemas/SourceAnnotation'
+          type: array
+          title: Annotations
+          description: Saved annotations for the source
+        created_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Created At
+          description: Curation record creation timestamp (ISO)
+        updated_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Updated At
+          description: Curation record update timestamp (ISO)
+      type: object
+      required:
+      - source_id
+      - source_type
+      title: SourceCurationResponse
+      description: Full curation state for a source.
+    SourceCurationSummary:
+      properties:
+        trust_signals:
+          $ref: '#/components/schemas/SourceTrustSignals'
+          description: Derived trust signals
+        overlay_summary:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Overlay Summary
+          description: Short overlay summary if one exists
+        recommended_queries:
+          items:
+            type: string
+          type: array
+          title: Recommended Queries
+          description: Suggested prompts from the overlay
+      type: object
+      title: SourceCurationSummary
+      description: Compact curation info embedded into source responses.
+    SourceCurationUpdateRequest:
+      properties:
+        trust_level:
+          anyOf:
+          - type: string
+            enum:
+            - low
+            - medium
+            - high
+          - type: 'null'
+          title: Trust Level
+          description: Trust preference for this source
+        overlay_kind:
+          anyOf:
+          - type: string
+            enum:
+            - custom
+            - nia_verified
+          - type: 'null'
+          title: Overlay Kind
+          description: Overlay provenance
+        overlay_summary:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Overlay Summary
+          description: Short curated source summary
+        overlay_guidance:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Overlay Guidance
+          description: Longer guidance for coding agents
+        recommended_queries:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Recommended Queries
+          description: Suggested prompts for this source
+        clear_overlay:
+          type: boolean
+          title: Clear Overlay
+          description: Remove any existing curated overlay
+          default: false
+      type: object
+      title: SourceCurationUpdateRequest
     SourceDeleteResponse:
       properties:
         id:
@@ -5238,6 +5859,85 @@ components:
       - type
       title: SourceResolveResponse
       description: Response for resolving a source identifier.
+    SourceTrustFilter:
+      properties:
+        minimum_trust_tier:
+          anyOf:
+          - type: string
+            enum:
+            - low
+            - medium
+            - high
+            - verified
+          - type: 'null'
+          title: Minimum Trust Tier
+          description: Only include sources at or above this effective trust tier
+        verified_only:
+          type: boolean
+          title: Verified Only
+          description: Only include Nia-verified sources
+          default: false
+        require_overlay:
+          type: boolean
+          title: Require Overlay
+          description: Only include sources with curated overlays
+          default: false
+      type: object
+      title: SourceTrustFilter
+      description: Filtering preferences for trust-aware retrieval.
+    SourceTrustSignals:
+      properties:
+        trust_level:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          title: Trust Level
+          description: User or team trust preference for the source
+          default: medium
+        trust_tier:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          - verified
+          title: Trust Tier
+          description: Effective trust tier after derived verified/global signals
+          default: medium
+        scope:
+          type: string
+          enum:
+          - private
+          - organization
+          - global
+          title: Scope
+          description: Ownership scope of the source
+          default: private
+        is_global:
+          type: boolean
+          title: Is Global
+          description: Whether the source references a shared global source
+          default: false
+        is_verified:
+          type: boolean
+          title: Is Verified
+          description: Whether the source has a Nia-verified overlay
+          default: false
+        overlay_available:
+          type: boolean
+          title: Overlay Available
+          description: Whether a curated overlay is attached
+          default: false
+        annotation_count:
+          type: integer
+          title: Annotation Count
+          description: Number of saved annotations for this source
+          default: 0
+      type: object
+      title: SourceTrustSignals
+      description: Trust and curation signals attached to a source.
     SourceUpdateRequest:
       properties:
         display_name:
@@ -5475,7 +6175,7 @@ components:
           maximum: 1.0
           minimum: 0.0
           title: Alpha
-          description: Weight for semantic search (0.7 = 70% semantic)
+          description: Weight for vector search (0.7 = 70% vector)
           default: 0.7
         compress_output:
           type: boolean
@@ -5538,7 +6238,7 @@ components:
         use_native_boosting:
           type: boolean
           title: Use Native Boosting
-          description: Use native full-text search Sum/Product boosting
+          description: Use TurboPuffer FTS v2 native Sum/Product boosting
           default: true
         semantic_cache_threshold:
           type: number
