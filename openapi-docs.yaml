@@ -54,6 +54,174 @@ tags:
 - name: Usage
   description: API usage statistics
 paths:
+  /daemon/e2e/sync:
+    post:
+      tags:
+      - E2E Encryption
+      summary: Push encrypted sync chunks
+      description: |
+        Upload encrypted chunks with vectors and blind index tokens.
+        Used by desktop adapters after running `buildE2ESyncBatch()`.
+        The server never sees plaintext — only ciphertext, embedding vectors, and HMAC tokens.
+      operationId: push_e2e_sync_v2_daemon_e2e_sync_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/E2ESyncRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/E2ESyncResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /daemon/e2e/sessions:
+    post:
+      tags:
+      - E2E Encryption
+      summary: Create decrypt session
+      description: |
+        Create a temporary, scoped session that allows a remote agent to decrypt
+        E2E-encrypted chunks through the desktop bridge. Sessions have a TTL,
+        max chunk limit, and allowed operations.
+      operationId: create_e2e_session_v2_daemon_e2e_sessions_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/E2ESessionCreateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/E2ESessionResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /daemon/e2e/sessions/{session_id}:
+    get:
+      tags:
+      - E2E Encryption
+      summary: Get decrypt session status
+      description: Check the status, remaining TTL, and chunk usage of a decrypt session.
+      operationId: get_e2e_session_v2_daemon_e2e_sessions__session_id__get
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/E2ESessionResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /daemon/e2e/decrypt:
+    post:
+      tags:
+      - E2E Encryption
+      summary: Retrieve ciphertext for decryption
+      description: |
+        Retrieve encrypted chunk ciphertext for client-side decryption.
+        Requires a valid decrypt session. The desktop bridge decrypts
+        locally and returns plaintext to the agent.
+      operationId: decrypt_e2e_chunks_v2_daemon_e2e_decrypt_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/E2EDecryptRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/E2EDecryptResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /daemon/e2e/sources/{source_id}/usage:
+    get:
+      tags:
+      - E2E Encryption
+      summary: Get E2E source usage
+      description: Get metering information for an E2E-encrypted source including chunk count and storage usage.
+      operationId: get_e2e_source_usage_v2_daemon_e2e_sources__source_id__usage_get
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/E2ESourceUsageResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /daemon/e2e/sources/{source_id}/data:
+    delete:
+      tags:
+      - E2E Encryption
+      summary: Purge encrypted data
+      description: Permanently delete all encrypted chunks, vectors, and blind index tokens for a source. This action cannot be undone.
+      operationId: purge_e2e_data_v2_daemon_e2e_sources__source_id__data_delete
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/E2EPurgeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /sources:
     get:
       tags:
@@ -3228,6 +3396,287 @@ paths:
                 $ref: '#/components/schemas/UsageSummaryResponse'
 components:
   schemas:
+    E2ESyncRequest:
+      properties:
+        local_folder_id:
+          type: string
+          title: Local Folder Id
+          description: ID of the local folder source to sync to
+        chunks:
+          items:
+            $ref: '#/components/schemas/E2ESyncChunk'
+          type: array
+          title: Chunks
+          description: Encrypted sync chunks with vectors and blind index tokens
+      type: object
+      required:
+      - local_folder_id
+      - chunks
+      title: E2ESyncRequest
+      description: Push encrypted chunks for E2E sync.
+    E2ESyncChunk:
+      properties:
+        chunk_id:
+          type: string
+          title: Chunk Id
+          description: Unique chunk identifier
+        ciphertext:
+          type: string
+          title: Ciphertext
+          description: Base64-encoded AES-256-GCM encrypted content
+        iv:
+          type: string
+          title: Iv
+          description: Base64-encoded initialization vector
+        embedding:
+          items:
+            type: number
+          type: array
+          title: Embedding
+          description: Client-computed embedding vector (zembed-1, 2560 dims)
+        blind_index_tokens:
+          items:
+            type: string
+          type: array
+          title: Blind Index Tokens
+          description: HMAC-SHA256 keyword tokens for server-side filtering
+        contact_hash:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Contact Hash
+          description: HMAC hash of the contact identifier
+        conversation_hash:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Conversation Hash
+          description: HMAC hash of the conversation identifier
+        day_bucket:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Day Bucket
+          description: Date bucket for time-based filtering (YYYY-MM-DD)
+        connector_type:
+          type: string
+          title: Connector Type
+          description: 'Source adapter type: imessage, whatsapp, notes, contacts, stickies, reminders, screenshots'
+      type: object
+      required:
+      - chunk_id
+      - ciphertext
+      - iv
+      - embedding
+      - connector_type
+      title: E2ESyncChunk
+      description: A single encrypted sync chunk.
+    E2ESyncResponse:
+      properties:
+        chunks_accepted:
+          type: integer
+          title: Chunks Accepted
+          description: Number of chunks successfully stored
+        chunks_rejected:
+          type: integer
+          title: Chunks Rejected
+          description: Number of chunks rejected (duplicates or errors)
+        cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor
+          description: Updated sync cursor
+      type: object
+      required:
+      - chunks_accepted
+      - chunks_rejected
+      title: E2ESyncResponse
+    E2ESessionCreateRequest:
+      properties:
+        local_folder_id:
+          type: string
+          title: Local Folder Id
+          description: E2E source to create session for
+        ttl_seconds:
+          type: integer
+          minimum: 30
+          maximum: 3600
+          title: Ttl Seconds
+          description: Session time-to-live in seconds (30s to 1h)
+          default: 300
+        max_chunks:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          title: Max Chunks
+          description: Maximum number of chunks that can be decrypted in this session
+          default: 50
+        allowed_operations:
+          items:
+            type: string
+            enum:
+            - search
+            - read
+            - list
+          type: array
+          title: Allowed Operations
+          description: Operations permitted in this session
+      type: object
+      required:
+      - local_folder_id
+      title: E2ESessionCreateRequest
+      description: Create a scoped decrypt session.
+    E2ESessionResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Session identifier
+        local_folder_id:
+          type: string
+          title: Local Folder Id
+        status:
+          type: string
+          enum:
+          - active
+          - expired
+          - exhausted
+          title: Status
+          description: 'Session status: active, expired, or exhausted'
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        expires_at:
+          type: string
+          format: date-time
+          title: Expires At
+        chunks_used:
+          type: integer
+          title: Chunks Used
+          description: Number of chunks decrypted so far
+        max_chunks:
+          type: integer
+          title: Max Chunks
+        allowed_operations:
+          items:
+            type: string
+          type: array
+          title: Allowed Operations
+      type: object
+      required:
+      - id
+      - local_folder_id
+      - status
+      - created_at
+      - expires_at
+      - chunks_used
+      - max_chunks
+      title: E2ESessionResponse
+    E2EDecryptRequest:
+      properties:
+        session_id:
+          type: string
+          title: Session Id
+          description: Active decrypt session ID
+        chunk_ids:
+          items:
+            type: string
+          type: array
+          title: Chunk Ids
+          description: IDs of chunks to retrieve ciphertext for
+      type: object
+      required:
+      - session_id
+      - chunk_ids
+      title: E2EDecryptRequest
+      description: Retrieve ciphertext for client-side decryption.
+    E2EDecryptResponse:
+      properties:
+        chunks:
+          items:
+            type: object
+            properties:
+              chunk_id:
+                type: string
+              ciphertext:
+                type: string
+                description: Base64-encoded encrypted content
+              iv:
+                type: string
+                description: Base64-encoded initialization vector
+          type: array
+          title: Chunks
+          description: Encrypted chunk data for client-side decryption
+        session_chunks_remaining:
+          type: integer
+          title: Session Chunks Remaining
+          description: Remaining decryption quota for this session
+      type: object
+      required:
+      - chunks
+      - session_chunks_remaining
+      title: E2EDecryptResponse
+    E2ESourceUsageResponse:
+      properties:
+        local_folder_id:
+          type: string
+          title: Local Folder Id
+        connector_type:
+          type: string
+          title: Connector Type
+          description: Adapter type (imessage, whatsapp, notes, etc.)
+        chunks_stored:
+          type: integer
+          title: Chunks Stored
+          description: Total encrypted chunks stored
+        storage_mb:
+          type: number
+          title: Storage Mb
+          description: Storage used in megabytes
+        last_sync_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Last Sync At
+        vectors_stored:
+          type: integer
+          title: Vectors Stored
+          description: Total embedding vectors in TurboPuffer
+      type: object
+      required:
+      - local_folder_id
+      - connector_type
+      - chunks_stored
+      - storage_mb
+      - vectors_stored
+      title: E2ESourceUsageResponse
+    E2EPurgeResponse:
+      properties:
+        local_folder_id:
+          type: string
+          title: Local Folder Id
+        chunks_deleted:
+          type: integer
+          title: Chunks Deleted
+          description: Number of encrypted chunks deleted
+        vectors_deleted:
+          type: integer
+          title: Vectors Deleted
+          description: Number of embedding vectors deleted
+        status:
+          type: string
+          title: Status
+          description: Purge status
+      type: object
+      required:
+      - local_folder_id
+      - chunks_deleted
+      - vectors_deleted
+      - status
+      title: E2EPurgeResponse
     AdvisorRequest:
       properties:
         query:
@@ -5000,6 +5449,13 @@ components:
           description: Generate follow-up questions (adds ~500-1000ms LLM latency).
             Disabled by default for speed.
           default: false
+        e2e_session_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: E2E Session Id
+          description: Active E2E decrypt session ID. When provided, encrypted local
+            folder results are decrypted through the desktop bridge before synthesis.
         mode:
           type: string
           const: query

@@ -1,0 +1,348 @@
+---
+title: 'End-to-End Encryption'
+description: 'Zero-knowledge sync for personal data — iMessage, WhatsApp, Apple Notes, Contacts, and more.'
+---
+
+Nia supports **end-to-end encrypted (E2E) sync** for personal and sensitive data sources. With E2E mode, your plaintext never leaves your device — Nia stores only encrypted vectors and ciphertext, enabling semantic search without server-side access to your data.
+
+<Info>
+  **Zero-knowledge guarantee**: The Nia server never sees plaintext content. Encryption, embedding, and decryption all happen on your device.
+</Info>
+
+---
+
+## How It Works
+
+```
+Desktop (Electron / Node)
+  ├─ Extract: adapter reads local SQLite / files
+  ├─ Chunk: group into conversation windows or individual items
+  ├─ Embed: client-side embeddings (zembed-1, 2560 dims)
+  ├─ Encrypt: AES-256-GCM per chunk (PBKDF2 key derivation)
+  ├─ Blind Index: HMAC-SHA256 keyword tokens for server-side filtering
+  └─ Upload: POST /v2/daemon/e2e/sync (ciphertext + vectors + tokens)
+
+Nia Cloud
+  ├─ Store: vectors in TurboPuffer, ciphertext in MongoDB
+  ├─ Search: vector similarity on client-computed embeddings
+  ├─ Filter: blind index tokens, contact_hash, conversation_hash, day_bucket
+  └─ Never sees plaintext
+
+Agent
+  ├─ Queries: POST /v2/search/query with e2e_session_id
+  ├─ Gets: encrypted chunk references from vector search
+  └─ Decrypts: via desktop bridge session (POST /v2/daemon/e2e/decrypt)
+```
+
+---
+
+## Supported E2E Source Types
+
+The E2E encryption layer is **source-agnostic** — every adapter produces the same `{ files, cursor, stats }` shape and pipes through the same `buildE2ESyncBatch()` pipeline.
+
+| Source | Adapter | DB / Format | Status |
+|--------|---------|-------------|--------|
+| iMessage | `imessage.ts` | SQLite `chat.db` | Production |
+| WhatsApp | `whatsapp.ts` | SQLite `ChatStorage.sqlite` | New |
+| Apple Notes | `notes.ts` | SQLite `NoteStore.sqlite` | New |
+| Apple Contacts | `contacts.ts` | AddressBook / vCard | New |
+| macOS Stickies | `stickies.ts` | Stickies DB / plist | New |
+| Apple Reminders | `reminders.ts` | SQLite | New |
+| Screenshots | `screenshots.ts` | Metadata + optional OCR text | New |
+
+<Tip>
+  All adapters live in the TypeScript SDK under `sdk/typescript/src/local-first/`. You can add your own by following the adapter pattern.
+</Tip>
+
+---
+
+## Key Concepts
+
+### Encryption Key
+
+A user-owned passphrase that **never leaves your device** and is never sent to the server. Stored in the macOS Keychain (or platform-equivalent secure storage). Used to derive AES-256-GCM encryption keys via PBKDF2.
+
+### Blind Index Key
+
+Derived separately from the same passphrase. Produces deterministic HMAC-SHA256 tokens for keywords, contact hashes, and conversation hashes. These tokens enable the server to **filter** encrypted results without knowing the plaintext values.
+
+### Embedding Profile
+
+All E2E sources use the `zembed-1-2560` embedding profile. Embeddings are computed **client-side** so that query embeddings from the agent match the stored document embeddings — enabling vector similarity search over encrypted data.
+
+### Decrypt Sessions
+
+When an agent needs to read E2E-encrypted content, the desktop app creates a **temporary scoped session** with configurable limits:
+
+- **TTL**: session expires after a set duration
+- **Max chunks**: limits how many chunks can be decrypted
+- **Allowed operations**: restricts what the session can do
+
+The agent never holds the encryption key — it receives decrypted content through the desktop bridge only within session bounds.
+
+### Sync Modes
+
+| Mode | Description |
+|------|-------------|
+| `server_indexed` | Default. Server sees plaintext and indexes it directly. Used for code repos, docs, etc. |
+| `e2e_client_indexed` | Zero-knowledge. Client encrypts and embeds before upload. Server stores only ciphertext and vectors. |
+
+---
+
+## E2E Data Pipeline
+
+Every adapter follows the same pipeline:
+
+```typescript
+// 1. Adapter extracts and chunks local data
+const batch = adapter.buildSyncBatch(rows);
+
+// 2. Pipe through E2E encryption layer
+const encrypted = await buildE2ESyncBatch({
+  chunks: batch.chunks,
+  encryptionKey,       // from OS keychain
+  blindIndexKey,       // derived from passphrase
+  embedder,            // zembed-1-2560 client-side
+});
+
+// 3. Push to Nia cloud
+await sdk.daemon.pushE2ESync({
+  localFolderId,
+  chunks: encrypted.syncChunks,
+});
+```
+
+---
+
+## API Endpoints
+
+### Push Encrypted Data
+
+```
+POST /v2/daemon/e2e/sync
+```
+
+Upload encrypted chunks with vectors and blind index tokens.
+
+### Decrypt Sessions
+
+```
+POST /v2/daemon/e2e/sessions          # Create a scoped decrypt session
+GET  /v2/daemon/e2e/sessions/{id}     # Check session status
+POST /v2/daemon/e2e/decrypt           # Retrieve ciphertext for decryption
+```
+
+### Source Management
+
+```
+GET    /v2/daemon/e2e/sources/{id}/usage   # Check E2E source metering
+DELETE /v2/daemon/e2e/sources/{id}/data    # Purge all encrypted data
+```
+
+### Querying E2E Sources
+
+Use the standard search endpoint with the `e2e_session_id` parameter:
+
+```typescript
+const result = await sdk.search.query({
+  messages: [{ role: "user", content: "What did Alice say about the project?" }],
+  local_folders: ["imessage-folder-id"],
+  e2e_session_id: session.id,  // desktop bridge session
+});
+```
+
+---
+
+## Demo App
+
+See E2E encryption in action with the iMessage demo app — a full working example of syncing, indexing, and chatting with your iMessage history:
+
+<Card title="nia-imessage-app-demo" icon="github" href="https://github.com/nozomio-labs/nia-imessage-app-demo">
+  Open-source demo app showcasing E2E encrypted iMessage sync, indexing, and conversational search. Clone it to get started quickly.
+</Card>
+
+---
+
+## Cookbook
+
+### Sync iMessage with E2E Encryption
+
+This is the most common E2E use case — indexing your iMessage history so agents can search your conversations without the server ever seeing message content.
+
+<Steps>
+  <Step title="Set up encryption">
+    On first run, the desktop app prompts for a passphrase. This derives both the encryption key and blind index key. The passphrase is stored in your macOS Keychain.
+
+    ```typescript
+    import { deriveE2EKeys } from "nia-ai-ts/local-first";
+
+    const { encryptionKey, blindIndexKey } = await deriveE2EKeys(passphrase);
+    ```
+  </Step>
+
+  <Step title="Build the sync batch">
+    The iMessage adapter reads `~/Library/Messages/chat.db` and produces conversation-windowed chunks:
+
+    ```typescript
+    import { iMessageAdapter } from "nia-ai-ts/local-first/imessage";
+
+    const batch = await iMessageAdapter.buildSyncBatch({
+      dbPath: "~/Library/Messages/chat.db",
+      cursor: lastSyncCursor,  // null for first sync
+    });
+    // batch = { files, cursor, stats }
+    ```
+  </Step>
+
+  <Step title="Encrypt and upload">
+    ```typescript
+    import { buildE2ESyncBatch } from "nia-ai-ts/local-first";
+    import { NiaSDK } from "nia-ai-ts";
+
+    const sdk = new NiaSDK({ apiKey: process.env.NIA_API_KEY! });
+
+    const encrypted = await buildE2ESyncBatch({
+      chunks: batch.files,
+      encryptionKey,
+      blindIndexKey,
+      embedder: "zembed-1-2560",
+    });
+
+    await sdk.daemon.pushE2ESync({
+      localFolderId: "your-imessage-folder-id",
+      chunks: encrypted.syncChunks,
+    });
+    ```
+  </Step>
+
+  <Step title="Query from an agent">
+    ```typescript
+    // Create a decrypt session (desktop-side)
+    const session = await sdk.daemon.createE2ESession({
+      localFolderId: "your-imessage-folder-id",
+      ttlSeconds: 300,         // 5-minute session
+      maxChunks: 50,           // limit decryption scope
+    });
+
+    // Agent queries with session
+    const results = await sdk.search.query({
+      messages: [{ role: "user", content: "meeting notes from Alice last week" }],
+      local_folders: ["your-imessage-folder-id"],
+      e2e_session_id: session.id,
+    });
+    ```
+  </Step>
+</Steps>
+
+### Create a Decrypt Session for a Remote Agent
+
+Decrypt sessions let you grant temporary, scoped access to encrypted data without sharing your key:
+
+```typescript
+const session = await sdk.daemon.createE2ESession({
+  localFolderId: "your-folder-id",
+  ttlSeconds: 600,           // 10-minute window
+  maxChunks: 100,            // max decryptable chunks
+  allowedOperations: ["search", "read"],
+});
+
+console.log(`Session ID: ${session.id}`);
+console.log(`Expires: ${session.expiresAt}`);
+
+// Pass session.id to the remote agent's e2e_session_id parameter
+```
+
+### Add a New Source Type
+
+Follow the adapter pattern to add support for any local data source:
+
+```typescript
+// sdk/typescript/src/local-first/my-source.ts
+import type { SyncAdapter, SyncBatch } from "./types";
+
+export const mySourceAdapter: SyncAdapter = {
+  name: "my_source",
+
+  async buildSyncBatch(options): Promise<SyncBatch> {
+    // 1. Read from local database or files
+    const rows = await readLocalData(options.dbPath, options.cursor);
+
+    // 2. Transform into chunks
+    const files = rows.map(row => ({
+      path: `my-source/${row.id}.txt`,
+      content: row.text,
+      metadata: { timestamp: row.created_at },
+    }));
+
+    // 3. Return standard shape
+    return {
+      files,
+      cursor: rows.at(-1)?.id ?? options.cursor,
+      stats: { total: files.length, new: files.length },
+    };
+  },
+};
+```
+
+Then pipe through the E2E layer as shown above.
+
+### Purge Encrypted Data
+
+Remove all encrypted data for a source:
+
+```typescript
+await sdk.daemon.purgeE2EData({
+  localFolderId: "your-folder-id",
+});
+```
+
+### Check E2E Source Usage
+
+```typescript
+const usage = await sdk.daemon.getE2ESourceUsage({
+  localFolderId: "your-folder-id",
+});
+
+console.log(`Chunks stored: ${usage.chunksStored}`);
+console.log(`Storage used: ${usage.storageMb} MB`);
+```
+
+---
+
+## Security Model
+
+| Property | Detail |
+|----------|--------|
+| Encryption algorithm | AES-256-GCM |
+| Key derivation | PBKDF2 from user passphrase |
+| Key storage | macOS Keychain / platform secure storage |
+| Embedding model | `zembed-1-2560` (client-side) |
+| Blind index | HMAC-SHA256 deterministic tokens |
+| Server access | Ciphertext + vectors only, never plaintext |
+| Session scope | TTL, max chunks, allowed operations |
+
+<Warning>
+  **Your passphrase is the only way to decrypt your data.** If you lose it, Nia cannot recover your encrypted content. Store your passphrase in a password manager.
+</Warning>
+
+---
+
+## Related Pages
+
+<CardGroup cols={2}>
+  <Card title="Local Sync" icon="folder-open" href="/local-sync">
+    Set up continuous sync for local folders and databases.
+  </Card>
+
+  <Card title="Source Types" icon="layer-group" href="/source-types">
+    Browse all supported source types.
+  </Card>
+
+  <Card title="SDK Examples" icon="code" href="/sdk/examples">
+    Complete code examples including E2E sync.
+  </Card>
+
+  <Card title="Privacy" icon="shield-halved" href="/privacy">
+    Learn about Nia's privacy and security practices.
+  </Card>
+</CardGroup>

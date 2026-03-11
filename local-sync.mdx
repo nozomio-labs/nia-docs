@@ -1,6 +1,6 @@
 ---
 title: 'Local Sync'
-description: 'Continuously sync local folders, databases, and chat history to Nia.'
+description: 'Continuously sync local folders, databases, and chat history to Nia — with optional end-to-end encryption.'
 ---
 
 Nia Sync is a standalone CLI daemon that continuously synchronizes your local data sources with Nia, enabling AI agents to search your personal knowledge base.
@@ -270,7 +270,15 @@ Nia Sync automatically extracts and indexes content from various data sources:
 <CardGroup cols={2}>
   <Card title="Chat & Messages" icon="message">
     - **iMessage** (`~/Library/Messages/chat.db`)
+    - **WhatsApp** (`ChatStorage.sqlite`)
     - **Telegram** (JSON exports, ZIP files)
+  </Card>
+
+  <Card title="Apple Ecosystem" icon="apple">
+    - **Apple Notes** (`NoteStore.sqlite`)
+    - **Apple Contacts** (AddressBook / vCard)
+    - **Apple Reminders** (SQLite)
+    - **macOS Stickies** (Stickies DB / plist)
   </Card>
 
   <Card title="Browser History" icon="globe">
@@ -279,14 +287,10 @@ Nia Sync automatically extracts and indexes content from various data sources:
     - **Firefox**
   </Card>
 
-  <Card title="Databases" icon="database">
+  <Card title="Media & Files" icon="image">
+    - **Screenshots** (metadata + optional OCR text)
     - Generic **SQLite** databases
-    - Auto-extracts tables into searchable text
-  </Card>
-
-  <Card title="Folders" icon="folder">
-    - Regular folders with text files
-    - Code, notes, documentation
+    - Regular folders with text files, code, notes
   </Card>
 </CardGroup>
 
@@ -297,8 +301,11 @@ Database content is extracted into virtual text files for semantic search:
 | Source | Virtual Path Format |
 |--------|---------------------|
 | iMessage | `messages/{contact}/{date}_{row_id}_{direction}.txt` |
+| WhatsApp | `whatsapp/{contact}/{date}_{msg_id}.txt` |
 | Safari/Chrome/Firefox | `history/{domain}/{date}_{id}.txt` |
 | Telegram | `telegram/{chat_name}/{date}_{msg_id}.txt` |
+| Apple Notes | `notes/{folder}/{note_title}_{id}.txt` |
+| Screenshots | `screenshots/{date}_{filename}.txt` |
 
 ---
 
@@ -387,6 +394,14 @@ The following are **never synced**:
 - **Build outputs**: `dist/`, `build/`, `.next/`
 
 API keys are stored locally with user-only read/write permissions and are never logged or transmitted in plaintext.
+
+### End-to-End Encryption
+
+For sensitive personal data (messages, contacts, notes), Nia supports **E2E encrypted sync** where plaintext never leaves your device. The server stores only ciphertext and encrypted vectors.
+
+<Card title="E2E Encryption Guide" icon="lock" href="/e2e-encryption">
+  Learn how E2E encryption works, supported source types, key management, and cookbook examples for syncing iMessage, WhatsApp, Apple Notes, and more.
+</Card>
 
 ---
 

@@ -50,7 +50,8 @@
               "oracle-research",
               "context-sharing",
               "scoped-mcp",
-              "local-sync"
+              "local-sync",
+              "e2e-encryption"
             ]
           },
           {

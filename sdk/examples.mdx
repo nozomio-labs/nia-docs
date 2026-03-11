@@ -657,6 +657,112 @@ Live code search across GitHub repositories without indexing.
 
 ---
 
+## Local Sync with E2E Encryption
+
+Sync personal data sources (iMessage, WhatsApp, Apple Notes, etc.) with zero-knowledge encryption. Plaintext never leaves your device.
+
+<Card title="iMessage Demo App" icon="github" href="https://github.com/nozomio-labs/nia-imessage-app-demo">
+  Full working example: E2E encrypted iMessage sync, indexing, and conversational search. Clone and run.
+</Card>
+
+### Sync iMessage
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import { NiaSDK } from "nia-ai-ts";
+    import { deriveE2EKeys, buildE2ESyncBatch } from "nia-ai-ts/local-first";
+    import { iMessageAdapter } from "nia-ai-ts/local-first/imessage";
+
+    const sdk = new NiaSDK({ apiKey: process.env.NIA_API_KEY! });
+
+    // 1. Derive encryption keys from passphrase (stored in OS keychain)
+    const { encryptionKey, blindIndexKey } = await deriveE2EKeys(passphrase);
+
+    // 2. Extract messages from local chat.db
+    const batch = await iMessageAdapter.buildSyncBatch({
+      dbPath: "~/Library/Messages/chat.db",
+      cursor: null,  // null = full sync, or pass last cursor for incremental
+    });
+
+    // 3. Encrypt and upload
+    const encrypted = await buildE2ESyncBatch({
+      chunks: batch.files,
+      encryptionKey,
+      blindIndexKey,
+      embedder: "zembed-1-2560",
+    });
+
+    await sdk.daemon.pushE2ESync({
+      localFolderId: "your-imessage-folder-id",
+      chunks: encrypted.syncChunks,
+    });
+
+    console.log(`Synced ${batch.stats.total} messages`);
+    ```
+  </Tab>
+</Tabs>
+
+### Create a Decrypt Session
+
+Decrypt sessions grant temporary, scoped access to encrypted data for agents.
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    // Desktop creates a session for the remote agent
+    const session = await sdk.daemon.createE2ESession({
+      localFolderId: "your-imessage-folder-id",
+      ttlSeconds: 300,         // 5-minute window
+      maxChunks: 50,           // max chunks decryptable
+      allowedOperations: ["search", "read"],
+    });
+
+    console.log(`Session: ${session.id}, expires: ${session.expiresAt}`);
+    ```
+  </Tab>
+</Tabs>
+
+### Query E2E Sources
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    result = sdk.search.query(
+        messages=[{"role": "user", "content": "What did Alice say about the deadline?"}],
+        local_folders=["your-imessage-folder-id"],
+        e2e_session_id="session-id-from-desktop",
+    )
+    print(result)
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```typescript
+    const result = await sdk.search.query({
+      messages: [{ role: "user", content: "What did Alice say about the deadline?" }],
+      local_folders: ["your-imessage-folder-id"],
+      e2e_session_id: "session-id-from-desktop",
+    });
+    console.log(result);
+    ```
+  </Tab>
+</Tabs>
+
+### Purge Encrypted Data
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    // Remove all encrypted data for a source
+    await sdk.daemon.purgeE2EData({
+      localFolderId: "your-imessage-folder-id",
+    });
+    ```
+  </Tab>
+</Tabs>
+
+---
+
 ## Async Support (Python)
 
 Every low-level API function has four variants:

@@ -51,6 +51,10 @@ If you prefer to browse by job to be done, start at [Capabilities](/tools-featur
   <Card title="Local Knowledge" icon="folder">
     Local folders, databases, and chat history via direct folder indexing or continuous sync.
   </Card>
+
+  <Card title="E2E Encrypted Sources" icon="lock" href="/e2e-encryption">
+    iMessage, WhatsApp, Apple Notes, Contacts, Reminders, Stickies, and Screenshots — synced with zero-knowledge encryption.
+  </Card>
 </CardGroup>
 
 ## Source-Type Matrix
@@ -65,6 +69,7 @@ If you prefer to browse by job to be done, start at [Capabilities](/tools-featur
 | Spreadsheets & tables | `index` with CSV, TSV, XLSX, or XLS | `search`, `nia_read`, `nia_explore` | Row and header aware |
 | Slack | [Slack Search](/slack-search) | `search`, `nia_grep` | Workspace data stays org-scoped |
 | Local folders, databases, chat history | `index(folder_path=...)`, [Local Sync](/local-sync) | `search`, `nia_read`, `nia_grep`, `nia_explore` | Best fit for continuously changing personal or team knowledge |
+| E2E encrypted sources (iMessage, WhatsApp, Notes, Contacts, Reminders, Stickies, Screenshots) | [E2E Encryption](/e2e-encryption), TypeScript SDK adapters | `search` with `e2e_session_id` | Zero-knowledge sync — plaintext never leaves your device |
 
 ## Code & Repositories
 
@@ -184,6 +189,21 @@ Best for internal notes, local folders, private documents, databases, and saved 
 **Start with**:
 - `index(folder_path=...)` for one-off folder indexing
 - [Local Sync](/local-sync) for continuous synchronization
+
+## E2E Encrypted Sources
+
+Best for sensitive personal data where **plaintext must never leave your device** — messages, contacts, notes, and more.
+
+**Use when**:
+- you need zero-knowledge sync for privacy-sensitive data
+- you want semantic search over encrypted content
+- you're building with iMessage, WhatsApp, Apple Notes, Contacts, Reminders, Stickies, or Screenshots
+
+**Supported sources**: iMessage, WhatsApp, Apple Notes, Apple Contacts, macOS Stickies, Apple Reminders, Screenshots
+
+**Start with**:
+- [E2E Encryption](/e2e-encryption) for the full architecture guide and cookbook
+- TypeScript SDK adapters in `sdk/typescript/src/local-first/`
 
 ## Related Pages
 
