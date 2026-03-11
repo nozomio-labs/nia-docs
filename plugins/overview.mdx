@@ -1,0 +1,76 @@
+---
+title: 'Plugins'
+description: 'Browse Nia integrations for OpenCode, OpenClaw, and Claude Code.'
+---
+
+Nia ships with agent-native integrations so you can search, read, index, and research without leaving your editor or chat workflow.
+
+<Info>
+  **One place, multiple delivery models:** OpenCode and Claude Code use plugin-style installs, while OpenClaw is distributed through a ClawHub skill. This page keeps them together so the integration choice is clear.
+</Info>
+
+## Plugin Directory
+
+<CardGroup cols={3}>
+  <Card title="OpenCode" icon="terminal" href="/integrations/opencode">
+    Install Nia directly in OpenCode with research triggers, context handoffs, and MCP access.
+  </Card>
+
+  <Card title="OpenClaw" icon="paw" href="/integrations/openclaw">
+    Use Nia inside OpenClaw through a ClawHub skill built for indexed search and source-aware answers.
+  </Card>
+
+  <Card title="Claude Code" icon="wand-magic-sparkles" href="/integrations/claude-code-skill">
+    Add Nia to Claude Code from the marketplace for repository, documentation, and research workflows.
+  </Card>
+</CardGroup>
+
+## How to Choose
+
+<Tabs>
+  <Tab title="Plugins">
+    Choose a plugin or skill page if your agent already has its own extension or marketplace workflow.
+
+    This is the fastest path when you want an agent-native install experience instead of manual setup.
+  </Tab>
+
+  <Tab title="MCP">
+    Choose the [MCP Server](/integrations/installation/mcp) if your editor supports Model Context Protocol directly and you want the full Nia tool surface.
+
+    This is the best default for Cursor, VS Code, Claude Desktop, and other MCP-aware tools.
+  </Tab>
+
+  <Tab title="Skill">
+    Choose the [Agent Skill](/integrations/installation/skill) if you want direct API calls without running an MCP server.
+
+    This is a good fit for lightweight or headless agent setups.
+  </Tab>
+</Tabs>
+
+## Getting Started
+
+<Steps>
+  <Step title="Pick your agent">
+    Start with the integration page that matches where you work: OpenCode, OpenClaw, or Claude Code.
+  </Step>
+
+  <Step title="Install Nia">
+    Follow the agent-specific setup flow, or fall back to the shared MCP or skill installation guides when you want a more general setup.
+  </Step>
+
+  <Step title="Connect your API key">
+    Generate a Nia API key, complete the setup instructions, and verify that search, read, and indexing tools are available inside your agent.
+  </Step>
+</Steps>
+
+## Other Setup Paths
+
+<CardGroup cols={2}>
+  <Card title="MCP Server" icon="server" href="/integrations/installation/mcp">
+    Configure Nia once and expose the full toolset through an MCP server.
+  </Card>
+
+  <Card title="Agent Skill" icon="bolt" href="/integrations/installation/skill">
+    Use Nia without MCP when you prefer a direct, lightweight integration.
+  </Card>
+</CardGroup>

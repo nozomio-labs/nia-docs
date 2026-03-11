@@ -1,13 +1,27 @@
 ---
-title: 'ClawHub Skill'
-description: 'Index and search code repositories, documentation, research papers, and HuggingFace datasets with Nia AI in Clawdbot.'
+title: 'OpenClaw'
+description: 'Use Nia in OpenClaw through a ClawHub skill for indexed search, source-aware answers, and research workflows.'
 ---
 
-The Nia skill for [Clawdbot](https://clawhub.ai) provides direct API access to Nia for indexing and searching code repositories, documentation, research papers, and HuggingFace datasets.
+The Nia integration for [OpenClaw](https://docs.openclaw.ai/tools/clawhub) is distributed through [ClawHub](https://clawhub.ai), the public skill registry for OpenClaw. It gives your OpenClaw workspace direct access to Nia for indexing and searching code repositories, documentation, research papers, and HuggingFace datasets.
 
 <Info>
-  **Shell-Based Integration**: Uses lightweight shell scripts with `curl` and `jq` for maximum compatibility and portability.
+  **OpenClaw uses skills through ClawHub**: the integration is delivered as a skill, but the day-to-day experience is still an agent-native Nia workflow inside OpenClaw.
 </Info>
+
+---
+
+## Install with ClawHub
+
+<CardGroup cols={2}>
+  <Card title="ClawHub Listing" icon="paw" href="https://www.clawhub.ai/arlanrakh/nia">
+    Open the Nia listing in ClawHub and add it to your OpenClaw workspace.
+  </Card>
+
+  <Card title="OpenClaw Skill Docs" icon="book-open" href="https://docs.openclaw.ai/tools/clawhub">
+    Learn how ClawHub installs and syncs skills into your OpenClaw workspace.
+  </Card>
+</CardGroup>
 
 ---
 
@@ -33,7 +47,7 @@ The Nia skill for [Clawdbot](https://clawhub.ai) provides direct API access to N
 
 ---
 
-## Installation
+## Configure Nia
 
 ### 1. Get Your API Key
 
@@ -155,12 +169,12 @@ All scripts are in `./scripts/`. Base URL: `https://apigcp.trynia.ai/v2`
 ## Links
 
 <CardGroup cols={2}>
-  <Card title="ClawHub" icon="paw" href="https://www.clawhub.ai/arlanrakh/nia">
-    View skill on ClawHub
+  <Card title="ClawHub Listing" icon="paw" href="https://www.clawhub.ai/arlanrakh/nia">
+    View the Nia skill on ClawHub
   </Card>
 
-  <Card title="Get API Key" icon="key" href="https://app.trynia.ai">
-    Sign up for Nia API access
+  <Card title="OpenClaw Docs" icon="book-open" href="https://docs.openclaw.ai/tools/clawhub">
+    Learn how OpenClaw loads and syncs skills
   </Card>
 </CardGroup>
 
