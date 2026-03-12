@@ -1,0 +1,174 @@
+---
+title: '21st.dev — Chat with any GitHub repo'
+description: 'A Next.js template that lets users chat about GitHub repositories using a deployed agent with Nia knowledge tools.'
+---
+
+[21st.dev](https://21st.dev) provides an agent SDK for building, deploying, and connecting AI agents to frontends. The **Nia Chat** template combines 21st Agents SDK with Nia's knowledge tools to create a repository chat experience — users pick a GitHub repo, the app indexes it via Nia, and an agent answers questions using the full codebase as context.
+
+<Info>
+  **Live demo**: Try the hosted example at [21st-sdk-nia-chat.vercel.app](https://21st-sdk-nia-chat.vercel.app) before setting up locally.
+</Info>
+
+---
+
+## How it works
+
+<Steps>
+  <Step title="User enters a GitHub repo">
+    The app normalizes the input and indexes the repository via the Nia API (`/api/nia/source`).
+  </Step>
+
+  <Step title="Sandbox + thread created">
+    A sandboxed agent environment is created with Nia skill scripts baked in (`/api/agent/sandbox`).
+  </Step>
+
+  <Step title="Chat streams responses">
+    The frontend connects to the agent using `createAgentChat` + `useChat` and streams answers grounded in the indexed codebase.
+  </Step>
+</Steps>
+
+The agent runs inside a sandbox with [Nia skill scripts](/integrations/installation/skill) (shell wrappers around the Nia REST API) baked in at deploy time. This gives it the ability to search, read, and explore the indexed repository.
+
+---
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Repository Analysis" icon="code-branch">
+    Index any public GitHub repo and ask questions about its architecture, patterns, and implementation details.
+  </Card>
+
+  <Card title="Codebase Chat" icon="comments">
+    Natural language conversation grounded in the full repository — not just file summaries.
+  </Card>
+
+  <Card title="Sandboxed Agents" icon="shield-halved">
+    Each agent runs in an isolated sandbox with Nia tools pre-installed via the 21st Agents SDK.
+  </Card>
+
+  <Card title="Multi-thread Sessions" icon="layer-group">
+    Create multiple conversation threads per sandbox, persisted in `localStorage`.
+  </Card>
+</CardGroup>
+
+---
+
+## Stack
+
+<CardGroup cols={3}>
+  <Card title="Next.js" icon="react">
+    App Router with API routes for agent management.
+  </Card>
+
+  <Card title="21st Agents SDK" icon="robot">
+    Agent definition, deployment, and frontend streaming.
+  </Card>
+
+  <Card title="Nia MCP" icon="magnifying-glass">
+    Knowledge tools for search, read, explore, and grep.
+  </Card>
+</CardGroup>
+
+---
+
+## Requirements
+
+- Node.js 18+
+- `API_KEY_21ST` — from [21st.dev](https://21st.dev/agents/api-keys)
+- `NIA_API_KEY` — from [app.trynia.ai](https://app.trynia.ai)
+- deployed `nia-agent-v2`
+
+<Note>
+  `NIA_API_KEY` must exist both in `.env.local` (for the Next.js server to resolve/index repos) **and** in the deployed sandbox environment (for the Nia skill scripts).
+</Note>
+
+---
+
+## Quick start
+
+Clone the repo and install dependencies:
+
+```bash
+git clone https://github.com/21st-dev/an-examples.git
+cd an-examples/nia-chat
+cp .env.example .env.local
+pnpm install
+```
+
+Set `API_KEY_21ST` and `NIA_API_KEY` in `.env.local`, then deploy the agent and start the dev server:
+
+```bash
+npx @21st-sdk/cli login
+npx @21st-sdk/cli deploy
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+---
+
+## Key files
+
+| File | What it does |
+|------|-------------|
+| `agents/nia-agent-v2/index.ts` | Agent definition — model, system prompt, sandbox setup. Uses `@21st-sdk/agent`. |
+| `agents/nia-agent-v2/template/.claude/skills/nia/` | Nia skill scripts baked into the sandbox. Shell wrappers for search, read, explore, etc. |
+| `app/api/nia/source/route.ts` | Normalizes the repo input, then resolves (or indexes) it via the Nia SDK. |
+| `app/api/agent/sandbox/route.ts` | Creates a sandbox + thread via `AgentClient` from `@21st-sdk/node`. |
+| `app/api/agent/token/route.ts` | Token endpoint using `createTokenHandler` from `@21st-sdk/nextjs/server`. |
+| `app/api/agent/threads/route.ts` | Lists/creates threads within a sandbox for multi-thread sessions. |
+| `app/page.tsx` | Main UI — repo picker, chat panel, thread sidebar. |
+
+---
+
+## Building something similar
+
+The core pattern for building an agent-powered app with Nia knowledge:
+
+<Steps>
+  <Step title="Define your agent">
+    Use `@21st-sdk/agent` to set the model, system prompt, and any tools/skills to include in the template directory.
+  </Step>
+
+  <Step title="Deploy the sandbox">
+    Run `npx @21st-sdk/cli deploy` to bake the template into the sandbox image.
+  </Step>
+
+  <Step title="Create API routes">
+    Set up sandbox/thread management with `AgentClient` and a token endpoint with `createTokenHandler`.
+  </Step>
+
+  <Step title="Connect the frontend">
+    Use `createAgentChat()` bound to a sandbox + thread, then pass it to `useChat()` from `@ai-sdk/react` for streaming.
+  </Step>
+</Steps>
+
+To add external knowledge (like Nia), index sources server-side before the chat starts, then give the agent skill scripts or MCP tools so it can query those sources at runtime.
+
+---
+
+## Links
+
+<CardGroup cols={2}>
+  <Card title="GitHub" icon="github" href="https://github.com/21st-dev/an-examples/tree/main/nia-chat">
+    View the source code on GitHub
+  </Card>
+
+  <Card title="Live Demo" icon="arrow-up-right-from-square" href="https://21st-sdk-nia-chat.vercel.app">
+    Try the hosted example
+  </Card>
+
+  <Card title="21st.dev" icon="globe" href="https://21st.dev">
+    Learn more about the 21st Agents SDK
+  </Card>
+
+  <Card title="Nia Skill Scripts" icon="bolt" href="/integrations/installation/skill">
+    How Nia skill scripts work
+  </Card>
+</CardGroup>
+
+---
+
+<Warning>
+**Need Help?** Join our [Discord community](https://discord.gg/BBSwUMrrfn) or reach out through [app.trynia.ai](https://app.trynia.ai/) for support.
+</Warning>

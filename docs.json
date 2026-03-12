@@ -95,6 +95,17 @@
         ]
       },
       {
+        "tab": "Integrations",
+        "groups": [
+          {
+            "group": "Partner Integrations",
+            "pages": [
+              "integrations/21st-dev"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Plugins",
         "groups": [
           {
