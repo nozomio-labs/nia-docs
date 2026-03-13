@@ -129,12 +129,12 @@ async def index(
             if e.detail and "3 free indexing operations" in e.detail:
                 return [TextContent(
                     type="text",
-                    text=f"❌ {e.detail}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+                    text=f"❌ {e.detail}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
                 )]
             else:
                 return [TextContent(
                     type="text",
-                    text=f"❌ {str(e)}\n\n💡 Tip: You've reached the free tier limit. Upgrade to Pro for unlimited access."
+                    text=f"❌ {str(e)}\n\n💡 Tip: You've reached the free tier limit. Upgrade to Builder for unlimited access."
                 )]
         else:
             return [TextContent(type="text", text=f"❌ {str(e)}")]
@@ -144,7 +144,7 @@ async def index(
         if "indexing operations" in error_msg.lower() or "lifetime limit" in error_msg.lower():
             return [TextContent(
                 type="text",
-                text=f"❌ {error_msg}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+                text=f"❌ {error_msg}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
             )]
         return [TextContent(
             type="text",
@@ -199,12 +199,12 @@ async def index(
 #             if e.detail and "3 free indexing operations" in e.detail:
 #                 return [TextContent(
 #                     type="text",
-#                     text=f"❌ {e.detail}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+#                     text=f"❌ {e.detail}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
 #                 )]
 #             else:
 #                 return [TextContent(
 #                     type="text",
-#                     text=f"❌ {str(e)}\n\n💡 Tip: You've reached the free tier limit. Upgrade to Pro for unlimited access."
+#                     text=f"❌ {str(e)}\n\n💡 Tip: You've reached the free tier limit. Upgrade to Builder for unlimited access."
 #                 )]
 #         else:
 #             return [TextContent(type="text", text=f"❌ {str(e)}")]
@@ -214,7 +214,7 @@ async def index(
 #         if "indexing operations" in error_msg.lower() or "lifetime limit" in error_msg.lower():
 #             return [TextContent(
 #                 type="text",
-#                 text=f"❌ {error_msg}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+#                 text=f"❌ {error_msg}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
 #             )]
 #         return [TextContent(
 #             type="text",
@@ -347,12 +347,12 @@ async def search_codebase(
             if e.detail and "3 free indexing operations" in e.detail:
                 return [TextContent(
                     type="text", 
-                    text=f"❌ {e.detail}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+                    text=f"❌ {e.detail}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
                 )]
             else:
                 return [TextContent(
                     type="text",
-                    text=f"❌ {str(e)}\n\n💡 Tip: You've reached the free tier limit. Upgrade to Pro for unlimited access."
+                    text=f"❌ {str(e)}\n\n💡 Tip: You've reached the free tier limit. Upgrade to Builder for unlimited access."
                 )]
         else:
             return [TextContent(type="text", text=f"❌ {str(e)}")]
@@ -362,7 +362,7 @@ async def search_codebase(
         if "indexing operations" in error_msg.lower() or "lifetime limit" in error_msg.lower():
             return [TextContent(
                 type="text",
-                text=f"❌ {error_msg}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+                text=f"❌ {error_msg}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
             )]
         return [TextContent(
             type="text",
@@ -648,7 +648,7 @@ async def search_documentation(
         logger.error(f"API Error searching documentation: {e}")
         error_msg = f"❌ {str(e)}"
         if e.status_code == 403 and "lifetime limit" in str(e).lower():
-            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Pro for unlimited access."
+            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Builder for unlimited access."
         return [TextContent(type="text", text=error_msg)]
     except Exception as e:
         logger.error(f"Error searching documentation: {e}")
@@ -716,12 +716,12 @@ async def search_documentation(
             if e.detail and "3 free indexing operations" in e.detail:
                 return [TextContent(
                     type="text", 
-                    text=f"❌ {e.detail}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+                    text=f"❌ {e.detail}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
                 )]
             else:
                 return [TextContent(
                     type="text",
-                    text=f"❌ {str(e)}\n\n💡 Tip: You've reached the free tier limit. Upgrade to Pro for unlimited access."
+                    text=f"❌ {str(e)}\n\n💡 Tip: You've reached the free tier limit. Upgrade to Builder for unlimited access."
                 )]
         else:
             return [TextContent(type="text", text=f"❌ {str(e)}")]
@@ -732,7 +732,7 @@ async def search_documentation(
         if "indexing operations" in error_msg.lower() or "lifetime limit" in error_msg.lower():
             return [TextContent(
                 type="text",
-                text=f"❌ {error_msg}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+                text=f"❌ {error_msg}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
             )]
         return [TextContent(
             type="text",
@@ -790,7 +790,7 @@ async def search_documentation(
         logger.error(f"API Error checking repository status: {e}")
         error_msg = f"❌ {str(e)}"
         if e.status_code == 403 and "lifetime limit" in str(e).lower():
-            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Pro for unlimited access."
+            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Builder for unlimited access."
         return [TextContent(type="text", text=error_msg)]
     except Exception as e:
         logger.error(f"Error checking repository status: {e}")
@@ -861,7 +861,7 @@ async def search_documentation(
 #         logger.error(f"API Error indexing documentation: {e}")
 #         error_msg = f"❌ {str(e)}"
 #         if e.status_code == 403 and "lifetime limit" in str(e).lower():
-#             error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Pro for unlimited access."
+#             error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Builder for unlimited access."
 #         return [TextContent(type="text", text=error_msg)]
 #     except Exception as e:
 #         logger.error(f"Error indexing documentation: {e}")
@@ -918,7 +918,7 @@ async def search_documentation(
         logger.error(f"API Error listing documentation: {e}")
         error_msg = f"❌ {str(e)}"
         if e.status_code == 403 and "lifetime limit" in str(e).lower():
-            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Pro for unlimited access."
+            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Builder for unlimited access."
         return [TextContent(type="text", text=error_msg)]
     except Exception as e:
         logger.error(f"Error listing documentation: {e}")
@@ -982,7 +982,7 @@ async def search_documentation(
         logger.error(f"API Error checking documentation status: {e}")
         error_msg = f"❌ {str(e)}"
         if e.status_code == 403 and "lifetime limit" in str(e).lower():
-            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Pro for unlimited access."
+            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Builder for unlimited access."
         return [TextContent(type="text", text=error_msg)]
     except Exception as e:
         logger.error(f"Error checking documentation status: {e}")
@@ -1257,9 +1257,9 @@ async def manage_resource(
         error_msg = f"❌ {str(e)}"
         if e.status_code == 403 or "free tier limit" in str(e).lower():
             if e.detail and "3 free indexing operations" in e.detail:
-                error_msg = f"❌ {e.detail}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+                error_msg = f"❌ {e.detail}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
             else:
-                error_msg += "\n\n💡 Tip: You've reached the free tier limit. Upgrade to Pro for unlimited access."
+                error_msg += "\n\n💡 Tip: You've reached the free tier limit. Upgrade to Builder for unlimited access."
         return [TextContent(type="text", text=error_msg)]
     except Exception as e:
         logger.error(f"Error in manage_resource ({action}): {e}")
@@ -1267,7 +1267,7 @@ async def manage_resource(
         if "indexing operations" in error_msg.lower() or "lifetime limit" in error_msg.lower():
             return [TextContent(
                 type="text",
-                text=f"❌ {error_msg}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+                text=f"❌ {error_msg}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
             )]
         return [TextContent(
             type="text",
@@ -1464,7 +1464,7 @@ async def get_github_file_tree(
         logger.error(f"API Error deleting {resource_type}: {e}")
         error_msg = f"❌ {str(e)}"
         if e.status_code == 403 and "lifetime limit" in str(e).lower():
-            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Pro for unlimited access."
+            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Builder for unlimited access."
         return [TextContent(type="text", text=error_msg)]
     except Exception as e:
         logger.error(f"Error deleting {resource_type}: {e}")
@@ -1568,7 +1568,7 @@ async def get_github_file_tree(
         logger.error(f"API Error checking {resource_type} status: {e}")
         error_msg = f"❌ {str(e)}"
         if e.status_code == 403 and "lifetime limit" in str(e).lower():
-            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Pro for unlimited access."
+            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Builder for unlimited access."
         return [TextContent(type="text", text=error_msg)]
     except Exception as e:
         logger.error(f"Error checking {resource_type} status: {e}")
@@ -1685,9 +1685,9 @@ async def get_github_file_tree(
         error_msg = f"❌ {str(e)}"
         if e.status_code == 403 or "free tier limit" in str(e).lower():
             if e.detail and "3 free indexing operations" in e.detail:
-                error_msg = f"❌ {e.detail}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+                error_msg = f"❌ {e.detail}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
             else:
-                error_msg += "\n\n💡 Tip: You've reached the free tier limit. Upgrade to Pro for unlimited access."
+                error_msg += "\n\n💡 Tip: You've reached the free tier limit. Upgrade to Builder for unlimited access."
         return [TextContent(type="text", text=error_msg)]
     except Exception as e:
         logger.error(f"Unexpected error listing resources: {e}")
@@ -1695,7 +1695,7 @@ async def get_github_file_tree(
         if "indexing operations" in error_msg.lower() or "lifetime limit" in error_msg.lower():
             return [TextContent(
                 type="text",
-                text=f"❌ {error_msg}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+                text=f"❌ {error_msg}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
             )]
         return [TextContent(
             type="text",
@@ -1731,7 +1731,7 @@ async def get_github_file_tree(
         logger.error(f"API Error deleting documentation: {e}")
         error_msg = f"❌ {str(e)}"
         if e.status_code == 403 and "lifetime limit" in str(e).lower():
-            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Pro for unlimited access."
+            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Builder for unlimited access."
         return [TextContent(type="text", text=error_msg)]
     except Exception as e:
         logger.error(f"Error deleting documentation: {e}")
@@ -1767,7 +1767,7 @@ async def get_github_file_tree(
         logger.error(f"API Error deleting repository: {e}")
         error_msg = f"❌ {str(e)}"
         if e.status_code == 403 and "lifetime limit" in str(e).lower():
-            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Pro for unlimited access."
+            error_msg += "\n\n💡 Tip: You've reached the free tier limit of 3 indexing operations. Upgrade to Builder for unlimited access."
         return [TextContent(type="text", text=error_msg)]
     except Exception as e:
         logger.error(f"Error deleting repository: {e}")
@@ -1811,7 +1811,7 @@ async def get_github_file_tree(
         logger.error(f"API Error renaming repository: {e}")
         error_msg = f"❌ {str(e)}"
         if e.status_code == 403 and "lifetime limit" in str(e).lower():
-            error_msg += "\n\n💡 Tip: You've reached the free tier limit. Upgrade to Pro for unlimited access."
+            error_msg += "\n\n💡 Tip: You've reached the free tier limit. Upgrade to Builder for unlimited access."
         return [TextContent(type="text", text=error_msg)]
     except Exception as e:
         logger.error(f"Error renaming repository: {e}")
@@ -1855,7 +1855,7 @@ async def get_github_file_tree(
         logger.error(f"API Error renaming documentation: {e}")
         error_msg = f"❌ {str(e)}"
         if e.status_code == 403 and "lifetime limit" in str(e).lower():
-            error_msg += "\n\n💡 Tip: You've reached the free tier limit. Upgrade to Pro for unlimited access."
+            error_msg += "\n\n💡 Tip: You've reached the free tier limit. Upgrade to Builder for unlimited access."
         return [TextContent(type="text", text=error_msg)]
     except Exception as e:
         logger.error(f"Error renaming documentation: {e}")
@@ -1994,12 +1994,12 @@ async def nia_web_search(
             if e.detail and "3 free indexing operations" in e.detail:
                 return [TextContent(
                     type="text", 
-                    text=f"❌ {e.detail}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+                    text=f"❌ {e.detail}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
                 )]
             else:
                 return [TextContent(
                     type="text",
-                    text=f"❌ {str(e)}\n\n💡 Tip: You've reached the free tier limit. Upgrade to Pro for unlimited access."
+                    text=f"❌ {str(e)}\n\n💡 Tip: You've reached the free tier limit. Upgrade to Builder for unlimited access."
                 )]
         else:
             return [TextContent(type="text", text=f"❌ {str(e)}")]
@@ -2152,12 +2152,12 @@ async def nia_deep_research_agent(
             if e.detail and "3 free indexing operations" in e.detail:
                 return [TextContent(
                     type="text", 
-                    text=f"❌ {e.detail}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited indexing."
+                    text=f"❌ {e.detail}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited indexing."
                 )]
             else:
                 return [TextContent(
                     type="text",
-                    text=f"❌ {str(e)}\n\n💡 Tip: You've reached the free tier limit. Upgrade to Pro for unlimited access."
+                    text=f"❌ {str(e)}\n\n💡 Tip: You've reached the free tier limit. Upgrade to Builder for unlimited access."
                 )]
         else:
             return [TextContent(type="text", text=f"❌ {str(e)}")]
@@ -2279,7 +2279,7 @@ async def read_source_content(
         if e.status_code == 403 or "free tier limit" in str(e).lower():
             return [TextContent(
                 type="text",
-                text=f"❌ {str(e)}\n\n💡 Tip: Upgrade to Pro at https://trynia.ai/billing for unlimited access."
+                text=f"❌ {str(e)}\n\n💡 Tip: Upgrade to Builder at https://trynia.ai/billing for unlimited access."
             )]
         else:
             return [TextContent(type="text", text=f"❌ {str(e)}")]
