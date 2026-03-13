@@ -32,6 +32,7 @@
                 "group": "Installation",
                 "pages": [
                   "integrations/installation/overview",
+                  "integrations/installation/cli",
                   "integrations/installation/mcp",
                   "integrations/installation/skill"
                 ]

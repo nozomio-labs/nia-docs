@@ -37,7 +37,16 @@ This wizard will:
 
 There are two ways to connect Nia to your coding agent. Both give you access to the same features and tools — they just differ in how they communicate with the Nia API.
 
-<CardGroup cols={2}>
+<CardGroup cols={3}>
+  <Card title="CLI" icon="terminal" href="/integrations/installation/cli">
+    A standalone command-line tool for terminal-based agents and pipelines.
+
+    - Full platform access from the shell
+    - JSON output for machine parsing
+    - Async jobs with streaming
+    - No background processes
+  </Card>
+
   <Card title="MCP Server" icon="server" href="/integrations/installation/mcp">
     The standard approach. Your IDE connects to Nia through the **Model Context Protocol** — either via a remote server (recommended) or a local process.
 
@@ -58,5 +67,5 @@ There are two ways to connect Nia to your coding agent. Both give you access to 
 </CardGroup>
 
 <Info>
-  **Not sure which to pick?** If your IDE natively supports MCP (most do), go with the **MCP Server**. If you prefer a simpler setup or your agent supports skills, try the **Agent Skill** — it uses direct API calls and can be even more responsive.
+  **Not sure which to pick?** If your agent runs in the terminal (Claude Code, custom pipelines), go with the **CLI**. If your IDE natively supports MCP (most do), go with the **MCP Server**. If you prefer a simpler setup or your agent supports skills, try the **Agent Skill**.
 </Info>

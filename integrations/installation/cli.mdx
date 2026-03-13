@@ -1,0 +1,232 @@
+---
+title: 'CLI'
+description: 'Use the Nia CLI to index, search, research, and share context directly from your terminal.'
+---
+
+The Nia CLI is a standalone command-line tool that gives terminal-based agents and developers direct access to the full Nia platform — indexing, search, research, and context sharing — without an MCP server or SDK.
+
+<Info>
+  **Built for agents.** Every command supports structured JSON output, async execution with status polling, and non-interactive operation. Agents can compose commands into multi-step pipelines without human intervention.
+</Info>
+
+---
+
+## Installation
+
+```bash
+bunx nia-wizard@latest
+```
+
+The wizard handles authentication, configuration, and CLI setup. Once complete, the `nia` command is available globally.
+
+<Accordion title="Alternative installation methods">
+  ```bash
+  npx nia-wizard@latest        # npm
+  pnpx nia-wizard@latest       # pnpm
+  yarn dlx nia-wizard@latest   # yarn
+  ```
+</Accordion>
+
+---
+
+## Authentication
+
+```bash
+# Interactive login
+nia auth login
+
+# Non-interactive (CI/agents)
+nia auth login --api-key "nk_your_api_key"
+
+# Check auth status
+nia auth status
+```
+
+You can also set `NIA_API_KEY` as an environment variable or pass `--api-key` to any command.
+
+---
+
+## Command Reference
+
+### Index
+
+Index repositories, documentation, papers, datasets, and local folders.
+
+```bash
+# GitHub repositories
+nia repos index vercel/ai
+nia repos index vercel/ai --branch canary
+
+# Documentation sites
+nia sources index https://docs.anthropic.com
+
+# Research papers (arXiv)
+nia papers index 2312.00752
+
+# HuggingFace datasets
+nia datasets index dair-ai/emotion
+
+# Local folders
+nia local add ~/dev/my-project
+nia local watch
+```
+
+Check indexing status:
+
+```bash
+nia repos list
+nia repos status <id>
+nia sources list --status indexing
+```
+
+### Search
+
+Unified semantic + BM25 hybrid search across all indexed sources.
+
+```bash
+# Search with AI-generated response
+nia search query "How does auth middleware work?" --repos vercel/ai
+
+# Universal search (vector + BM25, no LLM)
+nia search universal "streaming response" --include-repos
+
+# Web search
+nia search web "OpenTelemetry collector changes" --category github
+
+# Deep research (Pro)
+nia search deep "Compare RAG evaluation frameworks"
+```
+
+### Read, Grep, Explore
+
+Code-level access to any indexed source.
+
+```bash
+# Read a file
+nia repos read vercel-ai packages/ai/core/generate-text/index.ts
+
+# Regex search
+nia repos grep vercel-ai "generateText.*stream" --lines-after 5
+
+# Browse file tree
+nia repos tree vercel-ai
+
+# Same for documentation sources
+nia sources read <id> path/to/page
+nia sources grep <id> "pattern"
+nia sources tree <id>
+```
+
+### Research
+
+Autonomous AI research with Oracle and Tracer.
+
+```bash
+# Oracle: deep research across indexed sources
+nia oracle job "How does TurboPuffer handle vector quantization?" --repos turbopuffer/turbopuffer
+
+# Stream real-time progress
+nia oracle stream <job-id>
+
+# Check status
+nia oracle status <job-id>
+
+# Tracer: live GitHub code search (no indexing needed)
+nia tracer run "How does Hono handle error middleware?" --repos honojs/hono
+nia tracer stream <job-id>
+```
+
+### Context Sharing
+
+Save and retrieve context across agent sessions.
+
+```bash
+# Save context
+nia contexts save "Auth refactor plan" \
+  --summary "Migrating from JWT to session tokens" \
+  --content "$(cat plan.md)" \
+  --memory-type procedural
+
+# Search contexts
+nia contexts semantic "auth migration approach"
+
+# Retrieve specific context
+nia contexts get <id>
+```
+
+Memory types: `scratchpad` (temporary), `episodic` (session), `fact` (permanent), `procedural` (workflow).
+
+### Packages
+
+Search public package registries without indexing.
+
+```bash
+# Regex search in package source
+nia packages grep npm react "useState" --context-after 3
+
+# Semantic + keyword hybrid search
+nia packages hybrid npm react "state management hook"
+```
+
+Supported registries: `npm`, `py_pi`, `crates_io`, `golang_proxy`, `ruby_gems`.
+
+### GitHub (Live Access)
+
+Read and search any public GitHub repository without indexing.
+
+```bash
+nia github tree vercel/ai
+nia github read vercel/ai packages/ai/core/generate-text/index.ts
+nia github search vercel/ai "streamText"
+nia github glob vercel/ai "**/*.test.ts"
+```
+
+### Usage
+
+```bash
+nia usage
+```
+
+View API usage summary, plan info, and operation breakdowns.
+
+---
+
+## Global Flags
+
+| Flag | Description |
+|------|-------------|
+| `--api-key <key>` | Override API key for a single command |
+| `--verbose` | Enable verbose output |
+| `--no-color` | Disable colored output |
+
+---
+
+## CLI vs MCP vs Skill
+
+| Aspect | CLI | MCP Server | Agent Skill |
+|--------|-----|------------|-------------|
+| **Interface** | Shell commands | Tool protocol | HTTP API calls |
+| **Best for** | Terminal agents, pipelines, scripts | IDE-native agents | Lightweight setups |
+| **Setup** | `bunx nia-wizard@latest` | Config file per IDE | Skill file + API key |
+| **Async support** | Built-in (job IDs + streaming) | Handled by MCP | Manual polling |
+| **Background process** | None | Optional (local server) | None |
+
+---
+
+## Links
+
+<CardGroup cols={2}>
+  <Card title="GitHub" icon="github" href="https://github.com/nozomio/nia-cli">
+    View CLI source code
+  </Card>
+
+  <Card title="Get API Key" icon="key" href="https://app.trynia.ai">
+    Sign up for Nia API access
+  </Card>
+</CardGroup>
+
+---
+
+<Warning>
+**Need Help?** Join our [Discord community](https://discord.gg/BBSwUMrrfn) for support.
+</Warning>
