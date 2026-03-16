@@ -1,0 +1,214 @@
+---
+title: 'LangChain'
+description: 'Use all Nia tools as a LangChain integration — search, index, explore, and manage knowledge sources from any LangChain agent.'
+---
+
+The [langchain-nia](https://github.com/nozomio-labs/nia-langchain) package provides 20 LangChain-compatible tools that give any LangChain agent full access to Nia — a search and index API that continuously provides context from docs, research papers, datasets, codebases, and more so agents never rely on stale data.
+
+<Info>
+  **Official LangChain partner integration** built with `langchain-core` and the standard `BaseTool` / `BaseToolkit` interfaces. Passes all [LangChain standard tests](https://docs.langchain.com/oss/python/contributing/standard-tests-langchain).
+</Info>
+
+---
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Semantic Search" icon="magnifying-glass">
+    Search across indexed repos, docs, datasets, Slack, and more with natural language queries.
+  </Card>
+
+  <Card title="Source Management" icon="folder-open">
+    Index, list, sync, read, grep, and explore any indexed source directly from your agent.
+  </Card>
+
+  <Card title="GitHub Tools" icon="github">
+    Search code, read files, glob for patterns, and browse file trees in any GitHub repository.
+  </Card>
+
+  <Card title="Context Sharing" icon="brain">
+    Save and search conversation context across agents for persistent knowledge sharing.
+  </Card>
+</CardGroup>
+
+---
+
+## Installation
+
+<CodeGroup>
+  ```bash pip
+  pip install langchain-nia
+  ```
+  ```bash uv
+  uv add langchain-nia
+  ```
+</CodeGroup>
+
+---
+
+## Setup
+
+### 1. Get Your API Key
+
+Sign up at [trynia.ai](https://trynia.ai) to get your API key, or run the wizard:
+
+```bash
+npx nia-wizard@latest
+```
+
+### 2. Set the Environment Variable
+
+```bash
+export NIA_API_KEY="nk_..."
+```
+
+Or pass it directly in code:
+
+```python
+from langchain_nia import NiaAPIWrapper, NiaToolkit
+
+wrapper = NiaAPIWrapper(nia_api_key="nk_...")
+toolkit = NiaToolkit(api_wrapper=wrapper)
+```
+
+---
+
+## Quick Start
+
+### Using the Toolkit
+
+The `NiaToolkit` provides all 20 tools with a shared API client. Toggle tool groups with boolean flags:
+
+```python
+from langchain_nia import NiaToolkit
+
+toolkit = NiaToolkit(
+    include_search=True,        # 5 search tools
+    include_sources=True,       # 7 source management tools
+    include_github=True,        # 4 GitHub tools
+    include_contexts=True,      # 2 context/memory tools
+    include_dependencies=True,  # 2 dependency tools
+)
+
+tools = toolkit.get_tools()
+```
+
+### Using Individual Tools
+
+```python
+from langchain_nia import NiaSearch
+
+tool = NiaSearch()
+result = tool.invoke({"query": "how does authentication work?"})
+```
+
+### With a LangChain Agent
+
+```python
+from langchain_nia import NiaToolkit
+from langchain_openai import ChatOpenAI
+
+toolkit = NiaToolkit()
+tools = toolkit.get_tools()
+
+llm = ChatOpenAI(model="gpt-4o")
+llm_with_tools = llm.bind_tools(tools)
+
+response = llm_with_tools.invoke("Search for React hooks best practices in my indexed repos")
+```
+
+---
+
+## Available Tools
+
+### Search (5 tools)
+
+| Tool | Description |
+|------|-------------|
+| `NiaSearch` | Semantic search across all indexed repos, docs, and data sources |
+| `NiaWebSearch` | Web search with category filtering (github, news, research, etc.) and date range |
+| `NiaDeepResearch` | Multi-step comprehensive research with output formatting |
+| `NiaUniversalSearch` | Search all sources simultaneously with compression options |
+| `NiaAdvisor` | Analyze code against indexed documentation for recommendations |
+
+### Source Management (7 tools)
+
+| Tool | Description |
+|------|-------------|
+| `NiaIndex` | Index new sources — repos, docs, papers, datasets, local folders |
+| `NiaSourceList` | List indexed sources with type, status, and query filtering |
+| `NiaSourceSubscribe` | Subscribe to pre-indexed public sources |
+| `NiaSourceSync` | Re-sync an indexed source to pull latest changes |
+| `NiaRead` | Read files or pages from indexed sources (supports line ranges) |
+| `NiaGrep` | Regex pattern search within indexed sources with context lines |
+| `NiaExplore` | Browse the file tree structure of any indexed source |
+
+### GitHub (4 tools)
+
+| Tool | Description |
+|------|-------------|
+| `NiaGitHubSearch` | Search code in GitHub repositories via GitHub Code Search |
+| `NiaGitHubRead` | Read files from GitHub repos with optional line ranges |
+| `NiaGitHubGlob` | Find files matching glob patterns (e.g. `**/*.py`) |
+| `NiaGitHubTree` | Browse the file tree of any GitHub repository |
+
+### Context & Memory (2 tools)
+
+| Tool | Description |
+|------|-------------|
+| `NiaContextSave` | Save findings, resources, or context with tags for cross-agent sharing |
+| `NiaContextSearch` | Semantic search over previously saved contexts |
+
+### Dependencies (2 tools)
+
+| Tool | Description |
+|------|-------------|
+| `NiaDependencySubscribe` | Auto-subscribe to docs for all dependencies in a manifest file |
+| `NiaDependencyAnalyze` | Preview what would be indexed from a package manifest |
+
+---
+
+## Async Support
+
+All 20 tools support both synchronous and asynchronous execution:
+
+```python
+import asyncio
+from langchain_nia import NiaSearch
+
+tool = NiaSearch()
+
+# Sync
+result = tool.invoke({"query": "React hooks"})
+
+# Async
+result = asyncio.run(tool.ainvoke({"query": "React hooks"}))
+```
+
+---
+
+## Links
+
+<CardGroup cols={2}>
+  <Card title="GitHub" icon="github" href="https://github.com/nozomio-labs/nia-langchain">
+    View source code and contribute
+  </Card>
+
+  <Card title="PyPI" icon="python" href="https://pypi.org/project/langchain-nia/">
+    Install from PyPI
+  </Card>
+
+  <Card title="LangChain Docs" icon="link" href="https://docs.langchain.com/oss/python/integrations/tools">
+    LangChain tool integrations
+  </Card>
+
+  <Card title="Get API Key" icon="key" href="https://app.trynia.ai">
+    Sign up for Nia API access
+  </Card>
+</CardGroup>
+
+---
+
+<Warning>
+**Need Help?** Join our [Discord community](https://discord.gg/BBSwUMrrfn) or reach out through [app.trynia.ai](https://app.trynia.ai/) for support.
+</Warning>

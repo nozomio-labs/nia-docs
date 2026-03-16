@@ -101,7 +101,8 @@
           {
             "group": "Partner Integrations",
             "pages": [
-              "integrations/21st-dev"
+              "integrations/21st-dev",
+              "integrations/langchain"
             ]
           }
         ]
