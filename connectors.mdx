@@ -1,0 +1,107 @@
+---
+title: 'Connectors'
+description: 'Generic connector framework for integrating external data sources'
+---
+
+Connectors provide a unified way to integrate external data sources into Nia. Each connector type handles authentication (API key or OAuth), indexing, and sync scheduling.
+
+---
+
+## Available Connectors
+
+List all available connector types:
+
+```bash
+curl https://apigcp.trynia.ai/v2/connectors \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+---
+
+## Installing a Connector
+
+### API Key-Based
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/connectors/{connector_type}/install \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "api_key": "your-service-api-key"
+  }'
+```
+
+### OAuth-Based
+
+For OAuth connectors, the install endpoint returns an authorization URL. After the user authorizes, the callback completes the installation:
+
+```bash
+# 1. Initiate OAuth
+curl -X POST https://apigcp.trynia.ai/v2/connectors/{connector_type}/install \
+  -H "Authorization: Bearer $NIA_API_KEY"
+
+# 2. User authorizes in browser → redirects to callback
+# 3. Callback creates the installation automatically
+```
+
+---
+
+## Managing Installations
+
+### List All Installations
+
+```bash
+curl https://apigcp.trynia.ai/v2/connectors/installations \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+### Trigger Indexing
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/connectors/installations/{installation_id}/index \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+### Check Status
+
+```bash
+curl https://apigcp.trynia.ai/v2/connectors/installations/{installation_id}/status \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+### Update Sync Schedule
+
+```bash
+curl -X PATCH https://apigcp.trynia.ai/v2/connectors/installations/{installation_id}/schedule \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "interval": "6h"
+  }'
+```
+
+### Disconnect
+
+```bash
+curl -X DELETE https://apigcp.trynia.ai/v2/connectors/installations/{installation_id} \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+---
+
+## API Reference
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/connectors` | GET | List available connector types |
+| `/connectors/{type}/install` | POST | Install a connector (API key or OAuth) |
+| `/connectors/{type}/oauth/callback` | GET | OAuth callback handler |
+| `/connectors/installations` | GET | List all installations |
+| `/connectors/installations/{id}` | DELETE | Disconnect a connector |
+| `/connectors/installations/{id}/index` | POST | Trigger indexing |
+| `/connectors/installations/{id}/schedule` | PATCH | Update sync schedule |
+| `/connectors/installations/{id}/status` | GET | Get sync status and health |
+
+<Note>
+  Once indexed, connector sources are searchable through the same unified search and source APIs used for all other Nia source types.
+</Note>

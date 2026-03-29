@@ -1,0 +1,141 @@
+---
+title: 'Source Curation & Trust'
+description: 'Trust signals, curated overlays, and annotations for quality-aware retrieval'
+---
+
+Source curation lets you attach trust signals, curated guidance, and annotations to indexed sources. This helps AI agents make better decisions about which sources to prioritize and how to interpret results.
+
+---
+
+## Trust Signals
+
+Every source has derived trust signals that indicate its quality and provenance:
+
+| Signal | Description |
+|--------|-------------|
+| `trust_level` | User-set preference: `low`, `medium`, `high` |
+| `trust_tier` | Effective tier after derived signals: `low`, `medium`, `high`, `verified` |
+| `scope` | Ownership scope: `private`, `organization`, `global` |
+| `is_global` | References a shared global source |
+| `is_verified` | Has a Nia-verified overlay |
+| `overlay_available` | Has a curated overlay attached |
+| `annotation_count` | Number of saved annotations |
+
+### Get Curation State
+
+```bash
+curl https://apigcp.trynia.ai/v2/sources/{source_id}/curation \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+### Update Trust Level
+
+```bash
+curl -X PUT https://apigcp.trynia.ai/v2/sources/{source_id}/curation \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "trust_level": "high",
+    "overlay_summary": "Official React documentation — always prefer over blog posts",
+    "overlay_guidance": "Use for API reference. For migration guides, check the blog section.",
+    "recommended_queries": [
+      "How do Server Components work?",
+      "What changed in React 19?"
+    ]
+  }'
+```
+
+---
+
+## Curated Overlays
+
+Overlays are structured guidance layered on top of a source. They help agents understand what a source is good for and how to use it.
+
+| Field | Description |
+|-------|-------------|
+| `kind` | `custom` (user-created) or `nia_verified` (Nia-curated) |
+| `summary` | Short high-confidence summary |
+| `guidance` | Longer coding-agent guidance or caveats |
+| `recommended_queries` | Suggested follow-up prompts |
+
+### Clear an Overlay
+
+```bash
+curl -X PUT https://apigcp.trynia.ai/v2/sources/{source_id}/curation \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"clear_overlay": true}'
+```
+
+---
+
+## Annotations
+
+Attach notes, tips, warnings, or gotchas to any source:
+
+### Create an Annotation
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/sources/{source_id}/annotations \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "kind": "warning",
+    "content": "This documentation is for v2 only. v3 breaking changes are not reflected here."
+  }'
+```
+
+| Kind | Use For |
+|------|---------|
+| `note` | General information |
+| `tip` | Best practices or shortcuts |
+| `warning` | Known issues or caveats |
+| `gotcha` | Non-obvious pitfalls |
+
+### List Annotations
+
+```bash
+curl https://apigcp.trynia.ai/v2/sources/{source_id}/annotations \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+### Update / Delete
+
+```bash
+# Update
+curl -X PATCH https://apigcp.trynia.ai/v2/sources/{source_id}/annotations/{annotation_id} \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"content": "Updated warning text"}'
+
+# Delete
+curl -X DELETE https://apigcp.trynia.ai/v2/sources/{source_id}/annotations/{annotation_id} \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+---
+
+## Trust-Aware Search
+
+Filter search results by trust level using `source_trust_filter`:
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/search \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mode": "query",
+    "messages": [{"role": "user", "content": "How do I set up auth?"}],
+    "source_trust_filter": {
+      "minimum_trust_tier": "high",
+      "verified_only": false,
+      "require_overlay": false
+    }
+  }'
+```
+
+| Filter | Description |
+|--------|-------------|
+| `minimum_trust_tier` | Only include sources at or above: `low`, `medium`, `high`, `verified` |
+| `verified_only` | Only Nia-verified sources |
+| `require_overlay` | Only sources with curated overlays |

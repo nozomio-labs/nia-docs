@@ -58,29 +58,42 @@ Rate limit headers are included in responses:
 ### Index a Repository
 
 ```bash
-curl -X POST https://apigcp.trynia.ai/v2/repositories \
+curl -X POST https://apigcp.trynia.ai/v2/sources \
   -H "Authorization: Bearer $NIA_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"repository": "vercel/ai"}'
+  -d '{"type": "repository", "repository": "vercel/ai"}'
 ```
 
 ### Index Documentation
 
 ```bash
-curl -X POST https://apigcp.trynia.ai/v2/data-sources \
+curl -X POST https://apigcp.trynia.ai/v2/sources \
   -H "Authorization: Bearer $NIA_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"url": "https://sdk.vercel.ai/docs"}'
+  -d '{"type": "documentation", "url": "https://sdk.vercel.ai/docs"}'
 ```
 
 ### Search Across Sources
 
 ```bash
-curl -X POST https://apigcp.trynia.ai/v2/universal-search \
+curl -X POST https://apigcp.trynia.ai/v2/search \
   -H "Authorization: Bearer $NIA_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "query": "How do I stream responses?",
+    "mode": "universal",
+    "query": "How do I stream responses?"
+  }'
+```
+
+### Query with Chat Context
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/search \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mode": "query",
+    "messages": [{"role": "user", "content": "How do I stream responses?"}],
     "repositories": ["vercel/ai"],
     "data_sources": ["Vercel AI SDK"]
   }'
@@ -89,7 +102,7 @@ curl -X POST https://apigcp.trynia.ai/v2/universal-search \
 ### Package Search (No Indexing Required)
 
 ```bash
-curl -X POST https://apigcp.trynia.ai/v2/package-search/grep \
+curl -X POST https://apigcp.trynia.ai/v2/packages/grep \
   -H "Authorization: Bearer $NIA_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -99,21 +112,47 @@ curl -X POST https://apigcp.trynia.ai/v2/package-search/grep \
   }'
 ```
 
+### Document Agent (Query a PDF with AI)
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/document/agent \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source_id": "your-pdf-source-id",
+    "query": "What are the key findings?",
+    "json_schema": {
+      "type": "object",
+      "properties": {
+        "findings": { "type": "array", "items": { "type": "string" } },
+        "conclusion": { "type": "string" }
+      }
+    }
+  }'
+```
+
 ---
 
 ## Best Practices
 
-### Use Universal Search for Multi-Source Queries
+### Use Unified Search for Multi-Source Queries
 
-Instead of querying repositories and documentation separately, use the `/universal-search` endpoint to search across all your indexed sources at once:
+The unified `/search` endpoint supports four modes via a `mode` discriminator:
+
+| Mode | Description |
+|------|-------------|
+| `query` | Chat-style search with message history, scoped to specific sources |
+| `web` | Web search for external information |
+| `deep` | Multi-step research with AI analysis |
+| `universal` | Search across all indexed sources automatically |
 
 ```bash
-curl -X POST https://apigcp.trynia.ai/v2/universal-search \
+curl -X POST https://apigcp.trynia.ai/v2/search \
   -H "Authorization: Bearer $NIA_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "query": "authentication middleware implementation",
-    "search_mode": "unified"
+    "mode": "universal",
+    "query": "authentication middleware implementation"
   }'
 ```
 
@@ -128,7 +167,7 @@ headers = {"Authorization": f"Bearer {NIA_API_KEY}"}
 
 # Semantic search for understanding patterns
 response = requests.post(
-    "https://apigcp.trynia.ai/v2/package-search/hybrid",
+    "https://apigcp.trynia.ai/v2/packages/search",
     headers=headers,
     json={
         "registry": "py_pi",
@@ -161,27 +200,24 @@ def fetch_with_retry(url, headers, json_data, max_retries=3):
 
 ### Monitor Indexing Progress
 
-Large repositories take time to index. Poll the status endpoint:
+Large repositories take time to index. Poll the source status endpoint:
 
 ```bash
-# Check repository indexing status
-curl https://apigcp.trynia.ai/v2/repositories/vercel%2Fai \
+# Check source status
+curl https://apigcp.trynia.ai/v2/sources/{source_id} \
   -H "Authorization: Bearer $NIA_API_KEY"
 ```
 
-Response includes progress:
+### Check Usage
 
-```json
-{
-  "repository": "vercel/ai",
-  "status": "indexing",
-  "progress": {
-    "percentage": 45,
-    "stage": "embedding",
-    "message": "Processing files..."
-  }
-}
+View your current usage counts and limits:
+
+```bash
+curl https://apigcp.trynia.ai/v2/usage \
+  -H "Authorization: Bearer $NIA_API_KEY"
 ```
+
+Returns usage breakdown by operation type (queries, indexing, oracle, etc.) with used/limit/unlimited for each.
 
 ---
 
@@ -228,15 +264,15 @@ For custom applications, use the REST API directly:
 **JavaScript/TypeScript:**
 
 ```javascript
-const response = await fetch("https://apigcp.trynia.ai/v2/universal-search", {
+const response = await fetch("https://apigcp.trynia.ai/v2/search", {
   method: "POST",
   headers: {
     "Authorization": `Bearer ${process.env.NIA_API_KEY}`,
     "Content-Type": "application/json"
   },
   body: JSON.stringify({
-    query: "How does error handling work?",
-    repositories: ["fastapi/fastapi"]
+    mode: "universal",
+    query: "How does error handling work?"
   })
 });
 
@@ -254,11 +290,11 @@ headers = {
 }
 
 response = requests.post(
-    "https://apigcp.trynia.ai/v2/universal-search",
+    "https://apigcp.trynia.ai/v2/search",
     headers=headers,
     json={
-        "query": "How does error handling work?",
-        "repositories": ["fastapi/fastapi"]
+        "mode": "universal",
+        "query": "How does error handling work?"
     }
 )
 
@@ -269,19 +305,53 @@ results = response.json()
 
 ## Key Endpoints
 
+### Sources (Unified)
+
 | Endpoint | Description |
 |----------|-------------|
-| `POST /repositories` | Index a GitHub repository |
-| `POST /data-sources` | Index documentation/website |
-| `POST /research-papers` | Index arXiv papers |
-| `POST /universal-search` | Search across all sources |
-| `POST /query` | Query with chat context |
-| `POST /package-search/grep` | Regex search in packages |
-| `POST /package-search/hybrid` | Semantic search in packages |
-| `POST /oracle` | Deep research agent |
+| `POST /sources` | Create a source (repository, documentation, research_paper, huggingface_dataset, local_folder) |
+| `GET /sources` | List sources with type, status, and category filters |
+| `GET /sources/{id}` | Get source details |
+| `PATCH /sources/{id}` | Update source (display name, category) |
+| `DELETE /sources/{id}` | Delete a source |
+| `POST /sources/subscribe` | Subscribe to a pre-indexed global source |
+| `POST /sources/upload-url` | Get a signed URL for direct PDF upload |
+| `GET /sources-summary` | Quick inventory counts for all source types |
+
+### Search (Unified)
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /search` | Unified search with `mode`: `query`, `web`, `deep`, `universal` |
+
+### Document Agent & Extraction
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /document/agent` | Query a PDF with an AI agent — supports `json_schema` for structured output |
+| `POST /extract` | Extract structured records from PDFs using a JSON schema |
+| `POST /extract/engineering` | Engineering-focused extraction from technical documents |
+
+### Research & Analysis
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /oracle/jobs` | Create an Oracle research job |
+| `GET /oracle/jobs/{id}/stream` | Stream real-time research updates |
+| `POST /advisor` | Context-aware code advisor |
+| `POST /github/tracer` | Tracer agent for live GitHub search |
+| `POST /packages/search` | Semantic search in package source code |
+| `POST /packages/grep` | Regex search in package source code |
+
+### Context & Organization
+
+| Endpoint | Description |
+|----------|-------------|
 | `POST /contexts` | Save conversation context |
-| `POST /web-search` | Search the web |
-| `POST /deep-research` | Multi-step research |
+| `GET /contexts/semantic-search` | Vector + BM25 hybrid search over contexts |
+| `POST /categories` | Create a category for organizing sources |
+| `GET /usage` | Get usage counts and limits |
+| `POST /bulk-delete` | Delete multiple resources at once |
 
 <Info>
   Check out the [API Reference](/api-reference) for complete endpoint documentation with request/response schemas.

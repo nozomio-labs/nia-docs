@@ -47,9 +47,13 @@
             "group": "Capabilities",
             "pages": [
               "tools-features",
+              "document-agent",
+              "extraction",
               "tracer",
               "oracle-research",
               "context-sharing",
+              "source-curation",
+              "categories",
               "scoped-mcp",
               "local-sync",
               "e2e-encryption"
@@ -62,7 +66,9 @@
               "google-drive",
               "pdf-indexing",
               "huggingface-datasets",
-              "slack-search"
+              "slack-search",
+              "x-twitter",
+              "connectors"
             ]
           },
           {

@@ -1,0 +1,251 @@
+---
+title: 'Document Agent'
+description: 'Query any indexed PDF or document with an AI agent that reads, searches, and cites — with optional structured output'
+---
+
+The Document Agent runs a full AI agent against an indexed PDF or document. Unlike simple RAG retrieval, the agent autonomously uses tools — search, read sections, read pages — to research the document and produce a comprehensive answer with citations.
+
+<Info>
+  **Structured Output** — Pass a `json_schema` to get machine-readable structured responses. The agent's answer conforms to your schema while still grounding every field in the source document.
+</Info>
+
+---
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Agent-Based Retrieval" icon="robot">
+    The agent decides which sections to read, searches for relevant content, and iterates until it has enough evidence to answer.
+  </Card>
+
+  <Card title="Structured Output" icon="brackets-curly">
+    Pass a JSON Schema and get back validated structured data extracted from the document — not just free-text answers.
+  </Card>
+
+  <Card title="Section-Aware Citations" icon="quote-left">
+    Every citation includes page number, section ID, section title, and section path — so you know exactly where the answer came from.
+  </Card>
+
+  <Card title="Model Selection" icon="microchip">
+    Choose from `claude-opus-4-6-1m` (default, 1M context), `claude-opus-4-6`, `claude-sonnet-4-5-20250929`, and more.
+  </Card>
+
+  <Card title="Extended Thinking" icon="brain">
+    Enable extended thinking for complex analytical queries. The agent reasons through multi-step problems before answering.
+  </Card>
+
+  <Card title="Streaming" icon="wave-pulse">
+    Stream responses as SSE events for real-time UI updates.
+  </Card>
+</CardGroup>
+
+---
+
+## Quick Start
+
+### Basic Query
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/document/agent \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source_id": "your-pdf-source-id",
+    "query": "What are the key findings in section 3?"
+  }'
+```
+
+### With Structured Output
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/document/agent \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source_id": "your-pdf-source-id",
+    "query": "Extract all financial metrics mentioned in this filing",
+    "json_schema": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "value": { "type": "string" },
+              "period": { "type": "string" },
+              "page": { "type": "integer" }
+            },
+            "required": ["name", "value"]
+          }
+        },
+        "summary": { "type": "string" }
+      },
+      "required": ["metrics", "summary"]
+    }
+  }'
+```
+
+---
+
+## API Reference
+
+### Request
+
+`POST /v2/document/agent`
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `source_id` | string | Yes | — | Data source ID of the indexed document |
+| `query` | string | Yes | — | Question to ask about the document (1–10,000 chars) |
+| `json_schema` | object | No | — | JSON Schema for structured output |
+| `model` | string | No | `claude-opus-4-6-1m` | Model to use |
+| `thinking_enabled` | boolean | No | `true` | Enable extended thinking |
+| `thinking_budget` | integer | No | `10000` | Token budget for thinking (1,000–50,000) |
+| `stream` | boolean | No | `false` | Stream response as SSE events |
+
+### Available Models
+
+| Model | Context | Best For |
+|-------|---------|----------|
+| `claude-opus-4-6-1m` | 1M tokens | Large documents, complex analysis (default) |
+| `claude-opus-4-6` | Standard | Deep reasoning on shorter documents |
+| `claude-sonnet-4-5-20250929` | Standard | Fast, cost-effective queries |
+
+### Response
+
+```json
+{
+  "answer": "The key findings in section 3 include...",
+  "citations": [
+    {
+      "content": "We observed a 23% improvement in...",
+      "page_number": 12,
+      "section_id": "3.2",
+      "section_title": "Experimental Results",
+      "section_path": ["3. Methodology", "3.2 Experimental Results"],
+      "tool_source": "read_section"
+    }
+  ],
+  "structured_output": {
+    "metrics": [
+      { "name": "Revenue", "value": "$4.2B", "period": "Q3 2025", "page": 15 }
+    ],
+    "summary": "The filing reports..."
+  },
+  "model": "claude-opus-4-6-1m",
+  "usage": {
+    "input_tokens": 45000,
+    "output_tokens": 2500
+  }
+}
+```
+
+### Citation Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `content` | string | The cited text from the document |
+| `page_number` | integer | Page number where the citation appears |
+| `section_id` | string | Section identifier (e.g., "3.2") |
+| `section_title` | string | Section heading |
+| `section_path` | string[] | Full path from root to section |
+| `tool_source` | string | Which agent tool produced this citation |
+
+---
+
+## Structured Output
+
+When you provide a `json_schema`, the agent:
+
+1. Researches the document using its tools
+2. Extracts information matching your schema
+3. Returns both a free-text `answer` and a validated `structured_output`
+
+This is ideal for:
+
+- **Data extraction** — Pull structured records from financial filings, contracts, or reports
+- **Comparison tables** — Extract feature matrices or specification tables
+- **Entity extraction** — Identify people, dates, amounts, or terms
+- **Classification** — Categorize document sections or content types
+
+### Example: Extract Contract Terms
+
+```json
+{
+  "source_id": "contract-source-id",
+  "query": "Extract all payment terms and deadlines",
+  "json_schema": {
+    "type": "object",
+    "properties": {
+      "payment_terms": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "description": { "type": "string" },
+            "amount": { "type": "string" },
+            "due_date": { "type": "string" },
+            "conditions": { "type": "string" }
+          },
+          "required": ["description"]
+        }
+      },
+      "total_value": { "type": "string" },
+      "currency": { "type": "string" }
+    },
+    "required": ["payment_terms"]
+  }
+}
+```
+
+---
+
+## Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Financial Analysis" icon="chart-line">
+    Extract KPIs, revenue figures, and risk factors from SEC filings with structured schemas.
+  </Card>
+
+  <Card title="Research Synthesis" icon="flask">
+    Ask complex questions across research papers and get cited, section-aware answers.
+  </Card>
+
+  <Card title="Contract Review" icon="file-contract">
+    Pull obligations, deadlines, and clauses into structured data for downstream processing.
+  </Card>
+
+  <Card title="Technical Documentation" icon="book">
+    Query API specs and manuals with structured output for integration into code generation pipelines.
+  </Card>
+</CardGroup>
+
+---
+
+## Workflow
+
+<Steps>
+  <Step title="Index a Document">
+    Index any PDF via URL upload or arXiv:
+    ```bash
+    curl -X POST https://apigcp.trynia.ai/v2/sources \
+      -H "Authorization: Bearer $NIA_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"type": "research_paper", "url": "https://arxiv.org/abs/2401.12345"}'
+    ```
+  </Step>
+
+  <Step title="Query with the Agent">
+    Ask questions — optionally with a JSON schema for structured output.
+  </Step>
+
+  <Step title="Use the Citations">
+    Each answer includes citations with page numbers and section paths for verification.
+  </Step>
+</Steps>
+
+<Note>
+  The Document Agent works with any indexed PDF or document source. Index it first using `POST /v2/sources` or the MCP `index` tool, then pass the `source_id` to the agent.
+</Note>

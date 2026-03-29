@@ -71,7 +71,7 @@ curl --request POST \
     "repositories": ["fastapi/fastapi"],
     "data_sources": ["FastAPI Documentation"],
     "output_format": "markdown report with code examples",
-    "model": "claude-opus-4-5-20251101"
+    "model": "claude-opus-4-6"
   }'
 ```
 
@@ -81,7 +81,9 @@ Create asynchronous jobs via Hatchet workflow for better reliability:
 
 **Benefits:**
 - Queues jobs for reliable execution
-- Supports concurrency limits per user
+- Per-user concurrency limit: max 3 concurrent Oracle jobs
+- Additional jobs wait in queue automatically
+- 30-minute timeout per job
 - Enables reconnection to running jobs
 - Provides job status tracking and history
 
@@ -89,6 +91,7 @@ Create asynchronous jobs via Hatchet workflow for better reliability:
 1. Create job: `POST /v2/oracle/jobs`
 2. Subscribe to updates: `GET /v2/oracle/jobs/{job_id}/stream` (SSE)
 3. Check status: `GET /v2/oracle/jobs/{job_id}`
+4. Cancel if needed: `DELETE /v2/oracle/jobs/{job_id}`
 
 ## Real-time Event Types
 
@@ -118,12 +121,83 @@ Both execution methods provide real-time streaming events:
   5. Present findings with sources
 </Accordion>
 
-## Additional Features
+## Model Selection
 
-- **Chat with results:** Follow up on research with `/v2/oracle/sessions/{session_id}/chat`
-- **View history:** List past sessions with `/v2/oracle/history`
-- **Session details:** Get full session info with `/v2/oracle/sessions/{session_id}`
-- **Message history:** Retrieve chat messages with `/v2/oracle/sessions/{session_id}/messages`
+| Model | Context | Best For |
+|-------|---------|----------|
+| `claude-opus-4-6` | Standard | Deep reasoning, complex multi-source research |
+| `claude-opus-4-6-1m` | 1M tokens | Large codebases, extensive documentation analysis |
+| `claude-sonnet-4-5-20250929` | Standard | Fast, cost-effective research |
+| `claude-sonnet-4-5-1m` | 1M tokens | Fast research with large context |
+
+Pass the `model` parameter in your request:
+
+```json
+{
+  "query": "Compare authentication approaches",
+  "model": "claude-opus-4-6-1m"
+}
+```
+
+## 1M Context Window Usage
+
+Oracle jobs using 1M context models have a daily usage limit. Check your current usage:
+
+```bash
+curl https://apigcp.trynia.ai/v2/oracle/1m-usage \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+```json
+{
+  "used": 3,
+  "limit": 10,
+  "remaining": 7
+}
+```
+
+## Sessions & Follow-Up Chat
+
+Oracle research sessions persist. You can chat with the results, review history, and continue the conversation.
+
+### List Sessions
+
+```bash
+curl "https://apigcp.trynia.ai/v2/oracle/sessions?limit=20" \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+### Get Session Details
+
+```bash
+curl https://apigcp.trynia.ai/v2/oracle/sessions/{session_id} \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+### Follow-Up Chat (Streaming)
+
+Chat with the research results. Responses are grounded in the original report and citations:
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/oracle/sessions/{session_id}/chat/stream \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Can you elaborate on the security implications?"}'
+```
+
+### Get Chat Messages
+
+```bash
+curl https://apigcp.trynia.ai/v2/oracle/sessions/{session_id}/messages \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+### Delete a Session
+
+```bash
+curl -X DELETE https://apigcp.trynia.ai/v2/oracle/sessions/{session_id} \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
 
 ## Response Format
 

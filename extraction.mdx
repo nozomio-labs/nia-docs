@@ -1,0 +1,159 @@
+---
+title: 'Extraction'
+description: 'Extract structured data from PDFs — tables, engineering specs, and custom schemas'
+---
+
+Nia's Extraction API pulls structured data out of indexed documents. Define a JSON schema for what you want, and the extraction pipeline handles parsing, chunking, and schema-conformant output.
+
+Two modes are available:
+
+- **Table Extraction** — Extract records matching a JSON schema (e.g., rows from financial tables, line items from invoices)
+- **Engineering Extraction** — Extract technical specifications, parameters, and structured engineering data with optional follow-up queries
+
+---
+
+## Table Extraction
+
+### Start an Extraction
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/extract \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source_id": "your-pdf-source-id",
+    "json_schema": {
+      "type": "object",
+      "properties": {
+        "company": { "type": "string" },
+        "revenue": { "type": "string" },
+        "year": { "type": "integer" },
+        "growth_rate": { "type": "string" }
+      },
+      "required": ["company", "revenue"]
+    },
+    "page_range": "10-25"
+  }'
+```
+
+You can provide either `source_id` (for already indexed documents) or `url` (for direct URL processing).
+
+### Response
+
+```json
+{
+  "id": "ext_abc123",
+  "status": "processing",
+  "progress": 0,
+  "url": null,
+  "source_display_name": "Q3 2025 Earnings Report",
+  "page_range": "10-25",
+  "records": [],
+  "record_count": 0,
+  "page_count": 0,
+  "created_at": "2026-03-29T10:00:00Z",
+  "updated_at": "2026-03-29T10:00:00Z"
+}
+```
+
+### Poll for Results
+
+```bash
+curl https://apigcp.trynia.ai/v2/extract/{extraction_id} \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+When complete:
+
+```json
+{
+  "id": "ext_abc123",
+  "status": "completed",
+  "progress": 100,
+  "records": [
+    { "company": "Acme Corp", "revenue": "$4.2B", "year": 2025, "growth_rate": "12%" },
+    { "company": "Beta Inc", "revenue": "$1.8B", "year": 2025, "growth_rate": "8%" }
+  ],
+  "record_count": 15,
+  "page_count": 16
+}
+```
+
+---
+
+## Engineering Extraction
+
+Optimized for technical documents — datasheets, specifications, research papers with tables and formulas.
+
+### Start Engineering Extraction
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/extract/engineering \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source_id": "your-pdf-source-id",
+    "accuracy_mode": "fast",
+    "page_range": "1-50"
+  }'
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `source_id` | string | — | Source ID of indexed document |
+| `url` | string | — | Alternative: direct URL |
+| `page_range` | string | — | Optional page range (e.g., "1-50") |
+| `accuracy_mode` | string | `fast` | `fast` or higher accuracy modes |
+
+### Query an Extraction
+
+After extraction completes, ask follow-up questions:
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/extract/engineering/{extraction_id}/query \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What is the maximum operating temperature?",
+    "conversation_history": []
+  }'
+```
+
+The query endpoint supports conversation history for multi-turn follow-ups.
+
+---
+
+## List All Extractions
+
+```bash
+curl "https://apigcp.trynia.ai/v2/extractions?type=table&limit=30" \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `type` | string | — | Filter: `table` or `engineering` |
+| `limit` | integer | 30 | Max results (1–100) |
+| `offset` | integer | 0 | Pagination offset |
+
+---
+
+## Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Financial Tables" icon="table">
+    Extract revenue, expenses, and KPIs from earnings reports and SEC filings into structured records.
+  </Card>
+
+  <Card title="Technical Datasheets" icon="microchip">
+    Pull component specifications, operating parameters, and pin configurations from datasheets.
+  </Card>
+
+  <Card title="Invoice Processing" icon="file-invoice">
+    Extract line items, totals, and payment terms from invoices and purchase orders.
+  </Card>
+
+  <Card title="Research Data" icon="flask">
+    Extract experimental results, benchmark tables, and hyperparameter configurations from papers.
+  </Card>
+</CardGroup>

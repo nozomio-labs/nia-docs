@@ -1,0 +1,73 @@
+---
+title: 'Categories'
+description: 'Organize your indexed sources into categories for better management'
+---
+
+Categories help you organize indexed sources into logical groups. Assign colors and display order for visual organization in the dashboard.
+
+---
+
+## Create a Category
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/categories \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Backend Services",
+    "color": "#FF5733",
+    "order": 1
+  }'
+```
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | Yes | Category name (1–50 chars) |
+| `color` | string | No | Hex color (e.g., `#FF5733`) |
+| `order` | integer | No | Display order (0+) |
+
+## List Categories
+
+```bash
+curl "https://apigcp.trynia.ai/v2/categories?limit=50&offset=0" \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+## Update a Category
+
+```bash
+curl -X PATCH https://apigcp.trynia.ai/v2/categories/{category_id} \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Core Services",
+    "color": "#3498DB"
+  }'
+```
+
+## Delete a Category
+
+```bash
+curl -X DELETE https://apigcp.trynia.ai/v2/categories/{category_id} \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+Sources assigned to the deleted category become uncategorized.
+
+## Assign a Source to a Category
+
+Use the source update endpoint:
+
+```bash
+curl -X PATCH https://apigcp.trynia.ai/v2/sources/{source_id} \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"category_id": "your-category-id"}'
+```
+
+## Filter Sources by Category
+
+```bash
+curl "https://apigcp.trynia.ai/v2/sources?category_id=your-category-id" \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```

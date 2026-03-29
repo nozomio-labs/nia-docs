@@ -50,6 +50,19 @@ The `context` tool provides all context management operations through different 
 
 All operations use the same `context` tool with different `action` parameters.
 
+### Memory Types
+
+Contexts support different memory types with automatic TTL management:
+
+| Type | TTL | Best For |
+|------|-----|----------|
+| `scratchpad` | 1 hour | Short-lived working memory during a task |
+| `episodic` | 7 days | Session-level continuity between conversations |
+| `fact` | Permanent | Persistent facts about the project or user |
+| `procedural` | Permanent | Reusable how-to knowledge and workflows |
+
+You can also set a custom `ttl_seconds` to override the default.
+
 ### How It Works
 
 When you save a context, Nia captures:
@@ -61,6 +74,55 @@ When you save a context, Nia captures:
 - Every query you made
 
 When you open it in another agent, everything is there. No context lost.
+
+---
+
+### Semantic Search
+
+Search across saved contexts using vector + BM25 hybrid search:
+
+```bash
+curl "https://apigcp.trynia.ai/v2/contexts/semantic-search?q=authentication+setup&limit=10" \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+Returns relevance scores and highlights, with optional workspace filtering.
+
+### Text Search
+
+Simple keyword search across title, summary, content, and tags:
+
+```bash
+curl "https://apigcp.trynia.ai/v2/contexts/search?q=database+migrations" \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+### Lineage Tracking
+
+Track the provenance of context artifacts — which sources, tools, and models produced them:
+
+```json
+{
+  "lineage": {
+    "source_ids": ["repo:vercel/ai", "doc:Vercel AI SDK"],
+    "confidence": 0.95,
+    "tool_calls": ["search", "nia_read"],
+    "model_version": "claude-opus-4-6"
+  }
+}
+```
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/contexts` | POST | Save a new context |
+| `/contexts` | GET | List contexts (filter by tags, agent_source, memory_type) |
+| `/contexts/{id}` | GET | Get a specific context |
+| `/contexts/{id}` | PUT | Update a context |
+| `/contexts/{id}` | DELETE | Soft delete a context |
+| `/contexts/search` | GET | Text search across contexts |
+| `/contexts/semantic-search` | GET | Vector + BM25 hybrid search |
 
 ---
 

@@ -126,14 +126,96 @@ Or use the [Papers Playground](https://app.trynia.ai/playground/papers) for a vi
 
 ---
 
+## Document Agent
+
+Once a PDF is indexed, you can use the **Document Agent** to run an AI agent against the entire document. The agent autonomously searches, reads sections, and reads pages to produce comprehensive answers with citations.
+
+<CardGroup cols={2}>
+  <Card title="Structured Output" icon="brackets-curly" href="/document-agent">
+    Pass a JSON Schema and get back validated structured data extracted from the document.
+  </Card>
+
+  <Card title="Section-Aware Citations" icon="quote-left" href="/document-agent">
+    Every answer includes citations with page numbers, section IDs, and section paths.
+  </Card>
+</CardGroup>
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/document/agent \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source_id": "your-pdf-source-id",
+    "query": "What are the key findings?",
+    "model": "claude-opus-4-6-1m",
+    "json_schema": {
+      "type": "object",
+      "properties": {
+        "findings": { "type": "array", "items": { "type": "string" } },
+        "methodology": { "type": "string" }
+      }
+    }
+  }'
+```
+
+See the full [Document Agent guide](/document-agent) for all options including model selection, extended thinking, and streaming.
+
+---
+
+## Extraction
+
+Extract structured records from PDFs — financial tables, invoices, spec sheets — using the Extraction API:
+
+```bash
+curl -X POST https://apigcp.trynia.ai/v2/extract \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source_id": "your-pdf-source-id",
+    "json_schema": {
+      "type": "object",
+      "properties": {
+        "company": { "type": "string" },
+        "revenue": { "type": "string" }
+      }
+    },
+    "page_range": "10-25"
+  }'
+```
+
+See the full [Extraction guide](/extraction) for table extraction, engineering extraction, and follow-up queries.
+
+---
+
 ## Supported Sources
 
 | Source | Format | Example |
 |--------|--------|---------|
 | arXiv | URL or ID | `https://arxiv.org/abs/2401.12345` or `2401.12345` |
 | arXiv PDF | Direct PDF link | `https://arxiv.org/pdf/2401.12345` |
-| PDF Upload | Direct file upload | Upload via the Papers Playground |
+| PDF Upload | Direct file upload | Upload via the Papers Playground or `POST /sources/upload-url` |
+| Any PDF URL | Direct URL | Any publicly accessible PDF URL |
+
+### Upload via API
+
+Generate a signed URL for direct PDF upload:
+
+```bash
+# 1. Get upload URL
+curl -X POST https://apigcp.trynia.ai/v2/sources/upload-url \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"filename": "report.pdf", "content_type": "application/pdf"}'
+
+# 2. Upload the file to the returned upload_url (HTTP PUT)
+
+# 3. Create the source using the returned gcs_path
+curl -X POST https://apigcp.trynia.ai/v2/sources \
+  -H "Authorization: Bearer $NIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"type": "research_paper", "gcs_path": "returned-gcs-path", "is_pdf": true}'
+```
 
 <Info>
-  You can upload PDFs directly in the [Papers Playground](https://app.trynia.ai/playground/papers) — just drag and drop or use the upload button.
+  You can also upload PDFs directly in the [Papers Playground](https://app.trynia.ai/playground/papers) — just drag and drop or use the upload button.
 </Info>

@@ -1,0 +1,95 @@
+---
+title: 'X (Twitter) Integration'
+description: 'Index and search X/Twitter posts with semantic and keyword search'
+---
+
+Index posts from X (formerly Twitter) accounts and search them alongside your other Nia sources. Useful for tracking public communications, thought leadership content, or product announcements.
+
+---
+
+## Getting Started
+
+<Steps>
+  <Step title="Create an Installation">
+    Register an X account with a bearer token:
+    ```bash
+    curl -X POST https://apigcp.trynia.ai/v2/x/installations \
+      -H "Authorization: Bearer $NIA_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "username": "elonmusk",
+        "bearer_token": "YOUR_X_BEARER_TOKEN",
+        "display_name": "Elon Musk Posts",
+        "max_results": 200,
+        "include_replies": false,
+        "include_retweets": false
+      }'
+    ```
+  </Step>
+
+  <Step title="Trigger Indexing">
+    ```bash
+    curl -X POST https://apigcp.trynia.ai/v2/x/installations/{installation_id}/index \
+      -H "Authorization: Bearer $NIA_API_KEY"
+    ```
+  </Step>
+
+  <Step title="Check Status">
+    ```bash
+    curl https://apigcp.trynia.ai/v2/x/installations/{installation_id}/status \
+      -H "Authorization: Bearer $NIA_API_KEY"
+    ```
+  </Step>
+
+  <Step title="Search">
+    Once indexed, X posts are searchable through the unified search API alongside your other sources.
+  </Step>
+</Steps>
+
+---
+
+## Configuration Options
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `username` | string | Yes | — | X username (with or without @) |
+| `bearer_token` | string | Yes | — | X API bearer token (min 10 chars) |
+| `display_name` | string | No | — | Custom display name (max 120 chars) |
+| `max_results` | integer | No | 100 | Maximum recent posts to index (1–500) |
+| `include_replies` | boolean | No | false | Index replies |
+| `include_retweets` | boolean | No | false | Index reposts/retweets |
+
+---
+
+## Managing Installations
+
+### List Installations
+
+```bash
+curl https://apigcp.trynia.ai/v2/x/installations \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+### Get Installation Details
+
+```bash
+curl https://apigcp.trynia.ai/v2/x/installations/{installation_id} \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+### Delete Installation
+
+```bash
+curl -X DELETE https://apigcp.trynia.ai/v2/x/installations/{installation_id} \
+  -H "Authorization: Bearer $NIA_API_KEY"
+```
+
+---
+
+## Prerequisites
+
+You need an X API bearer token. Create one at the [X Developer Portal](https://developer.x.com/).
+
+<Note>
+  The bearer token is encrypted at rest. Nia uses it only to fetch posts from the X API during indexing.
+</Note>

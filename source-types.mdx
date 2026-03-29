@@ -55,6 +55,14 @@ If you prefer to browse by job to be done, start at [Capabilities](/tools-featur
   <Card title="E2E Encrypted Sources" icon="lock" href="/e2e-encryption">
     iMessage, WhatsApp, Apple Notes, Contacts, Reminders, Stickies, and Screenshots — synced with zero-knowledge encryption.
   </Card>
+
+  <Card title="X (Twitter)" icon="twitter" href="/x-twitter">
+    Index posts from X accounts and search them alongside other sources.
+  </Card>
+
+  <Card title="Connectors" icon="plug" href="/connectors">
+    Generic connector framework for integrating additional external data sources.
+  </Card>
 </CardGroup>
 
 ## Source-Type Matrix
@@ -70,6 +78,8 @@ If you prefer to browse by job to be done, start at [Capabilities](/tools-featur
 | Slack | [Slack Search](/slack-search) | `search`, `nia_grep` | Workspace data stays org-scoped |
 | Local folders, databases, chat history | `index(folder_path=...)`, [Local Sync](/local-sync) | `search`, `nia_read`, `nia_grep`, `nia_explore` | Best fit for continuously changing personal or team knowledge |
 | E2E encrypted sources (iMessage, WhatsApp, Notes, Contacts, Reminders, Stickies, Screenshots) | [E2E Encryption](/e2e-encryption), TypeScript SDK adapters | `search` with `e2e_session_id` | Zero-knowledge sync — plaintext never leaves your device |
+| X (Twitter) | [X Integration](/x-twitter) | `search` | Index and search public posts |
+| Connectors | [Connectors](/connectors) | `search` | Generic connector framework for additional sources |
 
 ## Code & Repositories
 
