@@ -1,0 +1,131 @@
+---
+title: 'Dream Cycle'
+description: 'Self-improving knowledge loop that discovers entities, finds connections, and enriches your vault overnight'
+---
+
+## What is the Dream Cycle?
+
+Most knowledge bases are passive — they index what you give them and stop there. The dream cycle makes your vault **actively self-improving**. When you trigger a dream, the vault:
+
+1. **Discovers missing entities** — scans all pages, finds people, tools, companies, and concepts mentioned across multiple pages that don't have their own dedicated page yet
+2. **Enriches them** — synthesizes new wiki pages for each discovered entity, pulling context from every page that mentions it
+3. **Finds connections** — identifies non-obvious relationships between pages from *different* sources that would be valuable to capture
+4. **Detects contradictions** — flags places where two pages make incompatible claims about the same thing
+5. **Writes a report** — outputs `/dream-report.md` summarizing everything it learned
+
+The name comes from [GBrain](https://github.com/garrytan/gbrain) by Gary Tan — the idea that your knowledge brain gets smarter while you sleep.
+
+---
+
+## Running a Dream
+
+<Tabs>
+  <Tab title="CLI">
+    ```bash
+    nia vault dream <vault-id>
+
+    # Poll status
+    nia vault info <vault-id>
+
+    # Read the report when done
+    nia sources read <vault-id> /dream-report.md
+    ```
+  </Tab>
+
+  <Tab title="Web UI">
+    Open the vault workspace → click the **Run** dropdown → select **Dream**.
+
+    Watch the workflow pill in the header cycle through:
+    - "reading vault pages"
+    - "extracting entities"
+    - "enriching Entity Name (3/10)"
+    - "discovering connections"
+    - "checking contradictions"
+    - "writing report"
+
+    When done, click `dream-report.md` (☾ icon) in the sidebar tree.
+  </Tab>
+
+  <Tab title="API">
+    ```bash
+    curl -X POST https://apigcp.trynia.ai/v2/vaults/<vault-id>/run \
+      -H "Authorization: Bearer $NIA_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"mode": "dream"}'
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## What It Produces
+
+### New Entity Pages
+
+The dream cycle creates up to 10 entity pages per run. Each page:
+- Uses the dual-section format (compiled truth + timeline)
+- Cross-links to existing pages with `[[wikilinks]]` and typed links like `[[React|uses]]`
+- Includes provenance tracking so you know it was created by the dream cycle
+- Gets indexed in TurboPuffer for semantic search
+
+Example: if "Stripe" is mentioned across 5 different concept pages but has no dedicated entity page, the dream cycle creates `/entities/stripe.md` with a synthesized overview, cross-references to every page that mentions it, and a timeline of when each mention occurred.
+
+### Connection Pages
+
+The dream cycle also creates up to 5 concept pages that capture non-obvious connections between pages from **different sources**. These are the "aha" moments — patterns that emerge when knowledge from separate domains is viewed together.
+
+### Dream Report
+
+`/dream-report.md` contains:
+
+- **Entities Discovered** — every entity/concept found with where it was mentioned and whether a page was created
+- **Pages Created** — list of new files written to the vault
+- **Connections** — cross-source connections discovered with rationale
+- **Contradictions** — factual conflicts detected between pages
+
+---
+
+## Automation
+
+### Weekly Auto-Dream
+
+Enable weekly automatic dream runs (Sunday 03:00 UTC):
+
+```bash
+nia vault auto-dream <vault-id> on
+```
+
+Or toggle it in the vault's **Settings** drawer in the web UI.
+
+The weekly dream is separate from the daily auto-sync (which runs `refresh` at 09:00 UTC). They don't interfere — if a dream is running when refresh triggers, the refresh queues and runs after.
+
+### Recommended Rhythm
+
+| Workflow | Frequency | What it does |
+|----------|-----------|--------------|
+| **Refresh** (auto-sync) | Daily, 09:00 UTC | Picks up new sources + regenerates stale pages |
+| **Dream** (auto-dream) | Weekly, Sunday 03:00 UTC | Discovers entities, finds connections, detects contradictions |
+| **Lint** | On demand | Health check — orphans, broken links, staleness report |
+
+With both enabled, your vault continuously ingests new information, keeps pages current, and actively discovers what's missing — without you doing anything.
+
+---
+
+## Cost
+
+Each dream cycle makes several Claude API calls:
+- 1 call for entity extraction (reads all page titles + bodies, up to 200K chars)
+- Up to 10 calls for entity enrichment (one per discovered entity)
+- 1 call for connection discovery
+- Up to 10 calls for contradiction detection (grouped by related pages)
+
+For a vault with ~500 pages, a dream run typically uses 12-15 Claude API calls and takes 5-10 minutes.
+
+---
+
+## Tips
+
+- **Run dream after a big ingest.** If you just added several new sources and ingested them, a dream run will find the cross-source connections that ingest alone misses.
+- **Read the dream report.** It's the quickest way to understand what your vault learned. The "Connections" section often surfaces insights you wouldn't have found by searching.
+- **Dream builds on itself.** Entity pages created by one dream become input to the next. Connections compound. The vault gets richer with every cycle.
+- **Contradictions are features.** When the dream finds contradictions, that's valuable — it means your sources disagree about something. Investigate and update the relevant pages.

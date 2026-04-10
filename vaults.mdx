@@ -1,0 +1,266 @@
+---
+title: 'Vaults'
+description: 'Agent-maintained personal wikis that compound knowledge from your indexed sources'
+---
+
+<Info>
+  **Builder Feature** — Vaults are included with Builder, Team, and Business plans. Free plan users can use vaults with purchased credits.
+</Info>
+
+## What is a Vault?
+
+A vault is a private, agent-maintained markdown wiki layered on top of your indexed Nia sources. Instead of searching raw source content every time, the agent distills your sources into structured, interlinked wiki pages — concepts, entities, and notes — that compound knowledge over time.
+
+Think of it as the difference between a search engine and a wiki: search gives you fragments every time you ask, a wiki builds up a persistent, evolving understanding.
+
+Inspired by Andrej Karpathy's [LLM Knowledge Bases](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) pattern, vaults follow a three-layer architecture:
+
+1. **Raw sources** — your indexed Nia sources (repos, docs, papers, Slack, Drive, local folders). Immutable. The vault reads from these but never modifies them.
+2. **The wiki** — markdown pages the agent writes and maintains. Concepts, entities, cross-references, and an evolving knowledge graph.
+3. **The schema** — a `schema.md` file you co-evolve with the agent that defines conventions for how the wiki is structured.
+
+---
+
+## Quick Start
+
+<Tabs>
+  <Tab title="CLI (recommended)">
+    One command creates the vault, triggers the first ingest, and wires it into your project:
+
+    ```bash
+    nia vault init "My Project" --from-source <source-id-1>,<source-id-2>
+    ```
+
+    This creates the vault, kicks off the ingest workflow, and appends a vault block to your `CLAUDE.md` / `AGENTS.md` so agents in this directory know about it automatically.
+  </Tab>
+
+  <Tab title="Web UI">
+    1. Go to **Vaults** in the sidebar
+    2. Click **New Vault**
+    3. Name it and pick sources
+    4. Click **Create** — then hit **Refresh** in the run menu to populate it
+  </Tab>
+
+  <Tab title="API">
+    ```bash
+    # Create
+    curl -X POST https://apigcp.trynia.ai/v2/vaults \
+      -H "Authorization: Bearer $NIA_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"display_name": "My Project", "source_ids": ["<id1>", "<id2>"]}'
+
+    # Trigger ingest
+    curl -X POST https://apigcp.trynia.ai/v2/vaults/<vault-id>/run \
+      -H "Authorization: Bearer $NIA_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"mode": "ingest"}'
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Wiki Layout
+
+Every vault has this structure:
+
+| Path | Purpose | Owned by |
+|------|---------|----------|
+| `/schema.md` | Wiki conventions. Sync never overwrites this. | You |
+| `/index.md` | Auto-maintained catalog of every page | Agent |
+| `/log.md` | Append-only history of ingests, syncs, lints, dreams | Agent |
+| `/META.md` | Vault metadata snapshot (id, sources, timestamps) | Agent |
+| `/concepts/*.md` | Concept pages — ideas, patterns, algorithms, theories | Agent |
+| `/entities/*.md` | Entity pages — people, products, repos, papers, tools | Agent |
+| `/notes/*.md` | Freeform pages. Sync always skips these. | You |
+| `/lint-report.md` | Latest lint output (orphans, stale pages, contradictions) | Agent |
+| `/dream-report.md` | Latest dream cycle output (entities discovered, connections found) | Agent |
+
+## Page Structure
+
+Every wiki page uses a dual-section format:
+
+```markdown
+# WebSocket Authentication
+
+WebSocket auth uses JWT tokens validated during the handshake upgrade.
+The token is checked by middleware before the connection upgrades.
+Tokens expire after 24h but connections persist via a refresh mechanism.
+
+---
+
+## Timeline
+- **2026-04-08** | JWT validation found in ws_middleware.py [Source: nia-app repo]
+- **2026-04-05** | Team discussed refresh mechanism [Source: Slack #eng-backend]
+
+## Sources
+- nia-app repository (source-id-123)
+```
+
+- **Compiled Truth** (above `---`): Current best understanding. Written as present-tense prose. Gets **rewritten** when sources update.
+- **Timeline** (below `---`): Append-only evidence trail. Each entry is dated with a source citation. **Never edited**, only appended to.
+
+This means you can always see *how* the knowledge evolved, not just what the current state is.
+
+## Wikilinks and Typed Links
+
+Pages cross-reference each other with `[[wikilinks]]`:
+
+```markdown
+This pattern is used by [[Stripe]] for their [[Webhook Verification]] flow.
+```
+
+For entity relationships, use **typed wikilinks** to capture the nature of the connection:
+
+```markdown
+[[Pedro Franceschi|founded]] [[Brex]]
+[[Nia|uses]] [[TurboPuffer]] for vector search
+[[Old Auth Pattern|contradicts]] [[New Auth Pattern]]
+```
+
+**Supported types:** `relates_to` (default), `works_at`, `founded`, `uses`, `extends`, `contradicts`, `supports`, `part_of`
+
+The graph visualization in the web UI color-codes edges by type so you can see relationship patterns at a glance.
+
+---
+
+## Workflows
+
+Vaults have five workflow modes you can trigger:
+
+### Ingest
+
+```bash
+nia vault ingest <vault-id>
+```
+
+For each source in the vault that doesn't have wiki pages yet, Claude reads the source content and synthesizes 3-15 interlinked concept/entity pages. Idempotent — sources that already have pages are skipped (pass `--force` to re-synthesize).
+
+### Sync
+
+```bash
+nia vault sync <vault-id>
+```
+
+For each wiki page whose underlying source has been re-indexed, regenerate the page. The compiled truth section is rewritten with the latest information; the timeline section gets new entries appended. Pages you've edited manually are always skipped.
+
+### Lint
+
+```bash
+nia vault lint <vault-id>
+```
+
+Walks the vault and writes `/lint-report.md` with:
+- **Orphan pages** — no inbound backlinks from other pages
+- **Stale pages** — source has been re-indexed since the page was generated
+- **Broken wikilinks** — referenced titles without matching pages
+- **Bridge concepts** — terms mentioned across pages from different sources that deserve their own page
+- **Contradictions** — Claude-detected factual conflicts between pages
+
+### Dream
+
+```bash
+nia vault dream <vault-id>
+```
+
+The self-improving dream cycle. This is what makes vaults actively compound knowledge rather than passively index. See [Dream Cycle](/vault-dream) for the full guide.
+
+### Refresh
+
+```bash
+nia vault run <vault-id> --mode refresh
+```
+
+Combined ingest + sync in one pass. This is what the daily auto-sync cron runs. Safe to trigger anytime.
+
+---
+
+## Automation
+
+### Daily Auto-Sync
+
+Enabled by default. Runs at 09:00 UTC daily. Triggers a `refresh` (idempotent ingest + sync) on every vault that has it enabled.
+
+```bash
+nia vault auto-sync <vault-id> off   # disable
+nia vault auto-sync <vault-id> on    # re-enable
+```
+
+### Weekly Auto-Dream
+
+Opt-in. Runs at 03:00 UTC every Sunday. Triggers the dream cycle to discover entities, find connections, and detect contradictions.
+
+```bash
+nia vault auto-dream <vault-id> on   # enable
+nia vault auto-dream <vault-id> off  # disable
+```
+
+Or toggle both in the vault's **Settings** drawer in the web UI.
+
+---
+
+## Reading and Writing
+
+Vault files are accessible via the same filesystem commands as any other Nia source:
+
+```bash
+# Browse the wiki
+nia sources tree <vault-id>
+nia sources read <vault-id> /index.md
+nia sources read <vault-id> /concepts/authentication.md
+
+# Search semantically
+nia vault search <vault-id> "how does auth work"
+
+# Grep across all pages
+nia sources grep <vault-id> "webhook"
+
+# Write a note (auto-protected from sync)
+nia sources write <vault-id> /notes/finding.md --body "# My Finding\n\n..."
+
+# Interactive bash session
+nia vault open <vault-id>
+
+# One-shot command (for agent tool loops)
+nia vault open <vault-id> --c "grep -rl 'auth' concepts/"
+```
+
+<Warning>
+  **Human edits are protected.** When you write to a vault file via `nia sources write` or the bash session, the backend stamps `provenance.last_human_edit` on that file. The sync workflow always skips pages with this flag set. Your edits will never be overwritten by background workflows.
+</Warning>
+
+---
+
+## Web UI
+
+The vault workspace at `app.trynia.ai/vaults/<id>` provides:
+
+- **Sidebar tree** — concepts, entities, and notes organized with category glyphs
+- **Page viewer** — rendered markdown with clickable wikilinks and a visual compiled truth / timeline separator
+- **Graph visualization** — force-directed graph of all pages and their connections, color-coded by category and link type
+- **Search palette** (`Cmd+K`) — fuzzy title search + full-text semantic search + AI agent mode
+- **Backlinks panel** — see which pages link to the current page
+- **Settings** — rename, edit schema, toggle auto-sync and auto-dream
+- **Run menu** — trigger ingest, sync, lint, dream, or refresh with one click
+
+---
+
+## API Reference
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| `POST` | `/v2/vaults` | Create vault |
+| `GET` | `/v2/vaults` | List vaults |
+| `GET` | `/v2/vaults/{id}` | Get vault metadata + workflow status |
+| `PATCH` | `/v2/vaults/{id}` | Update name, description, schema, auto-sync/dream toggles |
+| `DELETE` | `/v2/vaults/{id}` | Delete vault (removes all pages from PG + TurboPuffer) |
+| `GET` | `/v2/vaults/{id}/sources` | List linked sources |
+| `POST` | `/v2/vaults/{id}/sources` | Add a source |
+| `DELETE` | `/v2/vaults/{id}/sources/{source_id}` | Remove a source |
+| `POST` | `/v2/vaults/{id}/run` | Trigger workflow (`mode`: ingest, sync, lint, refresh, dream) |
+| `POST` | `/v2/vaults/{id}/cancel` | Cancel in-flight workflow |
+| `POST` | `/v2/vaults/{id}/search` | Hybrid search (vector + keyword) |
+| `POST` | `/v2/vaults/{id}/agent` | Streaming vault agent (SSE) |
+| `GET` | `/v2/vaults/{id}/graph` | Wikilink graph (nodes + typed edges) |
+
+Filesystem operations use the standard `/v2/fs/{vault-id}/*` endpoints — `tree`, `read`, `grep`, `write`, `delete`, `mv`.

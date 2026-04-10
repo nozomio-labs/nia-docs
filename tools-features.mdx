@@ -45,16 +45,12 @@ If you already know you need PDFs, code, documentation, datasets, Slack, or Goog
     Keep local folders, databases, and chat history fresh in Nia with continuous synchronization. Start with [Local Sync](/local-sync).
   </Card>
 
-  <Card title="Document Agent & Extraction" icon="file-lines">
-    Query indexed PDFs with an AI agent that reads, searches, and cites. Get structured output via JSON Schema. Use [Document Agent](/document-agent) and [Extraction](/extraction).
+  <Card title="Vaults" icon="book-sparkles" href="/vaults">
+    Agent-maintained personal wikis that compound knowledge from your indexed sources. Concepts, entities, wikilinks, dream cycles, and a knowledge graph — all built automatically.
   </Card>
 
   <Card title="Context Sharing" icon="comments">
     Save plans, discoveries, edited files, and conversation state so another agent can pick up where you left off. Use `context`.
-  </Card>
-
-  <Card title="Source Curation & Trust" icon="shield-check">
-    Attach trust signals, curated overlays, and annotations to sources for quality-aware retrieval. Start with [Source Curation](/source-curation).
   </Card>
 
   <Card title="Scoped MCP" icon="server">
@@ -76,10 +72,9 @@ If you already know you need PDFs, code, documentation, datasets, Slack, or Goog
 | Search public GitHub repos without setup | Search Without Indexing | [Tracer](/tracer) |
 | Compare options or investigate a question | Research & Analysis | `nia_research`, [Oracle Research Agent](/oracle-research) |
 | Review your code against docs | Research & Analysis | `nia_advisor` |
-| Query a PDF with AI and get structured output | Document Agent & Extraction | [Document Agent](/document-agent), [Extraction](/extraction) |
-| Curate source quality and trust | Source Curation & Trust | [Source Curation](/source-curation) |
 | Connect cloud file storage and keep it synced | Google Drive | [Google Drive Integration](/google-drive) |
 | Keep local knowledge fresh over time | Local Sync | [Local Sync](/local-sync) |
+| Build a persistent knowledge wiki from sources | Vaults | [Vaults](/vaults), `nia vault` CLI |
 | Hand off work between agents | Context Sharing | `context` |
 | Reduce tool surface for a focused workflow | Scoped MCP | [Scoped MCP Servers](/scoped-mcp) |
 
@@ -199,6 +194,25 @@ If you already know you need PDFs, code, documentation, datasets, Slack, or Goog
     **Related pages**:
     - [Tracer](/tracer)
     - [Oracle Research Agent](/oracle-research)
+  </Accordion>
+
+  <Accordion title="Vaults (Knowledge Base)">
+    ### Vault Management
+    Agent-maintained personal wikis that compound knowledge from your indexed sources. Create a vault, add sources, and the agent builds an interlinked wiki with concepts, entities, and a knowledge graph.
+
+    **CLI commands**:
+    ```bash
+    nia vault init "Topic" --from-source <id1>,<id2>   # one-shot setup
+    nia vault dream <vault-id>                          # self-improving dream cycle
+    nia vault search <vault-id> "query"                 # semantic search
+    nia vault open <vault-id>                           # interactive bash session
+    ```
+
+    **Workflows**: `ingest` (build pages from sources), `sync` (update stale pages), `lint` (find issues), `dream` (discover entities + connections), `refresh` (daily cron mode).
+
+    **Related pages**:
+    - [Vaults](/vaults)
+    - [Dream Cycle](/vault-dream)
   </Accordion>
 
   <Accordion title="Context Sharing">
