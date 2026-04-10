@@ -156,6 +156,35 @@ nia contexts get <id>
 
 Memory types: `scratchpad` (temporary), `episodic` (session), `fact` (permanent), `procedural` (workflow).
 
+### Vaults
+
+Agent-maintained personal wikis. See [Vaults](/vaults) for the full guide.
+
+```bash
+# One-shot setup: create + ingest + wire into project
+nia vault init "My Project" --from-source <id1>,<id2>
+
+# Browse and search
+nia vault search <vault-id> "how does auth work"
+nia vault open <vault-id>                          # interactive bash session
+nia vault open <vault-id> --c "grep -rl 'auth' ."  # one-shot command
+
+# Workflows
+nia vault ingest <vault-id>    # build pages from new sources
+nia vault sync <vault-id>      # regenerate stale pages
+nia vault lint <vault-id>      # find orphans, contradictions
+nia vault dream <vault-id>     # self-improving dream cycle
+
+# Automation
+nia vault auto-sync <vault-id> on     # daily refresh (09:00 UTC)
+nia vault auto-dream <vault-id> on    # weekly dream (Sunday 03:00 UTC)
+
+# Info
+nia vault list
+nia vault info <vault-id>
+nia vault list-sources <vault-id>
+```
+
 ### Packages
 
 Search public package registries without indexing.
